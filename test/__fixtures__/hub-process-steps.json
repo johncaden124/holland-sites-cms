@@ -1,0 +1,40 @@
+{
+  "docs": [
+    {
+      "id": 1,
+      "tenant": 1,
+      "order": 1,
+      "title": "On-Site Consultation",
+      "body": "We assess your property, discuss your goals, and understand what your outdoor space needs.",
+      "updatedAt": "2026-09-09T13:17:35.231Z",
+      "createdAt": "2026-09-09T13:17:35.231Z"
+    },
+    {
+      "id": 2,
+      "tenant": 1,
+      "order": 2,
+      "title": "Plan & Estimate",
+      "body": "We recommend the right approach and provide a clear plan, scope, and estimate before work begins.",
+      "updatedAt": "2026-09-09T13:17:35.282Z",
+      "createdAt": "2026-09-09T13:17:35.282Z"
+    },
+    {
+      "id": 3,
+      "tenant": 1,
+      "order": 3,
+      "title": "Build & Finish",
+      "body": "Our crew completes the work with careful installation, clean execution, and attention to every detail.",
+      "updatedAt": "2026-09-09T13:17:35.330Z",
+      "createdAt": "2026-09-09T13:17:35.330Z"
+    }
+  ],
+  "hasNextPage": false,
+  "hasPrevPage": false,
+  "limit": 100,
+  "nextPage": null,
+  "page": 1,
+  "pagingCounter": 1,
+  "prevPage": null,
+  "totalDocs": 3,
+  "totalPages": 1
+}

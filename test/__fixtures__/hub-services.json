@@ -1,0 +1,130 @@
+{
+  "docs": [
+    {
+      "id": 1,
+      "tenant": 1,
+      "order": 1,
+      "icon": "flower",
+      "title": "Landscape Design",
+      "blurb": "Thoughtful landscape plans tailored to your property, style, budget, and long-term outdoor goals.",
+      "bullets": [
+        {
+          "id": "6aa15c6d31653e4dd88ddb63",
+          "text": "Custom Outdoor Plans"
+        },
+        {
+          "id": "6aa15c6d31653e4dd88ddb64",
+          "text": "Built Around Your Space"
+        },
+        {
+          "id": "6aa15c6d31653e4dd88ddb65",
+          "text": "Designed to Last"
+        }
+      ],
+      "image": {
+        "id": 14,
+        "tenant": 1,
+        "alt": "Modern home with a professionally designed front yard",
+        "updatedAt": "2026-09-09T13:17:33.024Z",
+        "createdAt": "2026-09-09T13:17:33.024Z",
+        "url": "http://localhost:3000/api/media/file/service-design.jpg",
+        "thumbnailURL": null,
+        "filename": "service-design.jpg",
+        "mimeType": "image/jpeg",
+        "filesize": 420110,
+        "width": 1600,
+        "height": 1068
+      },
+      "imageAlt": "Modern home with a professionally designed front yard",
+      "updatedAt": "2026-09-09T13:17:33.115Z",
+      "createdAt": "2026-09-09T13:17:33.114Z"
+    },
+    {
+      "id": 2,
+      "tenant": 1,
+      "order": 2,
+      "icon": "sun",
+      "title": "Lawn & Garden Care",
+      "blurb": "Keep your yard healthy, clean, and well maintained with reliable seasonal and routine landscaping care.",
+      "bullets": [
+        {
+          "id": "6aa15c6d31653e4dd88ddb66",
+          "text": "Routine Maintenance"
+        },
+        {
+          "id": "6aa15c6d31653e4dd88ddb67",
+          "text": "Healthy, Tidy Lawns"
+        },
+        {
+          "id": "6aa15c6d31653e4dd88ddb68",
+          "text": "Care You Can Count On"
+        }
+      ],
+      "image": {
+        "id": 9,
+        "tenant": 1,
+        "alt": "Mowing a front lawn",
+        "updatedAt": "2026-09-09T13:17:32.122Z",
+        "createdAt": "2026-09-09T13:17:32.122Z",
+        "url": "http://localhost:3000/api/media/file/service-lawncare.jpg",
+        "thumbnailURL": null,
+        "filename": "service-lawncare.jpg",
+        "mimeType": "image/jpeg",
+        "filesize": 148725,
+        "width": 1600,
+        "height": 1068
+      },
+      "imageAlt": "Crew mowing and trimming a front yard",
+      "updatedAt": "2026-09-09T13:17:33.238Z",
+      "createdAt": "2026-09-09T13:17:33.238Z"
+    },
+    {
+      "id": 3,
+      "tenant": 1,
+      "order": 3,
+      "icon": "tree",
+      "title": "Hardscaping & Installation",
+      "blurb": "Upgrade your outdoor space with professionally installed patios, walkways, edging, planting, and landscape features.",
+      "bullets": [
+        {
+          "id": "6aa15c6d31653e4dd88ddb69",
+          "text": "Professional Installation"
+        },
+        {
+          "id": "6aa15c6d31653e4dd88ddb6a",
+          "text": "Durable Outdoor Features"
+        },
+        {
+          "id": "6aa15c6d31653e4dd88ddb6b",
+          "text": "Built for Better Living"
+        }
+      ],
+      "image": {
+        "id": 15,
+        "tenant": 1,
+        "alt": "Stone patio and walkway with layered planting",
+        "updatedAt": "2026-09-09T13:17:33.340Z",
+        "createdAt": "2026-09-09T13:17:33.340Z",
+        "url": "http://localhost:3000/api/media/file/service-hardscape.jpg",
+        "thumbnailURL": null,
+        "filename": "service-hardscape.jpg",
+        "mimeType": "image/jpeg",
+        "filesize": 266077,
+        "width": 1600,
+        "height": 2400
+      },
+      "imageAlt": "Stone patio and walkway with layered planting",
+      "updatedAt": "2026-09-09T13:17:33.411Z",
+      "createdAt": "2026-09-09T13:17:33.411Z"
+    }
+  ],
+  "hasNextPage": false,
+  "hasPrevPage": false,
+  "limit": 100,
+  "nextPage": null,
+  "page": 1,
+  "pagingCounter": 1,
+  "prevPage": null,
+  "totalDocs": 3,
+  "totalPages": 1
+}

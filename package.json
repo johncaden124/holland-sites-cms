@@ -1,0 +1,58 @@
+{
+  "name": "@hollandtech/site-cms",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared Payload-hub content layer for Holland Tech's niche website templates.",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./photo": {
+      "types": "./dist/photo.d.ts",
+      "default": "./dist/photo.js"
+    },
+    "./media-origins": {
+      "types": "./dist/mediaOrigins.d.ts",
+      "default": "./dist/mediaOrigins.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "site-cms": "./bin/site-cms.mjs"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "peerDependencies": {
+    "astro": "^7.0.0"
+  },
+  "astro": {
+    "external": true
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "astro": "^7.1.6",
+    "typescript": "^5.7.0",
+    "vitest": "5.0.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

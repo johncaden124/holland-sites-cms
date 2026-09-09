@@ -1,0 +1,399 @@
+{
+  "docs": [
+    {
+      "id": 1,
+      "tenant": 1,
+      "name": "LeapFly",
+      "tagline": "Make Your Yard Feel Finished",
+      "description": "From planting and fresh sod to patios, walkways, lighting, and complete landscape makeovers, our team handles the planning, installation, and cleanup.",
+      "nav": [
+        {
+          "id": "6aa15c6c31653e4dd88ddb4c",
+          "label": "Services",
+          "href": "#services"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb4d",
+          "label": "Process",
+          "href": "#process"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb4e",
+          "label": "Testimonial",
+          "href": "#testimonial"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb4f",
+          "label": "Faq",
+          "href": "#faq"
+        }
+      ],
+      "navCta": {
+        "label": "Get Free Estimate",
+        "href": "#faq"
+      },
+      "socials": [
+        {
+          "id": "6aa15c6c31653e4dd88ddb50",
+          "label": "x",
+          "href": "#"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb51",
+          "label": "linkedin",
+          "href": "#"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb52",
+          "label": "facebook",
+          "href": "#"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb53",
+          "label": "instagram",
+          "href": "#"
+        }
+      ],
+      "footer": {
+        "email": "contact@yourbrand.com",
+        "phone": {
+          "display": "+1 (201) 555-0123",
+          "tel": "+12015550123"
+        },
+        "address": "1700 Broadway, Denver, CO 80202"
+      },
+      "labels": {
+        "callPrefix": "Call us:",
+        "footerEmail": "Email",
+        "footerPhone": "Contact",
+        "footerAddress": "Address"
+      },
+      "copyright": "© 2026 LeapFly, All Rights Reserved",
+      "heroHeadline": "Make Your Yard\nFeel Finished",
+      "heroCta": {
+        "label": "Get My Free Estimate",
+        "href": "#faq"
+      },
+      "heroPhone": {
+        "display": "+1 (312) 555-0189",
+        "tel": "+13125550189"
+      },
+      "heroVideo": {
+        "id": 1,
+        "tenant": 1,
+        "alt": "Hero video",
+        "updatedAt": "2026-09-09T13:17:30.987Z",
+        "createdAt": "2026-09-09T13:17:30.987Z",
+        "url": "http://localhost:3000/api/media/file/hero.mp4",
+        "thumbnailURL": null,
+        "filename": "hero.mp4",
+        "mimeType": "video/mp4",
+        "filesize": 9261354,
+        "width": null,
+        "height": null
+      },
+      "heroPoster": {
+        "id": 2,
+        "tenant": 1,
+        "alt": "Hero poster",
+        "updatedAt": "2026-09-09T13:17:31.422Z",
+        "createdAt": "2026-09-09T13:17:31.422Z",
+        "url": "http://localhost:3000/api/media/file/hero-poster.jpg",
+        "thumbnailURL": null,
+        "filename": "hero-poster.jpg",
+        "mimeType": "image/jpeg",
+        "filesize": 411269,
+        "width": 1600,
+        "height": 899
+      },
+      "avatars": [
+        {
+          "id": "6aa15c6c31653e4dd88ddb54",
+          "image": {
+            "id": 3,
+            "tenant": 1,
+            "alt": "Customer",
+            "updatedAt": "2026-09-09T13:17:31.527Z",
+            "createdAt": "2026-09-09T13:17:31.527Z",
+            "url": "http://localhost:3000/api/media/file/avatar-1.jpg",
+            "thumbnailURL": null,
+            "filename": "avatar-1.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 7244,
+            "width": 300,
+            "height": 300
+          }
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb55",
+          "image": {
+            "id": 4,
+            "tenant": 1,
+            "alt": "Customer",
+            "updatedAt": "2026-09-09T13:17:31.610Z",
+            "createdAt": "2026-09-09T13:17:31.610Z",
+            "url": "http://localhost:3000/api/media/file/avatar-2.jpg",
+            "thumbnailURL": null,
+            "filename": "avatar-2.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 10114,
+            "width": 300,
+            "height": 300
+          }
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb56",
+          "image": {
+            "id": 5,
+            "tenant": 1,
+            "alt": "Customer",
+            "updatedAt": "2026-09-09T13:17:31.698Z",
+            "createdAt": "2026-09-09T13:17:31.697Z",
+            "url": "http://localhost:3000/api/media/file/avatar-3.jpg",
+            "thumbnailURL": null,
+            "filename": "avatar-3.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 17833,
+            "width": 300,
+            "height": 300
+          }
+        }
+      ],
+      "review": {
+        "summary": "4.97/5 from over 600 reviews."
+      },
+      "recommend": {
+        "value": "98%",
+        "label": "Would recommend our service"
+      },
+      "aboutHeading": "We create outdoor spaces that look better, work better, and stay beautiful through every season.",
+      "trustCard": {
+        "title": "Landscaping You Can Trust",
+        "body": "Every property is different. We take time to understand your space, priorities, and budget before recommending the right landscaping solution.",
+        "bullets": [
+          {
+            "id": "6aa15c6c31653e4dd88ddb57",
+            "text": "Experienced Local Crew"
+          },
+          {
+            "id": "6aa15c6c31653e4dd88ddb58",
+            "text": "Quality Materials & Plants"
+          }
+        ]
+      },
+      "aboutCards": [
+        {
+          "id": "6aa15c6c31653e4dd88ddb59",
+          "title": "Our Vision",
+          "body": "To create beautiful, functional outdoor spaces that add lasting value and make every property more enjoyable."
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb5a",
+          "title": "Our Mission",
+          "body": "To deliver dependable landscaping through thoughtful planning, skilled workmanship, quality materials, and care"
+        }
+      ],
+      "servicesIntro": {
+        "chip": "What We Do",
+        "heading": "Outdoor Spaces,\nDone Right.",
+        "copy": "From routine lawn care to complete landscape upgrades, we create and maintain outdoor spaces built around your property and needs."
+      },
+      "workIntro": {
+        "chip": "Our Work",
+        "heading": "See the Difference",
+        "copy": "Explore outdoor spaces transformed through thoughtful landscaping, quality craftsmanship, and attention to every detail."
+      },
+      "featuredProject": {
+        "title": "Coastal Garden Escape",
+        "subtitle": "Complete Landscaping"
+      },
+      "testimonialsIntro": {
+        "chip": "Client Stories",
+        "heading": "What Homeowners Say"
+      },
+      "impactIntro": {
+        "chip": "Our Impact",
+        "heading": "Landscaping Results\nYou Can See"
+      },
+      "processIntro": {
+        "chip": "Our Process",
+        "heading": "From Plan to Perfect Yard",
+        "copy": "A simple, organized process that keeps your landscaping project clear, efficient, and stress-free from start to finish."
+      },
+      "faqIntro": {
+        "chip": "Landscaping FAQs",
+        "heading": "Questions, Answered",
+        "copy": "Find quick answers about our landscaping services, project timelines, maintenance options, estimates, and what to expect."
+      },
+      "faqSideCard": {
+        "title": "Planning a Project?",
+        "body": "Tell us about your property and goals. We'll help you understand the best landscaping options for your space.",
+        "cta": "Get a Free Estimate",
+        "href": "#top"
+      },
+      "ctaBand": {
+        "heading": "Ready to Transform Your\nOutdoor Space?",
+        "copy": "Tell us what you have in mind and get a clear plan for your landscaping project. We'll help you create an outdoor space that fits your property, goals, and budget.",
+        "button": "Get a Free Estimate",
+        "href": "#top"
+      },
+      "ctaStrip": [
+        {
+          "id": "6aa15c6c31653e4dd88ddb5b",
+          "image": {
+            "id": 6,
+            "tenant": 1,
+            "alt": "Covered patio lounge beside a lawn",
+            "updatedAt": "2026-09-09T13:17:31.779Z",
+            "createdAt": "2026-09-09T13:17:31.779Z",
+            "url": "http://localhost:3000/api/media/file/work-7.jpg",
+            "thumbnailURL": null,
+            "filename": "work-7.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 482380,
+            "width": 1600,
+            "height": 1420
+          },
+          "alt": "Covered patio lounge beside a lawn"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb5c",
+          "image": {
+            "id": 7,
+            "tenant": 1,
+            "alt": "Garden path with landscape lighting at dusk",
+            "updatedAt": "2026-09-09T13:17:31.878Z",
+            "createdAt": "2026-09-09T13:17:31.878Z",
+            "url": "http://localhost:3000/api/media/file/work-1.jpg",
+            "thumbnailURL": null,
+            "filename": "work-1.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 690888,
+            "width": 1600,
+            "height": 2133
+          },
+          "alt": "Garden path with landscape lighting at dusk"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb5d",
+          "image": {
+            "id": 8,
+            "tenant": 1,
+            "alt": "Aerial view of a villa garden with pool",
+            "updatedAt": "2026-09-09T13:17:31.993Z",
+            "createdAt": "2026-09-09T13:17:31.993Z",
+            "url": "http://localhost:3000/api/media/file/work-4.jpg",
+            "thumbnailURL": null,
+            "filename": "work-4.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 1562229,
+            "width": 1600,
+            "height": 2844
+          },
+          "alt": "Aerial view of a villa garden with pool"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb5e",
+          "image": {
+            "id": 9,
+            "tenant": 1,
+            "alt": "Mowing a front lawn",
+            "updatedAt": "2026-09-09T13:17:32.122Z",
+            "createdAt": "2026-09-09T13:17:32.122Z",
+            "url": "http://localhost:3000/api/media/file/service-lawncare.jpg",
+            "thumbnailURL": null,
+            "filename": "service-lawncare.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 148725,
+            "width": 1600,
+            "height": 1068
+          },
+          "alt": "Mowing a front lawn"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb5f",
+          "image": {
+            "id": 10,
+            "tenant": 1,
+            "alt": "Gardener planting a fresh bed",
+            "updatedAt": "2026-09-09T13:17:32.210Z",
+            "createdAt": "2026-09-09T13:17:32.210Z",
+            "url": "http://localhost:3000/api/media/file/work-2.jpg",
+            "thumbnailURL": null,
+            "filename": "work-2.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 236640,
+            "width": 1600,
+            "height": 1067
+          },
+          "alt": "Gardener planting a fresh bed"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb60",
+          "image": {
+            "id": 11,
+            "tenant": 1,
+            "alt": "Home with lit brick path and planting at dusk",
+            "updatedAt": "2026-09-09T13:17:32.298Z",
+            "createdAt": "2026-09-09T13:17:32.298Z",
+            "url": "http://localhost:3000/api/media/file/work-6.jpg",
+            "thumbnailURL": null,
+            "filename": "work-6.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 464932,
+            "width": 1600,
+            "height": 1067
+          },
+          "alt": "Home with lit brick path and planting at dusk"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb61",
+          "image": {
+            "id": 12,
+            "tenant": 1,
+            "alt": "Gardener trimming a hedge",
+            "updatedAt": "2026-09-09T13:17:32.403Z",
+            "createdAt": "2026-09-09T13:17:32.403Z",
+            "url": "http://localhost:3000/api/media/file/work-3.jpg",
+            "thumbnailURL": null,
+            "filename": "work-3.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 798530,
+            "width": 1600,
+            "height": 2400
+          },
+          "alt": "Gardener trimming a hedge"
+        },
+        {
+          "id": "6aa15c6c31653e4dd88ddb62",
+          "image": {
+            "id": 13,
+            "tenant": 1,
+            "alt": "Lit walkway through an evening garden",
+            "updatedAt": "2026-09-09T13:17:32.509Z",
+            "createdAt": "2026-09-09T13:17:32.509Z",
+            "url": "http://localhost:3000/api/media/file/work-5.jpg",
+            "thumbnailURL": null,
+            "filename": "work-5.jpg",
+            "mimeType": "image/jpeg",
+            "filesize": 321307,
+            "width": 1600,
+            "height": 2397
+          },
+          "alt": "Lit walkway through an evening garden"
+        }
+      ],
+      "updatedAt": "2026-09-09T13:17:32.819Z",
+      "createdAt": "2026-09-09T13:17:32.818Z"
+    }
+  ],
+  "hasNextPage": false,
+  "hasPrevPage": false,
+  "limit": 100,
+  "nextPage": null,
+  "page": 1,
+  "pagingCounter": 1,
+  "prevPage": null,
+  "totalDocs": 1,
+  "totalPages": 1
+}
