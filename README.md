@@ -20,6 +20,18 @@ here.
 | `mediaOrigins`, `imageProps`, `SERVICE_ICONS` | `ServiceIcon.astro` artwork; `astro.config.mjs` |
 | `site-cms parity / export-content / capture-fixtures` | its own fixtures and its fixture-vs-`src/data` test |
 
+## Installing it
+
+Until the `@hollandtech` npm scope exists, templates depend on this repo from git:
+
+```bash
+npm i github:johncaden124/holland-sites-cms#v0.1.0
+```
+
+npm clones the repo, installs its devDependencies and runs `prepare`, which is `npm run build` —
+so `dist/` stays out of git and every consumer compiles it on install. Moving to npm later is a
+one-line change to the dependency spec in each template; nothing else moves.
+
 ## Using it from a template
 
 ```ts
