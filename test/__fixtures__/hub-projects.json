@@ -8,8 +8,8 @@
         "id": 7,
         "tenant": 1,
         "alt": "Garden path with landscape lighting at dusk",
-        "updatedAt": "2026-09-09T13:17:31.878Z",
-        "createdAt": "2026-09-09T13:17:31.878Z",
+        "updatedAt": "2026-09-10T23:51:44.400Z",
+        "createdAt": "2026-09-10T23:51:44.400Z",
         "url": "http://localhost:3000/api/media/file/work-1.jpg",
         "thumbnailURL": null,
         "filename": "work-1.jpg",
@@ -20,8 +20,8 @@
       },
       "alt": "Garden path with landscape lighting at dusk",
       "emphasis": "featured",
-      "updatedAt": "2026-09-09T13:17:33.508Z",
-      "createdAt": "2026-09-09T13:17:33.508Z"
+      "updatedAt": "2026-09-10T23:51:45.945Z",
+      "createdAt": "2026-09-10T23:51:45.945Z"
     },
     {
       "id": 2,
@@ -31,8 +31,8 @@
         "id": 10,
         "tenant": 1,
         "alt": "Gardener planting a fresh bed",
-        "updatedAt": "2026-09-09T13:17:32.210Z",
-        "createdAt": "2026-09-09T13:17:32.210Z",
+        "updatedAt": "2026-09-10T23:51:44.698Z",
+        "createdAt": "2026-09-10T23:51:44.698Z",
         "url": "http://localhost:3000/api/media/file/work-2.jpg",
         "thumbnailURL": null,
         "filename": "work-2.jpg",
@@ -43,8 +43,8 @@
       },
       "alt": "Gardener planting a fresh bed",
       "emphasis": "featured",
-      "updatedAt": "2026-09-09T13:17:33.590Z",
-      "createdAt": "2026-09-09T13:17:33.590Z"
+      "updatedAt": "2026-09-10T23:51:46.028Z",
+      "createdAt": "2026-09-10T23:51:46.028Z"
     },
     {
       "id": 3,
@@ -54,8 +54,8 @@
         "id": 12,
         "tenant": 1,
         "alt": "Gardener trimming a hedge",
-        "updatedAt": "2026-09-09T13:17:32.403Z",
-        "createdAt": "2026-09-09T13:17:32.403Z",
+        "updatedAt": "2026-09-10T23:51:44.873Z",
+        "createdAt": "2026-09-10T23:51:44.873Z",
         "url": "http://localhost:3000/api/media/file/work-3.jpg",
         "thumbnailURL": null,
         "filename": "work-3.jpg",
@@ -66,8 +66,8 @@
       },
       "alt": "Gardener trimming a hedge",
       "emphasis": "standard",
-      "updatedAt": "2026-09-09T13:17:33.675Z",
-      "createdAt": "2026-09-09T13:17:33.675Z"
+      "updatedAt": "2026-09-10T23:51:46.112Z",
+      "createdAt": "2026-09-10T23:51:46.112Z"
     },
     {
       "id": 4,
@@ -77,8 +77,8 @@
         "id": 8,
         "tenant": 1,
         "alt": "Aerial view of a villa garden with pool",
-        "updatedAt": "2026-09-09T13:17:31.993Z",
-        "createdAt": "2026-09-09T13:17:31.993Z",
+        "updatedAt": "2026-09-10T23:51:44.501Z",
+        "createdAt": "2026-09-10T23:51:44.501Z",
         "url": "http://localhost:3000/api/media/file/work-4.jpg",
         "thumbnailURL": null,
         "filename": "work-4.jpg",
@@ -89,8 +89,8 @@
       },
       "alt": "Aerial view of a villa garden with pool",
       "emphasis": "standard",
-      "updatedAt": "2026-09-09T13:17:33.764Z",
-      "createdAt": "2026-09-09T13:17:33.764Z"
+      "updatedAt": "2026-09-10T23:51:46.193Z",
+      "createdAt": "2026-09-10T23:51:46.193Z"
     },
     {
       "id": 5,
@@ -100,8 +100,8 @@
         "id": 13,
         "tenant": 1,
         "alt": "Lit walkway through an evening garden",
-        "updatedAt": "2026-09-09T13:17:32.509Z",
-        "createdAt": "2026-09-09T13:17:32.509Z",
+        "updatedAt": "2026-09-10T23:51:44.972Z",
+        "createdAt": "2026-09-10T23:51:44.972Z",
         "url": "http://localhost:3000/api/media/file/work-5.jpg",
         "thumbnailURL": null,
         "filename": "work-5.jpg",
@@ -112,8 +112,8 @@
       },
       "alt": "Lit walkway through an evening garden",
       "emphasis": "standard",
-      "updatedAt": "2026-09-09T13:17:33.880Z",
-      "createdAt": "2026-09-09T13:17:33.880Z"
+      "updatedAt": "2026-09-10T23:51:46.277Z",
+      "createdAt": "2026-09-10T23:51:46.277Z"
     },
     {
       "id": 6,
@@ -123,8 +123,8 @@
         "id": 11,
         "tenant": 1,
         "alt": "Home with lit brick path and planting at dusk",
-        "updatedAt": "2026-09-09T13:17:32.298Z",
-        "createdAt": "2026-09-09T13:17:32.298Z",
+        "updatedAt": "2026-09-10T23:51:44.780Z",
+        "createdAt": "2026-09-10T23:51:44.780Z",
         "url": "http://localhost:3000/api/media/file/work-6.jpg",
         "thumbnailURL": null,
         "filename": "work-6.jpg",
@@ -135,8 +135,8 @@
       },
       "alt": "Home with lit brick path and planting at dusk",
       "emphasis": "featured",
-      "updatedAt": "2026-09-09T13:17:33.970Z",
-      "createdAt": "2026-09-09T13:17:33.970Z"
+      "updatedAt": "2026-09-10T23:51:46.367Z",
+      "createdAt": "2026-09-10T23:51:46.367Z"
     },
     {
       "id": 7,
@@ -146,8 +146,8 @@
         "id": 6,
         "tenant": 1,
         "alt": "Covered patio lounge beside a lawn",
-        "updatedAt": "2026-09-09T13:17:31.779Z",
-        "createdAt": "2026-09-09T13:17:31.779Z",
+        "updatedAt": "2026-09-10T23:51:44.317Z",
+        "createdAt": "2026-09-10T23:51:44.316Z",
         "url": "http://localhost:3000/api/media/file/work-7.jpg",
         "thumbnailURL": null,
         "filename": "work-7.jpg",
@@ -158,8 +158,8 @@
       },
       "alt": "Covered patio lounge beside a lawn",
       "emphasis": "featured",
-      "updatedAt": "2026-09-09T13:17:34.058Z",
-      "createdAt": "2026-09-09T13:17:34.057Z"
+      "updatedAt": "2026-09-10T23:51:46.448Z",
+      "createdAt": "2026-09-10T23:51:46.448Z"
     }
   ],
   "hasNextPage": false,

@@ -90,7 +90,7 @@ export async function exportContent(root, argv) {
       },
     ],
   })
-  const moduleNames = ['site', 'about', 'cta', 'services', 'gallery', 'testimonials', 'process', 'stats', 'faqs']
+  const moduleNames = ['site', 'hero', 'about', 'cta', 'services', 'gallery', 'testimonials', 'process', 'stats', 'faqs']
   /** @type {Record<string, any>[]} */
   let modules
   try {
@@ -107,6 +107,7 @@ export async function exportContent(root, argv) {
   /** @param {string[]} list */
   const texts = (list) => list.map((text) => ({ text }))
   const s = data.site.site
+  const h = data.hero.hero
 
   const out = {
     site: {
@@ -115,6 +116,10 @@ export async function exportContent(root, argv) {
       tagline: s.tagline,
       description: s.description,
       heroHeadline: s.heroHeadline,
+      // Optional throughout: a key the template never set must stay absent, or the hub would store
+      // an empty string and the mapper would hand it back as content nobody wrote.
+      ...(s.heroEyebrow ? { heroEyebrow: s.heroEyebrow } : {}),
+      ...(s.licenseNumber ? { licenseNumber: s.licenseNumber } : {}),
       nav: s.nav,
       navCta: s.navCta,
       heroCta: s.heroCta,
@@ -122,13 +127,16 @@ export async function exportContent(root, argv) {
       socials: s.socials,
       footer: s.footer,
       copyright: s.copyright,
-      // Hero (video, poster and avatars are imported by the layout, not declared in src/data)
+      // Hero. The poster and avatars are image imports and the video is a `public/` path, so all
+      // three come from `src/data/hero.ts` — hard-coding the basenames here (as this did) forced
+      // every template on the hub to ship exactly `hero.mp4`, `hero-poster.jpg` and three avatars
+      // named `avatar-1..3.jpg`, whatever its own assets were actually called.
       heroPhone: s.heroPhone,
-      heroVideo: 'hero.mp4',
-      heroPoster: 'hero-poster.jpg',
-      avatars: [{ image: 'avatar-1.jpg' }, { image: 'avatar-2.jpg' }, { image: 'avatar-3.jpg' }],
+      ...(h.video ? { heroVideo: basename(h.video) } : {}),
+      heroPoster: img(h.poster),
+      avatars: h.avatars.map((/** @type {{ src: string }} */ a) => ({ image: img(a) })),
       review: s.review,
-      recommend: s.recommend,
+      heroBadge: s.heroBadge,
       // About
       aboutHeading: data.about.aboutHeading,
       trustCard: { ...data.about.trustCard, bullets: texts(data.about.trustCard.bullets) },
@@ -185,10 +193,16 @@ export async function exportContent(root, argv) {
   /** @param {boolean} ok @param {string} msg */
   const check = (ok, msg) => { if (!ok) problems.push(msg) }
 
-  // 1. lossless: every string in the source modules survives into the JSON
+  // 1. lossless: every string in the source modules survives into the JSON. A media *path* is the
+  //    one thing allowed to shrink — an image import already arrives here as its basename, and the
+  //    hero video is a `public/` path (`/hero.mp4`) that the hub stores as `hero.mp4` — so accept
+  //    either form for those. Copy still has to survive verbatim, which is what this guards.
   const sourceStrings = strings(Object.fromEntries(Object.entries(data).map(([name, m]) => [name, { ...m }])))
   const outStrings = strings(out)
-  for (const str of sourceStrings) check(outStrings.has(str), `source string missing from export: ${JSON.stringify(str)}`)
+  for (const str of sourceStrings) {
+    const survived = outStrings.has(str) || (IMAGE_RE.test(str) && outStrings.has(basename(str)))
+    check(survived, `source string missing from export: ${JSON.stringify(str)}`)
+  }
 
   // 2. every image is a bare basename that exists on disk (basename first — resolving a path
   //    against src/assets/ or public/ could "find" a file and mask the real problem)

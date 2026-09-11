@@ -8,22 +8,22 @@
       "description": "From planting and fresh sod to patios, walkways, lighting, and complete landscape makeovers, our team handles the planning, installation, and cleanup.",
       "nav": [
         {
-          "id": "6aa15c6c31653e4dd88ddb4c",
+          "id": "6aa34291929d864f2409374f",
           "label": "Services",
           "href": "#services"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb4d",
+          "id": "6aa34291929d864f24093750",
           "label": "Process",
           "href": "#process"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb4e",
+          "id": "6aa34291929d864f24093751",
           "label": "Testimonial",
           "href": "#testimonial"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb4f",
+          "id": "6aa34291929d864f24093752",
           "label": "Faq",
           "href": "#faq"
         }
@@ -34,22 +34,22 @@
       },
       "socials": [
         {
-          "id": "6aa15c6c31653e4dd88ddb50",
+          "id": "6aa34291929d864f24093753",
           "label": "x",
           "href": "#"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb51",
+          "id": "6aa34291929d864f24093754",
           "label": "linkedin",
           "href": "#"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb52",
+          "id": "6aa34291929d864f24093755",
           "label": "facebook",
           "href": "#"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb53",
+          "id": "6aa34291929d864f24093756",
           "label": "instagram",
           "href": "#"
         }
@@ -60,16 +60,22 @@
           "display": "+1 (201) 555-0123",
           "tel": "+12015550123"
         },
-        "address": "1700 Broadway, Denver, CO 80202"
+        "address": "1700 Broadway, Denver, CO 80202",
+        "serviceArea": null,
+        "hours": null
       },
       "labels": {
         "callPrefix": "Call us:",
         "footerEmail": "Email",
         "footerPhone": "Contact",
-        "footerAddress": "Address"
+        "footerAddress": "Address",
+        "footerServiceArea": "Service area",
+        "footerHours": "Hours"
       },
       "copyright": "© 2026 LeapFly, All Rights Reserved",
+      "licenseNumber": null,
       "heroHeadline": "Make Your Yard\nFeel Finished",
+      "heroEyebrow": null,
       "heroCta": {
         "label": "Get My Free Estimate",
         "href": "#faq"
@@ -81,9 +87,9 @@
       "heroVideo": {
         "id": 1,
         "tenant": 1,
-        "alt": "Hero video",
-        "updatedAt": "2026-09-09T13:17:30.987Z",
-        "createdAt": "2026-09-09T13:17:30.987Z",
+        "alt": "LeapFly",
+        "updatedAt": "2026-09-10T23:51:43.581Z",
+        "createdAt": "2026-09-10T23:51:43.581Z",
         "url": "http://localhost:3000/api/media/file/hero.mp4",
         "thumbnailURL": null,
         "filename": "hero.mp4",
@@ -95,9 +101,9 @@
       "heroPoster": {
         "id": 2,
         "tenant": 1,
-        "alt": "Hero poster",
-        "updatedAt": "2026-09-09T13:17:31.422Z",
-        "createdAt": "2026-09-09T13:17:31.422Z",
+        "alt": "LeapFly",
+        "updatedAt": "2026-09-10T23:51:43.996Z",
+        "createdAt": "2026-09-10T23:51:43.996Z",
         "url": "http://localhost:3000/api/media/file/hero-poster.jpg",
         "thumbnailURL": null,
         "filename": "hero-poster.jpg",
@@ -108,13 +114,13 @@
       },
       "avatars": [
         {
-          "id": "6aa15c6c31653e4dd88ddb54",
+          "id": "6aa34291929d864f24093757",
           "image": {
             "id": 3,
             "tenant": 1,
-            "alt": "Customer",
-            "updatedAt": "2026-09-09T13:17:31.527Z",
-            "createdAt": "2026-09-09T13:17:31.527Z",
+            "alt": "LeapFly",
+            "updatedAt": "2026-09-10T23:51:44.096Z",
+            "createdAt": "2026-09-10T23:51:44.096Z",
             "url": "http://localhost:3000/api/media/file/avatar-1.jpg",
             "thumbnailURL": null,
             "filename": "avatar-1.jpg",
@@ -125,13 +131,13 @@
           }
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb55",
+          "id": "6aa34291929d864f24093758",
           "image": {
             "id": 4,
             "tenant": 1,
-            "alt": "Customer",
-            "updatedAt": "2026-09-09T13:17:31.610Z",
-            "createdAt": "2026-09-09T13:17:31.610Z",
+            "alt": "LeapFly",
+            "updatedAt": "2026-09-10T23:51:44.170Z",
+            "createdAt": "2026-09-10T23:51:44.170Z",
             "url": "http://localhost:3000/api/media/file/avatar-2.jpg",
             "thumbnailURL": null,
             "filename": "avatar-2.jpg",
@@ -142,13 +148,13 @@
           }
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb56",
+          "id": "6aa34291929d864f24093759",
           "image": {
             "id": 5,
             "tenant": 1,
-            "alt": "Customer",
-            "updatedAt": "2026-09-09T13:17:31.698Z",
-            "createdAt": "2026-09-09T13:17:31.697Z",
+            "alt": "LeapFly",
+            "updatedAt": "2026-09-10T23:51:44.242Z",
+            "createdAt": "2026-09-10T23:51:44.242Z",
             "url": "http://localhost:3000/api/media/file/avatar-3.jpg",
             "thumbnailURL": null,
             "filename": "avatar-3.jpg",
@@ -162,7 +168,7 @@
       "review": {
         "summary": "4.97/5 from over 600 reviews."
       },
-      "recommend": {
+      "heroBadge": {
         "value": "98%",
         "label": "Would recommend our service"
       },
@@ -172,23 +178,23 @@
         "body": "Every property is different. We take time to understand your space, priorities, and budget before recommending the right landscaping solution.",
         "bullets": [
           {
-            "id": "6aa15c6c31653e4dd88ddb57",
+            "id": "6aa34291929d864f2409375a",
             "text": "Experienced Local Crew"
           },
           {
-            "id": "6aa15c6c31653e4dd88ddb58",
+            "id": "6aa34291929d864f2409375b",
             "text": "Quality Materials & Plants"
           }
         ]
       },
       "aboutCards": [
         {
-          "id": "6aa15c6c31653e4dd88ddb59",
+          "id": "6aa34291929d864f2409375c",
           "title": "Our Vision",
           "body": "To create beautiful, functional outdoor spaces that add lasting value and make every property more enjoyable."
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb5a",
+          "id": "6aa34291929d864f2409375d",
           "title": "Our Mission",
           "body": "To deliver dependable landscaping through thoughtful planning, skilled workmanship, quality materials, and care"
         }
@@ -239,13 +245,13 @@
       },
       "ctaStrip": [
         {
-          "id": "6aa15c6c31653e4dd88ddb5b",
+          "id": "6aa34291929d864f2409375e",
           "image": {
             "id": 6,
             "tenant": 1,
             "alt": "Covered patio lounge beside a lawn",
-            "updatedAt": "2026-09-09T13:17:31.779Z",
-            "createdAt": "2026-09-09T13:17:31.779Z",
+            "updatedAt": "2026-09-10T23:51:44.317Z",
+            "createdAt": "2026-09-10T23:51:44.316Z",
             "url": "http://localhost:3000/api/media/file/work-7.jpg",
             "thumbnailURL": null,
             "filename": "work-7.jpg",
@@ -257,13 +263,13 @@
           "alt": "Covered patio lounge beside a lawn"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb5c",
+          "id": "6aa34291929d864f2409375f",
           "image": {
             "id": 7,
             "tenant": 1,
             "alt": "Garden path with landscape lighting at dusk",
-            "updatedAt": "2026-09-09T13:17:31.878Z",
-            "createdAt": "2026-09-09T13:17:31.878Z",
+            "updatedAt": "2026-09-10T23:51:44.400Z",
+            "createdAt": "2026-09-10T23:51:44.400Z",
             "url": "http://localhost:3000/api/media/file/work-1.jpg",
             "thumbnailURL": null,
             "filename": "work-1.jpg",
@@ -275,13 +281,13 @@
           "alt": "Garden path with landscape lighting at dusk"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb5d",
+          "id": "6aa34291929d864f24093760",
           "image": {
             "id": 8,
             "tenant": 1,
             "alt": "Aerial view of a villa garden with pool",
-            "updatedAt": "2026-09-09T13:17:31.993Z",
-            "createdAt": "2026-09-09T13:17:31.993Z",
+            "updatedAt": "2026-09-10T23:51:44.501Z",
+            "createdAt": "2026-09-10T23:51:44.501Z",
             "url": "http://localhost:3000/api/media/file/work-4.jpg",
             "thumbnailURL": null,
             "filename": "work-4.jpg",
@@ -293,13 +299,13 @@
           "alt": "Aerial view of a villa garden with pool"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb5e",
+          "id": "6aa34291929d864f24093761",
           "image": {
             "id": 9,
             "tenant": 1,
             "alt": "Mowing a front lawn",
-            "updatedAt": "2026-09-09T13:17:32.122Z",
-            "createdAt": "2026-09-09T13:17:32.122Z",
+            "updatedAt": "2026-09-10T23:51:44.619Z",
+            "createdAt": "2026-09-10T23:51:44.619Z",
             "url": "http://localhost:3000/api/media/file/service-lawncare.jpg",
             "thumbnailURL": null,
             "filename": "service-lawncare.jpg",
@@ -311,13 +317,13 @@
           "alt": "Mowing a front lawn"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb5f",
+          "id": "6aa34291929d864f24093762",
           "image": {
             "id": 10,
             "tenant": 1,
             "alt": "Gardener planting a fresh bed",
-            "updatedAt": "2026-09-09T13:17:32.210Z",
-            "createdAt": "2026-09-09T13:17:32.210Z",
+            "updatedAt": "2026-09-10T23:51:44.698Z",
+            "createdAt": "2026-09-10T23:51:44.698Z",
             "url": "http://localhost:3000/api/media/file/work-2.jpg",
             "thumbnailURL": null,
             "filename": "work-2.jpg",
@@ -329,13 +335,13 @@
           "alt": "Gardener planting a fresh bed"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb60",
+          "id": "6aa34291929d864f24093763",
           "image": {
             "id": 11,
             "tenant": 1,
             "alt": "Home with lit brick path and planting at dusk",
-            "updatedAt": "2026-09-09T13:17:32.298Z",
-            "createdAt": "2026-09-09T13:17:32.298Z",
+            "updatedAt": "2026-09-10T23:51:44.780Z",
+            "createdAt": "2026-09-10T23:51:44.780Z",
             "url": "http://localhost:3000/api/media/file/work-6.jpg",
             "thumbnailURL": null,
             "filename": "work-6.jpg",
@@ -347,13 +353,13 @@
           "alt": "Home with lit brick path and planting at dusk"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb61",
+          "id": "6aa34291929d864f24093764",
           "image": {
             "id": 12,
             "tenant": 1,
             "alt": "Gardener trimming a hedge",
-            "updatedAt": "2026-09-09T13:17:32.403Z",
-            "createdAt": "2026-09-09T13:17:32.403Z",
+            "updatedAt": "2026-09-10T23:51:44.873Z",
+            "createdAt": "2026-09-10T23:51:44.873Z",
             "url": "http://localhost:3000/api/media/file/work-3.jpg",
             "thumbnailURL": null,
             "filename": "work-3.jpg",
@@ -365,13 +371,13 @@
           "alt": "Gardener trimming a hedge"
         },
         {
-          "id": "6aa15c6c31653e4dd88ddb62",
+          "id": "6aa34291929d864f24093765",
           "image": {
             "id": 13,
             "tenant": 1,
             "alt": "Lit walkway through an evening garden",
-            "updatedAt": "2026-09-09T13:17:32.509Z",
-            "createdAt": "2026-09-09T13:17:32.509Z",
+            "updatedAt": "2026-09-10T23:51:44.972Z",
+            "createdAt": "2026-09-10T23:51:44.972Z",
             "url": "http://localhost:3000/api/media/file/work-5.jpg",
             "thumbnailURL": null,
             "filename": "work-5.jpg",
@@ -383,8 +389,8 @@
           "alt": "Lit walkway through an evening garden"
         }
       ],
-      "updatedAt": "2026-09-09T13:17:32.819Z",
-      "createdAt": "2026-09-09T13:17:32.818Z"
+      "updatedAt": "2026-09-10T23:51:45.266Z",
+      "createdAt": "2026-09-10T23:51:45.265Z"
     }
   ],
   "hasNextPage": false,

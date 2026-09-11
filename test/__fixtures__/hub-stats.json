@@ -6,8 +6,8 @@
       "order": 1,
       "value": "12",
       "label": "Years of Experience",
-      "updatedAt": "2026-09-09T13:17:35.381Z",
-      "createdAt": "2026-09-09T13:17:35.381Z"
+      "updatedAt": "2026-09-10T23:51:47.721Z",
+      "createdAt": "2026-09-10T23:51:47.721Z"
     },
     {
       "id": 2,
@@ -15,8 +15,8 @@
       "order": 2,
       "value": "98%",
       "label": "Satisfied Customers",
-      "updatedAt": "2026-09-09T13:17:35.429Z",
-      "createdAt": "2026-09-09T13:17:35.429Z"
+      "updatedAt": "2026-09-10T23:51:47.767Z",
+      "createdAt": "2026-09-10T23:51:47.767Z"
     },
     {
       "id": 3,
@@ -24,8 +24,8 @@
       "order": 3,
       "value": "500+",
       "label": "Projects Completed",
-      "updatedAt": "2026-09-09T13:17:35.478Z",
-      "createdAt": "2026-09-09T13:17:35.478Z"
+      "updatedAt": "2026-09-10T23:51:47.814Z",
+      "createdAt": "2026-09-10T23:51:47.814Z"
     }
   ],
   "hasNextPage": false,

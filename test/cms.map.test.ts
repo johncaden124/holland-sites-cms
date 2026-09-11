@@ -22,6 +22,7 @@ import {
   media,
   photo,
   type HubFaqDoc,
+  type HubMedia,
   type HubProcessStepDoc,
   type HubProjectDoc,
   type HubServiceDoc,
@@ -75,8 +76,9 @@ describe('photo / media', () => {
   });
 
   it('media returns the populated doc itself, so videos (no dimensions) pass', () => {
-    expect(media('site.heroVideo', baseSiteDoc.heroVideo)).toBe(baseSiteDoc.heroVideo);
-    expect(baseSiteDoc.heroVideo.width).toBeNull();
+    const video = baseSiteDoc.heroVideo as HubMedia;
+    expect(media('site.heroVideo', video)).toBe(video);
+    expect(video.width).toBeNull();
   });
 
   it('names the field and the fix for an unset, unpopulated or non-image relation', () => {
@@ -87,7 +89,7 @@ describe('photo / media', () => {
     expect(() => photo('site.heroPoster', 157)).toThrow(
       'CMS site.heroPoster: relation not populated (got 157); fetch with depth=1',
     );
-    expect(() => photo('site.heroPoster', baseSiteDoc.heroVideo)).toThrow(
+    expect(() => photo('site.heroPoster', baseSiteDoc.heroVideo as HubMedia)).toThrow(
       'CMS site.heroPoster: media has no width/height (is it an image?)',
     );
   });
@@ -120,11 +122,23 @@ describe('mapSite', () => {
   });
 
   it('names the hub field path when a site media relation is missing', () => {
-    expect(() => mapSite(siteDoc({ heroVideo: null as never }))).toThrow(/^CMS site\.heroVideo: no image set/);
+    expect(() => mapSite(siteDoc({ heroPoster: null as never }))).toThrow(/^CMS site\.heroPoster: no image set/);
     const avatars = baseSiteDoc.avatars.map((a, i) => (i === 2 ? { ...a, image: 7 as never } : a));
     expect(() => mapSite(siteDoc({ avatars }))).toThrow(/^CMS site\.avatars\[2\]\.image: relation not populated/);
     const ctaStrip = (baseSiteDoc.ctaStrip ?? []).map((c, i) => (i === 3 ? { ...c, image: null as never } : c));
     expect(() => mapSite(siteDoc({ ctaStrip }))).toThrow(/^CMS site\.ctaStrip\[3\]\.image: no image set/);
+  });
+
+  it('omits hero.video entirely when the tenant uploaded none', () => {
+    // The poster carries the hero on its own, so a niche with no stock footage can still onboard.
+    // The key must be ABSENT, not undefined: each template asserts its fixtures deep-equal its own
+    // `src/data`, where a template with no video simply has no `video` key.
+    for (const empty of [null, undefined]) {
+      const hero = mapSite(siteDoc({ heroVideo: empty })).hero;
+      expect('video' in hero).toBe(false);
+      expect(hero.poster).toBeDefined();
+    }
+    expect(mapSite(siteDoc({})).hero.video).toBe((baseSiteDoc.heroVideo as HubMedia).url);
   });
 
   it('names the document and the allowed values for an unknown select', () => {

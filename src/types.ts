@@ -37,6 +37,12 @@ export interface SiteSettings {
   description: string;
   /** The hero H1. One rendered line per `\n`, so a client can set their own two-line headline. */
   heroHeadline: string;
+  /**
+   * The hero's chip, above the H1 — the one section that had no `chip` of its own. Optional
+   * because it is a design element, not a fact: a template renders it only when a client sets it
+   * ("24/7 emergency · Greater Columbus"), so a niche whose hero has no room for one omits it.
+   */
+  heroEyebrow?: string;
   nav: NavLink[];
   /** The nav pill's call to action. */
   navCta: NavLink;
@@ -49,17 +55,37 @@ export interface SiteSettings {
     email: string;
     phone: { display: string; tel: string };
     address: string;
+    /**
+     * Where the business works ("Greater Columbus, OH"). Optional: emergency trades sell it as a
+     * first-class fact and templates give it a footer column, but a niche that does not show one
+     * omits it rather than inventing copy.
+     */
+    serviceArea?: string;
+    /** When they answer ("24/7", "Mon-Fri 7am-6pm"). Optional for the same reason. */
+    hours?: string;
   };
   review: { summary: string };
-  recommend: { value: string; label: string };
+  /**
+   * The hero's value + label badge ("98% / Would recommend our service", "24/7 / A real dispatcher").
+   * Named for what it is rather than what the first template put in it.
+   */
+  heroBadge: { value: string; label: string };
+  /**
+   * Contractor licence number, displayed near the copyright. Several regulated trades must show
+   * one by law; optional because just as many have none.
+   */
+  licenseNumber?: string;
   /** Short interface strings components would otherwise hard-code, so every niche can reword them. */
   labels: {
     /** Precedes the phone number on the "call us" buttons. */
     callPrefix: string;
-    /** Headings above the three footer contact columns. */
+    /** Headings above the footer contact columns. */
     footerEmail: string;
     footerPhone: string;
     footerAddress: string;
+    /** Headings for the two optional footer columns; unused when their field is unset. */
+    footerServiceArea: string;
+    footerHours: string;
   };
   socials: Social[];
   copyright: string;
@@ -135,10 +161,25 @@ export interface Intro {
 }
 export type ShortIntro = Pick<Intro, 'chip' | 'heading'>;
 
+/**
+ * The hero's media, from `site.heroVideo` / `heroPoster` / `avatars`. A template's own copy lives in
+ * `src/data/hero.ts`, which is also what `site-cms export-content` reads for the basenames to seed.
+ */
+export interface HeroMedia {
+  /**
+   * The background video: an absolute URL in CMS mode, a `public/` path standalone. Absent when the
+   * tenant uploaded none — stock footage is scarce for some trades, so the hub field is optional and
+   * a template must fall back to `poster` alone rather than render a `<video>` with no source.
+   */
+  video?: string;
+  poster: Photo;
+  avatars: Photo[];
+}
+
 /** Everything on the page that is not one of the six list collections; `getSite()` returns it. */
 export interface SiteContent {
   site: SiteSettings;
-  hero: { video: string; poster: Photo; avatars: Photo[] };
+  hero: HeroMedia;
   aboutHeading: string;
   trustCard: { title: string; body: string; bullets: string[] };
   aboutCards: AboutCard[];

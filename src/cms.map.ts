@@ -39,25 +39,38 @@ type Row<T> = T & { id?: string | null };
 type TextRows = Row<{ text: string }>[] | null | undefined;
 /** Select fields arrive as plain strings; `oneOf` narrows them to what the components render. */
 type Select = string;
+/**
+ * An optional hub text field. Payload answers `null` for one a client left empty — not absence —
+ * so every optional string the hub can send is typed here, and `opt` turns both into a missing key.
+ */
+type OptionalText = string | null | undefined;
 
 export interface HubSiteDoc {
   name: string;
   tagline: string;
   description: string;
   heroHeadline: string;
+  /** Optional in the hub, so `null` on most tenants. */
+  heroEyebrow?: OptionalText;
   nav?: Row<NavLink>[] | null;
   navCta: NavLink;
   heroCta: NavLink;
   labels: SiteSettings['labels'];
   socials?: Row<{ label: Select; href: string }>[] | null;
-  footer: SiteSettings['footer'];
+  /** `serviceArea` / `hours` are optional, and the hub sends `null` rather than omitting them. */
+  footer: Omit<SiteSettings['footer'], 'serviceArea' | 'hours'> & {
+    serviceArea?: OptionalText;
+    hours?: OptionalText;
+  };
   copyright: string;
   heroPhone: SiteSettings['heroPhone'];
-  heroVideo: HubMedia;
+  /** Optional: a tenant with no stock footage leaves it empty and the hero falls back to the poster. */
+  heroVideo?: HubMedia | number | string | null;
   heroPoster: HubMedia;
   avatars: Row<{ image: HubMedia }>[];
   review: SiteSettings['review'];
-  recommend: SiteSettings['recommend'];
+  heroBadge: SiteSettings['heroBadge'];
+  licenseNumber?: OptionalText;
   aboutHeading: string;
   trustCard: { title: string; body: string; bullets?: TextRows };
   aboutCards: Row<{ title: string; body: string }>[];
@@ -125,6 +138,15 @@ export function photo(field: string, m: HubMedia | number | string | null | unde
 
 const texts = (rows: TextRows): string[] => (rows ?? []).map((r) => r.text);
 
+/**
+ * An optional hub text field as a spreadable object — the key exists only when the operator set it.
+ * Payload answers `null` or `''` for an untouched optional text, while a template that does not use
+ * the field has no key at all in `src/data`, and `{ key: undefined }` is not the same object as one
+ * without the key (the per-template fixture tests compare with `toStrictEqual`).
+ */
+const opt = <K extends string>(key: K, value: string | null | undefined) =>
+  (value ? { [key]: value } : {}) as { [P in K]?: string };
+
 /** `collection[i] "title"` — how every per-document error names the document. */
 const at = (collection: string, i: number, title?: string) =>
   title == null ? `${collection}[${i}]` : `${collection}[${i}] ${JSON.stringify(title)}`;
@@ -155,13 +177,14 @@ const EMPHASIS = keys<GalleryImage['emphasis']>({ featured: true, standard: true
 // ---- mappers ------------------------------------------------------------------------------
 
 export function mapSite(doc: HubSiteDoc): SiteContent {
-  const { footer, heroPhone, review, recommend } = doc;
+  const { footer, heroPhone, review, heroBadge } = doc;
   return {
     site: {
       name: doc.name,
       tagline: doc.tagline,
       description: doc.description,
       heroHeadline: doc.heroHeadline,
+      ...opt('heroEyebrow', doc.heroEyebrow),
       nav: (doc.nav ?? []).map(({ label, href }) => ({ label, href })),
       navCta: { label: doc.navCta.label, href: doc.navCta.href },
       heroCta: { label: doc.heroCta.label, href: doc.heroCta.href },
@@ -170,14 +193,19 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
         email: footer.email,
         phone: { display: footer.phone.display, tel: footer.phone.tel },
         address: footer.address,
+        ...opt('serviceArea', footer.serviceArea),
+        ...opt('hours', footer.hours),
       },
       review: { summary: review.summary },
-      recommend: { value: recommend.value, label: recommend.label },
+      heroBadge: { value: heroBadge.value, label: heroBadge.label },
+      ...opt('licenseNumber', doc.licenseNumber),
       labels: {
         callPrefix: doc.labels.callPrefix,
         footerEmail: doc.labels.footerEmail,
         footerPhone: doc.labels.footerPhone,
         footerAddress: doc.labels.footerAddress,
+        footerServiceArea: doc.labels.footerServiceArea,
+        footerHours: doc.labels.footerHours,
       },
       socials: (doc.socials ?? []).map(({ label, href }, i) => ({
         label: oneOf(`${at('site.socials', i)}.label`, label, SOCIALS),
@@ -186,7 +214,9 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
       copyright: doc.copyright,
     },
     hero: {
-      video: media('site.heroVideo', doc.heroVideo).url,
+      // Optional: an unset upload is `null`/absent, and the key is then omitted entirely so a
+      // template's `hero.video === undefined` branch matches a template with no video in `src/data`.
+      ...opt('video', doc.heroVideo == null ? undefined : media('site.heroVideo', doc.heroVideo).url),
       poster: photo('site.heroPoster', doc.heroPoster),
       avatars: doc.avatars.map((a, i) => photo(`${at('site.avatars', i)}.image`, a.image)),
     },

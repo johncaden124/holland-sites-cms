@@ -381,7 +381,10 @@ export function createCms(options: CmsOptions): Cms {
       if (!cmsEnabled) return local.site;
       return memo('site:content', async () => {
         const content = mapSite((await fetchDocs<HubSiteDoc>('site'))[0] as HubSiteDoc);
-        assertMediaUrl('site.hero.video', content.hero.video);
+        // The hero video is the one media URL that never reaches `<Image>` (a `<video>` source is a
+        // raw URL), so `checked` below cannot see it — assert it here. Absent when the tenant set no
+        // video, which is allowed: the template falls back to the poster.
+        if (content.hero.video !== undefined) assertMediaUrl('site.hero.video', content.hero.video);
         return checked('site', content);
       });
     },
