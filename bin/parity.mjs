@@ -29,9 +29,19 @@ export async function parity(root, argv) {
 
   // ---- normalisation --------------------------------------------------------------------------
 
-  /** Absolute `http(s)://…/name.ext`, a `/_astro/name.<hash>.ext` original, or a `/name.ext` public file. */
+  /**
+   * Absolute `http(s)://…/name.ext`, a `/_astro/name.<hash>.ext` original, or a `/name.ext` public
+   * file — with an optional query string, which is dropped.
+   *
+   * The query is how the hub addresses a tenant's media on a dev hub: R2 objects are keyed
+   * `<tenantId>/<file>`, and Payload's own `/api/media/file/:filename` route takes that segment as
+   * `?prefix=<tenantId>` because its route parameter is a single path segment. A production media
+   * domain carries the prefix in the path instead and has no query at all. Either way the tenant
+   * prefix is addressing, not content: the standalone build has no tenant, so parity must not see
+   * one. A wrong *basename* still shows as a difference.
+   */
   const RAW_MEDIA_URL = new RegExp(
-    `^(?:${cfg.mediaUrlPrefixes.join('|')})([A-Za-z0-9-]+?)(?:\\.[A-Za-z0-9_-]+)?\\.(${cfg.mediaExtensions.join('|')})$`,
+    `^(?:${cfg.mediaUrlPrefixes.join('|')})([A-Za-z0-9-]+?)(?:\\.[A-Za-z0-9_-]+)?\\.(${cfg.mediaExtensions.join('|')})(?:\\?[^"']*)?$`,
   )
 
   /**

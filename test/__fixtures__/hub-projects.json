@@ -8,9 +8,10 @@
         "id": 7,
         "tenant": 1,
         "alt": "Garden path with landscape lighting at dusk",
-        "updatedAt": "2026-09-10T23:51:44.400Z",
-        "createdAt": "2026-09-10T23:51:44.400Z",
-        "url": "http://localhost:3000/api/media/file/work-1.jpg",
+        "prefix": "1",
+        "updatedAt": "2026-09-11T15:35:38.884Z",
+        "createdAt": "2026-09-11T15:35:38.884Z",
+        "url": "http://localhost:3000/api/media/file/work-1.jpg?prefix=1",
         "thumbnailURL": null,
         "filename": "work-1.jpg",
         "mimeType": "image/jpeg",
@@ -20,8 +21,8 @@
       },
       "alt": "Garden path with landscape lighting at dusk",
       "emphasis": "featured",
-      "updatedAt": "2026-09-10T23:51:45.945Z",
-      "createdAt": "2026-09-10T23:51:45.945Z"
+      "updatedAt": "2026-09-11T15:35:40.375Z",
+      "createdAt": "2026-09-11T15:35:40.375Z"
     },
     {
       "id": 2,
@@ -31,9 +32,10 @@
         "id": 10,
         "tenant": 1,
         "alt": "Gardener planting a fresh bed",
-        "updatedAt": "2026-09-10T23:51:44.698Z",
-        "createdAt": "2026-09-10T23:51:44.698Z",
-        "url": "http://localhost:3000/api/media/file/work-2.jpg",
+        "prefix": "1",
+        "updatedAt": "2026-09-11T15:35:39.165Z",
+        "createdAt": "2026-09-11T15:35:39.165Z",
+        "url": "http://localhost:3000/api/media/file/work-2.jpg?prefix=1",
         "thumbnailURL": null,
         "filename": "work-2.jpg",
         "mimeType": "image/jpeg",
@@ -43,8 +45,8 @@
       },
       "alt": "Gardener planting a fresh bed",
       "emphasis": "featured",
-      "updatedAt": "2026-09-10T23:51:46.028Z",
-      "createdAt": "2026-09-10T23:51:46.028Z"
+      "updatedAt": "2026-09-11T15:35:40.457Z",
+      "createdAt": "2026-09-11T15:35:40.457Z"
     },
     {
       "id": 3,
@@ -54,9 +56,10 @@
         "id": 12,
         "tenant": 1,
         "alt": "Gardener trimming a hedge",
-        "updatedAt": "2026-09-10T23:51:44.873Z",
-        "createdAt": "2026-09-10T23:51:44.873Z",
-        "url": "http://localhost:3000/api/media/file/work-3.jpg",
+        "prefix": "1",
+        "updatedAt": "2026-09-11T15:35:39.333Z",
+        "createdAt": "2026-09-11T15:35:39.333Z",
+        "url": "http://localhost:3000/api/media/file/work-3.jpg?prefix=1",
         "thumbnailURL": null,
         "filename": "work-3.jpg",
         "mimeType": "image/jpeg",
@@ -66,8 +69,8 @@
       },
       "alt": "Gardener trimming a hedge",
       "emphasis": "standard",
-      "updatedAt": "2026-09-10T23:51:46.112Z",
-      "createdAt": "2026-09-10T23:51:46.112Z"
+      "updatedAt": "2026-09-11T15:35:40.540Z",
+      "createdAt": "2026-09-11T15:35:40.540Z"
     },
     {
       "id": 4,
@@ -77,9 +80,10 @@
         "id": 8,
         "tenant": 1,
         "alt": "Aerial view of a villa garden with pool",
-        "updatedAt": "2026-09-10T23:51:44.501Z",
-        "createdAt": "2026-09-10T23:51:44.501Z",
-        "url": "http://localhost:3000/api/media/file/work-4.jpg",
+        "prefix": "1",
+        "updatedAt": "2026-09-11T15:35:38.991Z",
+        "createdAt": "2026-09-11T15:35:38.991Z",
+        "url": "http://localhost:3000/api/media/file/work-4.jpg?prefix=1",
         "thumbnailURL": null,
         "filename": "work-4.jpg",
         "mimeType": "image/jpeg",
@@ -89,8 +93,8 @@
       },
       "alt": "Aerial view of a villa garden with pool",
       "emphasis": "standard",
-      "updatedAt": "2026-09-10T23:51:46.193Z",
-      "createdAt": "2026-09-10T23:51:46.193Z"
+      "updatedAt": "2026-09-11T15:35:40.622Z",
+      "createdAt": "2026-09-11T15:35:40.622Z"
     },
     {
       "id": 5,
@@ -100,9 +104,10 @@
         "id": 13,
         "tenant": 1,
         "alt": "Lit walkway through an evening garden",
-        "updatedAt": "2026-09-10T23:51:44.972Z",
-        "createdAt": "2026-09-10T23:51:44.972Z",
-        "url": "http://localhost:3000/api/media/file/work-5.jpg",
+        "prefix": "1",
+        "updatedAt": "2026-09-11T15:35:39.433Z",
+        "createdAt": "2026-09-11T15:35:39.433Z",
+        "url": "http://localhost:3000/api/media/file/work-5.jpg?prefix=1",
         "thumbnailURL": null,
         "filename": "work-5.jpg",
         "mimeType": "image/jpeg",
@@ -112,8 +117,8 @@
       },
       "alt": "Lit walkway through an evening garden",
       "emphasis": "standard",
-      "updatedAt": "2026-09-10T23:51:46.277Z",
-      "createdAt": "2026-09-10T23:51:46.277Z"
+      "updatedAt": "2026-09-11T15:35:40.703Z",
+      "createdAt": "2026-09-11T15:35:40.703Z"
     },
     {
       "id": 6,
@@ -123,9 +128,10 @@
         "id": 11,
         "tenant": 1,
         "alt": "Home with lit brick path and planting at dusk",
-        "updatedAt": "2026-09-10T23:51:44.780Z",
-        "createdAt": "2026-09-10T23:51:44.780Z",
-        "url": "http://localhost:3000/api/media/file/work-6.jpg",
+        "prefix": "1",
+        "updatedAt": "2026-09-11T15:35:39.250Z",
+        "createdAt": "2026-09-11T15:35:39.249Z",
+        "url": "http://localhost:3000/api/media/file/work-6.jpg?prefix=1",
         "thumbnailURL": null,
         "filename": "work-6.jpg",
         "mimeType": "image/jpeg",
@@ -135,8 +141,8 @@
       },
       "alt": "Home with lit brick path and planting at dusk",
       "emphasis": "featured",
-      "updatedAt": "2026-09-10T23:51:46.367Z",
-      "createdAt": "2026-09-10T23:51:46.367Z"
+      "updatedAt": "2026-09-11T15:35:40.792Z",
+      "createdAt": "2026-09-11T15:35:40.792Z"
     },
     {
       "id": 7,
@@ -146,9 +152,10 @@
         "id": 6,
         "tenant": 1,
         "alt": "Covered patio lounge beside a lawn",
-        "updatedAt": "2026-09-10T23:51:44.317Z",
-        "createdAt": "2026-09-10T23:51:44.316Z",
-        "url": "http://localhost:3000/api/media/file/work-7.jpg",
+        "prefix": "1",
+        "updatedAt": "2026-09-11T15:35:38.782Z",
+        "createdAt": "2026-09-11T15:35:38.782Z",
+        "url": "http://localhost:3000/api/media/file/work-7.jpg?prefix=1",
         "thumbnailURL": null,
         "filename": "work-7.jpg",
         "mimeType": "image/jpeg",
@@ -158,8 +165,8 @@
       },
       "alt": "Covered patio lounge beside a lawn",
       "emphasis": "featured",
-      "updatedAt": "2026-09-10T23:51:46.448Z",
-      "createdAt": "2026-09-10T23:51:46.448Z"
+      "updatedAt": "2026-09-11T15:35:40.876Z",
+      "createdAt": "2026-09-11T15:35:40.876Z"
     }
   ],
   "hasNextPage": false,

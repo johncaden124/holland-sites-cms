@@ -6,8 +6,8 @@
       "order": 1,
       "question": "Do you offer free landscaping estimates?",
       "answer": "Yes. We can review your property, discuss your goals, and provide a clear estimate before any work begins.",
-      "updatedAt": "2026-09-10T23:51:47.861Z",
-      "createdAt": "2026-09-10T23:51:47.861Z"
+      "updatedAt": "2026-09-11T15:35:42.259Z",
+      "createdAt": "2026-09-11T15:35:42.259Z"
     },
     {
       "id": 2,
@@ -15,8 +15,8 @@
       "order": 2,
       "question": "What landscaping services do you provide?",
       "answer": "We offer landscape design, lawn and garden care, planting, hardscaping, seasonal maintenance, and outdoor improvements.",
-      "updatedAt": "2026-09-10T23:51:47.913Z",
-      "createdAt": "2026-09-10T23:51:47.913Z"
+      "updatedAt": "2026-09-11T15:35:42.305Z",
+      "createdAt": "2026-09-11T15:35:42.305Z"
     },
     {
       "id": 3,
@@ -24,8 +24,8 @@
       "order": 3,
       "question": "How long does a landscaping project take?",
       "answer": "Timelines depend on the size and scope of the project. We'll give you a clear schedule before work starts.",
-      "updatedAt": "2026-09-10T23:51:47.958Z",
-      "createdAt": "2026-09-10T23:51:47.958Z"
+      "updatedAt": "2026-09-11T15:35:42.349Z",
+      "createdAt": "2026-09-11T15:35:42.349Z"
     },
     {
       "id": 4,
@@ -33,8 +33,8 @@
       "order": 4,
       "question": "Can you work with my existing landscape?",
       "answer": "Absolutely. We can refresh, extend, or redesign around what you already have — keeping what works and improving the rest.",
-      "updatedAt": "2026-09-10T23:51:48.005Z",
-      "createdAt": "2026-09-10T23:51:48.005Z"
+      "updatedAt": "2026-09-11T15:35:42.395Z",
+      "createdAt": "2026-09-11T15:35:42.395Z"
     },
     {
       "id": 5,
@@ -42,8 +42,8 @@
       "order": 5,
       "question": "Do you offer ongoing lawn maintenance?",
       "answer": "Yes. We offer routine and seasonal maintenance plans to keep your lawn and garden healthy year-round.",
-      "updatedAt": "2026-09-10T23:51:48.052Z",
-      "createdAt": "2026-09-10T23:51:48.052Z"
+      "updatedAt": "2026-09-11T15:35:42.444Z",
+      "createdAt": "2026-09-11T15:35:42.444Z"
     },
     {
       "id": 6,
@@ -51,8 +51,8 @@
       "order": 6,
       "question": "How do I get started?",
       "answer": "Contact us to request a free estimate. We'll schedule an on-site consultation and walk you through the next steps.",
-      "updatedAt": "2026-09-10T23:51:48.097Z",
-      "createdAt": "2026-09-10T23:51:48.097Z"
+      "updatedAt": "2026-09-11T15:35:42.489Z",
+      "createdAt": "2026-09-11T15:35:42.489Z"
     }
   ],
   "hasNextPage": false,

@@ -81,7 +81,10 @@ npx site-cms capture-fixtures --out src/lib/__fixtures__
 - **`parity`** builds twice (with and without the hub) and requires the two pages to be identical
   once known-equivalent differences are normalised away. Those normalisation rules are the one
   per-template thing, so they come from an optional `site-cms.config.mjs` at the consumer root; the
-  defaults reproduce the landscaping template's original rules exactly.
+  defaults reproduce the landscaping template's original rules exactly. A media URL's query string
+  is dropped: the hub keys R2 objects per tenant and a dev hub addresses that as `?prefix=<id>`,
+  which is addressing rather than content — the standalone build has no tenant. A differing
+  *basename* is still a difference.
 - **`export-content`** loads `src/data/*.ts` through the consumer's own Vite, projects it onto the
   hub schema and verifies the result is lossless before writing. `--media` copies every referenced
   file out of `src/assets/` and `public/` into one folder — the JSON and the uploads are the two

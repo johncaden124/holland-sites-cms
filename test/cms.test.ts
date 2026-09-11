@@ -390,7 +390,9 @@ describe('cms', () => {
     it('accepts loopback media from a loopback hub', async () => {
       vi.stubGlobal('fetch', vi.fn(async () => json(hubSite)));
       const cms = createCms(hub('http://localhost:3000'));
-      expect((await cms.getSite()).hero.poster.src).toBe('http://localhost:3000/api/media/file/hero-poster.jpg');
+      // Read from the fixture rather than spelled out: a dev hub's media URL carries the tenant as
+      // `?prefix=<id>` (the hub keys R2 objects per tenant), and the id depends on seed order.
+      expect((await cms.getSite()).hero.poster.src).toBe(hubSite.docs[0].heroPoster.url);
     });
 
     it('accepts the other spelling of loopback on the hub’s port', async () => {
@@ -430,7 +432,7 @@ describe('cms', () => {
       vi.stubGlobal('fetch', vi.fn(async () => json(hubSite)));
       const cms = createCms(hub('https://hub.hollandtech.com'));
       await expect(cms.getSite()).rejects.toThrow(
-        'CMS site.hero.video: media URL http://localhost:3000/api/media/file/hero.mp4 is not an allowed image origin' +
+        `CMS site.hero.video: media URL ${hubSite.docs[0].heroVideo.url} is not an allowed image origin` +
           ' (expected https://media.hollandtech.com) — Astro would ship it unoptimised',
       );
     });
