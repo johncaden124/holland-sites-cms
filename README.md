@@ -67,7 +67,10 @@ import { SERVICE_ICONS, type ServiceIcon } from '@hollandtech/site-cms/service-i
 
 The service-icon vocabulary is the contract between the CMS (which offers the values) and every
 template (which draws them), so the hub needs it too — and the hub is a Next/Payload app with no
-Astro. This subpath is the vocabulary alone: no Astro types, no `Photo`, nothing that would drag the
+Astro. The `astro` peer is declared **optional** for exactly this reason: it exists so `Photo` stays
+assignable to `<Image src>`, which only matters to a consumer that uses `Photo`. Left required,
+pnpm's auto-install-peers pulled Astro and its platform binaries into the hub for a 36-element
+array. This subpath is the vocabulary alone: no Astro types, no `Photo`, nothing that would drag the
 peer dependency in. It exists so the hub can import the list rather than keep a hand-synced copy of
 it, which is a contract that drifts silently — the hub would offer an editor a value no template can
 draw. Templates should keep importing from the root, which re-exports the same list.

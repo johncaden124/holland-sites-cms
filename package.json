@@ -1,6 +1,6 @@
 {
   "name": "@hollandtech/site-cms",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "Shared Payload-hub content layer for Holland Tech's niche website templates.",
   "license": "MIT",
@@ -44,6 +44,11 @@
   },
   "peerDependencies": {
     "astro": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "astro": {
+      "optional": true
+    }
   },
   "astro": {
     "external": true
