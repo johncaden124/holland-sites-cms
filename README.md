@@ -59,6 +59,19 @@ import { mediaOrigins } from '@hollandtech/site-cms/media-origins';
 const { remotePatterns } = mediaOrigins({ payloadUrl: env.PAYLOAD_URL, mediaHost: env.PUBLIC_MEDIA_HOST });
 ```
 
+### `./service-icons` — for the hub, not the templates
+
+```ts
+import { SERVICE_ICONS, type ServiceIcon } from '@hollandtech/site-cms/service-icons';
+```
+
+The service-icon vocabulary is the contract between the CMS (which offers the values) and every
+template (which draws them), so the hub needs it too — and the hub is a Next/Payload app with no
+Astro. This subpath is the vocabulary alone: no Astro types, no `Photo`, nothing that would drag the
+peer dependency in. It exists so the hub can import the list rather than keep a hand-synced copy of
+it, which is a contract that drifts silently — the hub would offer an editor a value no template can
+draw. Templates should keep importing from the root, which re-exports the same list.
+
 `createCms` **validates eagerly and throws synchronously**, so a template calling it at module scope
 fails at import — the same moment a misconfigured Cloudflare Pages build used to fail, with the same
 words. The getters are closures, so destructuring them is the intended use.

@@ -342,27 +342,52 @@ export function createCms(options: CmsOptions): Cms {
   /** Mapped content is a handful of levels deep; anything deeper is a shape nobody meant to write. */
   const MAX_DEPTH = 12;
 
-  /** Walk mapped content for every `RemotePhoto` (`{ src, width, height }`), whatever field it sits in. */
-  function checkPhotos(value: unknown, path: string, depth = 0): void {
+  /**
+   * Walk mapped content once, for two things:
+   *
+   * 1. **Holes.** TypeScript describes the hub's JSON but cannot check it — `fetchDocs<HubSiteDoc>`
+   *    is an assertion about a parsed response, not a guarantee. So if the hub renames or drops a
+   *    field, `doc.copyright` is simply `undefined`, the mapper hands it on, and the page ships with
+   *    a blank footer and a green build. Nothing else catches that: the value is only ever
+   *    interpolated into HTML, where `undefined` renders as nothing.
+   *
+   *    A hole is unambiguous here *because* the mappers omit optional keys entirely rather than
+   *    setting them to `undefined` (see `opt` in `cms.map.ts`), so any `undefined` or `null` still
+   *    present is a field the mapper expected and the hub did not send.
+   *
+   *    This catches renames and removals, which is the realistic drift. It does not catch a field
+   *    that changed *type* — the walk has no schema to check against — but that is a deliberate
+   *    model change, and one that moves the template too.
+   *
+   * 2. **Media origins**, for every `RemotePhoto` (`{ src, width, height }`), whatever field it
+   *    sits in.
+   */
+  function checkContent(value: unknown, path: string, depth = 0): void {
     if (depth > MAX_DEPTH) {
       throw new Error(`CMS ${path}: content nested more than ${MAX_DEPTH} levels deep — check the mappers`);
     }
+    if (value === undefined || value === null) {
+      throw new Error(
+        `CMS ${path}: the hub did not send this field (got ${value}) — it was renamed or removed.` +
+          ' Optional fields are omitted by the mappers, so this is always a mismatch, not an empty value.',
+      );
+    }
     if (Array.isArray(value)) {
-      value.forEach((item, i) => checkPhotos(item, `${path}[${i}]`, depth + 1));
-    } else if (value && typeof value === 'object') {
+      value.forEach((item, i) => checkContent(item, `${path}[${i}]`, depth + 1));
+    } else if (typeof value === 'object') {
       // `'format' in value` first, before any property *read*: a local `ImageMetadata` is a Proxy in
       // a production build whose `get` trap copies the unoptimised original into `dist/`, and `in`
       // goes through `has`, which it does not trap. See `photo.ts`.
       if (!('format' in value) && 'src' in value && typeof value.src === 'string' && 'width' in value) {
         assertMediaUrl(path, value.src);
       } else {
-        for (const [key, child] of Object.entries(value)) checkPhotos(child, `${path}.${key}`, depth + 1);
+        for (const [key, child] of Object.entries(value)) checkContent(child, `${path}.${key}`, depth + 1);
       }
     }
   }
 
   function checked<T>(collection: string, content: T): T {
-    checkPhotos(content, collection);
+    checkContent(content, collection);
     return content;
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@hollandtech/site-cms",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "description": "Shared Payload-hub content layer for Holland Tech's niche website templates.",
   "license": "MIT",
@@ -21,6 +21,10 @@
     "./media-origins": {
       "types": "./dist/mediaOrigins.d.ts",
       "default": "./dist/mediaOrigins.js"
+    },
+    "./service-icons": {
+      "types": "./dist/serviceIcons.d.ts",
+      "default": "./dist/serviceIcons.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",

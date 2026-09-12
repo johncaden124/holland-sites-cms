@@ -446,6 +446,55 @@ describe('cms', () => {
     });
   });
 
+  describe('a field the hub stopped sending', () => {
+    /** The site fixture with one key renamed, i.e. exactly what a hub-side field rename looks like. */
+    const siteWithout = (field: string) => {
+      const { [field]: renamed, ...rest } = hubSite.docs[0] as Record<string, unknown>;
+      return { ...hubSite, docs: [{ ...rest, [`${field}Renamed`]: renamed }] };
+    };
+
+    it('fails the build and names the path, rather than shipping a blank', async () => {
+      // The whole point: `copyright` is only ever interpolated into HTML, where `undefined` renders
+      // as nothing. Without this check the footer would just be empty and the build green.
+      vi.stubGlobal('fetch', vi.fn(async () => json(siteWithout('copyright'))));
+      const cms = createCms(hub('http://localhost:3000'));
+      await expect(cms.getSite()).rejects.toThrow(/^CMS site\.site\.copyright: the hub did not send this field/);
+    });
+
+    it('names a missing group, instead of "Cannot read properties of undefined"', async () => {
+      // The mapper reads `ctaBand.heading` inside an object literal, so without `group()` this is a
+      // bare TypeError naming neither the collection nor the field — and it happens before the
+      // content walk can see anything.
+      vi.stubGlobal('fetch', vi.fn(async () => json(siteWithout('ctaBand'))));
+      const cms = createCms(hub('http://localhost:3000'));
+      await expect(cms.getSite()).rejects.toThrow(/^CMS site\.ctaBand: the hub did not send this field/);
+    });
+
+    it('names a missing intro group by its own field name', async () => {
+      vi.stubGlobal('fetch', vi.fn(async () => json(siteWithout('processIntro'))));
+      const cms = createCms(hub('http://localhost:3000'));
+      await expect(cms.getSite()).rejects.toThrow(/^CMS site\.processIntro: the hub did not send this field/);
+    });
+
+    it('does NOT fire for an optional field the tenant left empty', async () => {
+      // `heroEyebrow` and friends are `null` on most tenants; `opt` omits the key rather than
+      // passing `undefined` through, which is what makes a hole unambiguous above.
+      const docs = [{ ...hubSite.docs[0], heroEyebrow: null, licenseNumber: null }];
+      vi.stubGlobal('fetch', vi.fn(async () => json({ ...hubSite, docs })));
+      const cms = createCms(hub('http://localhost:3000'));
+      const site = (await cms.getSite()).site;
+      expect('heroEyebrow' in site).toBe(false);
+      expect('licenseNumber' in site).toBe(false);
+    });
+
+    it('fires for a list collection too, naming the document', async () => {
+      const docs = hubFaqs.docs.map((d, i) => (i === 2 ? { ...d, answer: undefined } : d));
+      vi.stubGlobal('fetch', vi.fn(async () => json({ ...hubFaqs, docs })));
+      const cms = createCms(hub('http://localhost:3000'));
+      await expect(cms.getFaqs()).rejects.toThrow(/^CMS faqs\[2\]\.answer: the hub did not send this field/);
+    });
+  });
+
   describe('warnMissingIcon', () => {
     it('warns once per icon per build, through the injected warn', () => {
       const warn = vi.fn();

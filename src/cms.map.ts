@@ -147,6 +147,25 @@ const texts = (rows: TextRows): string[] => (rows ?? []).map((r) => r.text);
 const opt = <K extends string>(key: K, value: string | null | undefined) =>
   (value ? { [key]: value } : {}) as { [P in K]?: string };
 
+/**
+ * A required hub **group** (or array), or a build error that names it.
+ *
+ * Reading straight through a missing group — `doc.ctaBand.heading` when the hub no longer sends
+ * `ctaBand` — throws `Cannot read properties of undefined (reading 'heading')`, which names neither
+ * the collection nor the field and is the operator's entire experience of the failed build. The
+ * scalar case is caught later by the content walk in `cms.ts`, but only because the mapper gets far
+ * enough to return; a missing group never gets there.
+ */
+function group<T>(field: string, value: T | null | undefined): T {
+  if (value == null) {
+    throw new Error(
+      `CMS ${field}: the hub did not send this field (got ${value}) — it was renamed or removed.` +
+        ' Optional fields are omitted by the mappers, so this is always a mismatch, not an empty value.',
+    );
+  }
+  return value;
+}
+
 /** `collection[i] "title"` — how every per-document error names the document. */
 const at = (collection: string, i: number, title?: string) =>
   title == null ? `${collection}[${i}]` : `${collection}[${i}] ${JSON.stringify(title)}`;
@@ -177,7 +196,19 @@ const EMPHASIS = keys<GalleryImage['emphasis']>({ featured: true, standard: true
 // ---- mappers ------------------------------------------------------------------------------
 
 export function mapSite(doc: HubSiteDoc): SiteContent {
-  const { footer, heroPhone, review, heroBadge } = doc;
+  // Every group is read through `group()` so a hub-side rename fails by name instead of as a
+  // `Cannot read properties of undefined` from somewhere inside this object literal.
+  const footer = group('site.footer', doc.footer);
+  const heroPhone = group('site.heroPhone', doc.heroPhone);
+  const review = group('site.review', doc.review);
+  const heroBadge = group('site.heroBadge', doc.heroBadge);
+  const labels = group('site.labels', doc.labels);
+  const trustCard = group('site.trustCard', doc.trustCard);
+  const faqSideCard = group('site.faqSideCard', doc.faqSideCard);
+  const ctaBand = group('site.ctaBand', doc.ctaBand);
+  const featuredProject = group('site.featuredProject', doc.featuredProject);
+  const navCta = group('site.navCta', doc.navCta);
+  const heroCta = group('site.heroCta', doc.heroCta);
   return {
     site: {
       name: doc.name,
@@ -186,12 +217,12 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
       heroHeadline: doc.heroHeadline,
       ...opt('heroEyebrow', doc.heroEyebrow),
       nav: (doc.nav ?? []).map(({ label, href }) => ({ label, href })),
-      navCta: { label: doc.navCta.label, href: doc.navCta.href },
-      heroCta: { label: doc.heroCta.label, href: doc.heroCta.href },
+      navCta: { label: navCta.label, href: navCta.href },
+      heroCta: { label: heroCta.label, href: heroCta.href },
       heroPhone: { display: heroPhone.display, tel: heroPhone.tel },
       footer: {
         email: footer.email,
-        phone: { display: footer.phone.display, tel: footer.phone.tel },
+        phone: { display: group('site.footer.phone', footer.phone).display, tel: footer.phone.tel },
         address: footer.address,
         ...opt('serviceArea', footer.serviceArea),
         ...opt('hours', footer.hours),
@@ -200,12 +231,12 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
       heroBadge: { value: heroBadge.value, label: heroBadge.label },
       ...opt('licenseNumber', doc.licenseNumber),
       labels: {
-        callPrefix: doc.labels.callPrefix,
-        footerEmail: doc.labels.footerEmail,
-        footerPhone: doc.labels.footerPhone,
-        footerAddress: doc.labels.footerAddress,
-        footerServiceArea: doc.labels.footerServiceArea,
-        footerHours: doc.labels.footerHours,
+        callPrefix: labels.callPrefix,
+        footerEmail: labels.footerEmail,
+        footerPhone: labels.footerPhone,
+        footerAddress: labels.footerAddress,
+        footerServiceArea: labels.footerServiceArea,
+        footerHours: labels.footerHours,
       },
       socials: (doc.socials ?? []).map(({ label, href }, i) => ({
         label: oneOf(`${at('site.socials', i)}.label`, label, SOCIALS),
@@ -218,29 +249,29 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
       // template's `hero.video === undefined` branch matches a template with no video in `src/data`.
       ...opt('video', doc.heroVideo == null ? undefined : media('site.heroVideo', doc.heroVideo).url),
       poster: photo('site.heroPoster', doc.heroPoster),
-      avatars: doc.avatars.map((a, i) => photo(`${at('site.avatars', i)}.image`, a.image)),
+      avatars: group('site.avatars', doc.avatars).map((a, i) => photo(`${at('site.avatars', i)}.image`, a.image)),
     },
     aboutHeading: doc.aboutHeading,
-    trustCard: { title: doc.trustCard.title, body: doc.trustCard.body, bullets: texts(doc.trustCard.bullets) },
-    aboutCards: doc.aboutCards.map(({ title, body }) => ({ title, body })),
-    servicesIntro: intro(doc.servicesIntro),
-    workIntro: intro(doc.workIntro),
-    featuredProject: { title: doc.featuredProject.title, subtitle: doc.featuredProject.subtitle },
-    testimonialsIntro: shortIntro(doc.testimonialsIntro),
-    impactIntro: shortIntro(doc.impactIntro),
-    processIntro: intro(doc.processIntro),
-    faqIntro: intro(doc.faqIntro),
+    trustCard: { title: trustCard.title, body: trustCard.body, bullets: texts(trustCard.bullets) },
+    aboutCards: group('site.aboutCards', doc.aboutCards).map(({ title, body }) => ({ title, body })),
+    servicesIntro: intro('site.servicesIntro', doc.servicesIntro),
+    workIntro: intro('site.workIntro', doc.workIntro),
+    featuredProject: { title: featuredProject.title, subtitle: featuredProject.subtitle },
+    testimonialsIntro: shortIntro('site.testimonialsIntro', doc.testimonialsIntro),
+    impactIntro: shortIntro('site.impactIntro', doc.impactIntro),
+    processIntro: intro('site.processIntro', doc.processIntro),
+    faqIntro: intro('site.faqIntro', doc.faqIntro),
     faqSideCard: {
-      title: doc.faqSideCard.title,
-      body: doc.faqSideCard.body,
-      cta: doc.faqSideCard.cta,
-      href: doc.faqSideCard.href,
+      title: faqSideCard.title,
+      body: faqSideCard.body,
+      cta: faqSideCard.cta,
+      href: faqSideCard.href,
     },
     ctaBand: {
-      heading: doc.ctaBand.heading,
-      copy: doc.ctaBand.copy,
-      button: doc.ctaBand.button,
-      href: doc.ctaBand.href,
+      heading: ctaBand.heading,
+      copy: ctaBand.copy,
+      button: ctaBand.button,
+      href: ctaBand.href,
     },
     ctaStrip: (doc.ctaStrip ?? []).map((c, i) => ({
       image: photo(`${at('site.ctaStrip', i)}.image`, c.image),
@@ -248,8 +279,14 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
     })),
   };
 }
-const intro = ({ chip, heading, copy }: Intro): Intro => ({ chip, heading, copy });
-const shortIntro = ({ chip, heading }: ShortIntro): ShortIntro => ({ chip, heading });
+const intro = (field: string, value: Intro): Intro => {
+  const { chip, heading, copy } = group(field, value);
+  return { chip, heading, copy };
+};
+const shortIntro = (field: string, value: ShortIntro): ShortIntro => {
+  const { chip, heading } = group(field, value);
+  return { chip, heading };
+};
 
 export const mapServices = (docs: HubServiceDoc[]): Service[] =>
   docs.map((d, i) => {
