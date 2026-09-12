@@ -43,7 +43,7 @@ export function pruneStandaloneMedia({ enabled, files }: { enabled: boolean; fil
           );
           if (size === undefined) continue;
 
-          const referencedIn = html.find(([, body]) => body.includes(file));
+          const referencedIn = html.find(([, body]) => referencesPath(body, file));
           if (referencedIn) {
             logger.warn(`kept ${file}: still referenced by ${relative(root, referencedIn[0])}`);
             continue;
@@ -54,6 +54,20 @@ export function pruneStandaloneMedia({ enabled, files }: { enabled: boolean; fil
       },
     },
   };
+}
+
+/**
+ * Does `html` reference `file` as a URL in its own right?
+ *
+ * Not a substring test. In CMS mode the hub serves the same basename from its own route —
+ * `http://localhost:3000/api/media/file/hero.mp4?prefix=1` contains `/hero.mp4` — so a plain
+ * `includes` reads every CMS build as still needing the local copy, which is exactly backwards.
+ * Require a URL boundary before the path and a terminator after it, so only a reference that
+ * *starts* at this path counts.
+ */
+function referencesPath(html: string, file: string): boolean {
+  const escaped = file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|["'(\\s,=])${escaped}(?=["')\\s,?#]|$)`).test(html);
 }
 
 /** Every built HTML file as `[absolutePath, contents]`. */
