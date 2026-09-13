@@ -25,7 +25,7 @@ here.
 Until the `@hollandtech` npm scope exists, templates depend on this repo from git:
 
 ```bash
-npm i github:johncaden124/holland-sites-cms#v0.5.0
+npm i github:johncaden124/holland-sites-cms#v0.5.1
 ```
 
 npm clones the repo, installs its devDependencies and runs `prepare`, which is `npm run build` —
@@ -127,6 +127,20 @@ npx site-cms capture-fixtures --out src/lib/__fixtures__
   is dropped: the hub keys R2 objects per tenant and a dev hub addresses that as `?prefix=<id>`,
   which is addressing rather than content — the standalone build has no tenant. A differing
   *basename* is still a difference.
+
+  Both builds inherit the environment, and only `PAYLOAD_URL` / `PAYLOAD_API_KEY` are overridden
+  (emptied for the standalone half). So **anything else the consumer's own build needs has to be
+  exported, and has to be one value for both halves**. A template may fail the CMS build outright
+  without it — the landscaping template throws when `PUBLIC_SITE_URL` is unset in CMS mode, rather
+  than ship canonical and OG tags pointing at the template's placeholder domain:
+
+  ```bash
+  PUBLIC_SITE_URL=https://leapfly.example.com \
+  PAYLOAD_URL=http://localhost:3000 PAYLOAD_API_KEY=… npm run parity
+  ```
+
+  Giving such a variable two different values is worse than forgetting it: both builds succeed and
+  the run fails on a difference that is the environment, not the content.
 - **`export-content`** loads `src/data/*.ts` through the consumer's own Vite, projects it onto the
   hub schema and verifies the result is lossless before writing. `--media` copies every referenced
   file out of `src/assets/` and `public/` into one folder — the JSON and the uploads are the two

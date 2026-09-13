@@ -19,7 +19,9 @@ const USAGE = `site-cms <command>
   export-content [--out f] [--media dir]    export src/data/*.ts as hub-shaped seed JSON
   capture-fixtures [--out dir]              capture the hub's REST responses as test fixtures
 
-parity and capture-fixtures read PAYLOAD_URL and PAYLOAD_API_KEY from the environment.`
+parity and capture-fixtures read PAYLOAD_URL and PAYLOAD_API_KEY from the environment.
+parity also inherits the rest of it into BOTH builds, so anything the consumer's own build
+requires (PUBLIC_SITE_URL, say) must be exported too, and with one value.`
 
 const COMMANDS = {
   parity,
