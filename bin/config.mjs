@@ -6,16 +6,13 @@
  * package existed, so a repo with no config file behaves identically. The file exists for the one
  * genuinely per-template thing in the CLI: which raw URLs a parity run may normalise away.
  *
- * @typedef {object} ParityConfig
- * @property {string[]} mediaUrlPrefixes  Regex fragments a raw media URL may start with.
- * @property {string[]} mediaExtensions  Regex fragments a raw media URL may end in.
- * @property {string[]} mediaAttributes  `attr="…"` attributes whose value is a raw media URL.
- * @property {[string, string][]} mediaTagAttributes  `<tag attr="…"` pairs, same.
- * @property {{ pattern: string, token: string }[]} hashedAssets  Hashed build assets, collapsed to
- *   one token *after* the media rules so a hashed original is not swallowed before it is recognised.
+ * The *shapes* live in `src/config.ts` and ship on the `./config` subpath, so a consumer annotates
+ * its own config file against the same types these defaults are declared with. They used to be
+ * declared here and hand-copied into each consumer, which is a contract that drifts silently.
  *
- * @typedef {object} SiteCmsConfig
- * @property {ParityConfig} parity
+ * @typedef {import('../dist/config.js').ParityConfig} ParityConfig
+ * @typedef {import('../dist/config.js').SiteCmsConfig} SiteCmsConfig
+ * @typedef {import('../dist/config.js').ResolvedSiteCmsConfig} ResolvedSiteCmsConfig
  */
 import { pathToFileURL } from 'node:url'
 import { existsSync } from 'node:fs'
@@ -52,11 +49,11 @@ export const PARITY_DEFAULTS = {
  * Load `site-cms.config.mjs` from `root` if it is there, merged one level deep over the defaults.
  *
  * @param {string} root
- * @returns {Promise<{ parity: ParityConfig }>}
+ * @returns {Promise<ResolvedSiteCmsConfig>}
  */
 export async function loadConfig(root) {
   const path = resolve(root, CONFIG_FILE)
-  /** @type {Partial<SiteCmsConfig>} */
+  /** @type {SiteCmsConfig} */
   let user = {}
   if (existsSync(path)) {
     const mod = await import(pathToFileURL(path).href)

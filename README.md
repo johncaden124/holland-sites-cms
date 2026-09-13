@@ -25,7 +25,7 @@ here.
 Until the `@hollandtech` npm scope exists, templates depend on this repo from git:
 
 ```bash
-npm i github:johncaden124/holland-sites-cms#v0.1.0
+npm i github:johncaden124/holland-sites-cms#v0.5.0
 ```
 
 npm clones the repo, installs its devDependencies and runs `prepare`, which is `npm run build` —
@@ -58,6 +58,32 @@ export const {
 import { mediaOrigins } from '@hollandtech/site-cms/media-origins';
 const { remotePatterns } = mediaOrigins({ payloadUrl: env.PAYLOAD_URL, mediaHost: env.PUBLIC_MEDIA_HOST });
 ```
+
+### `./astro` — the build integrations
+
+```js
+// astro.config.mjs
+import { pruneStandaloneMedia } from '@hollandtech/site-cms/astro';
+
+integrations: [pruneStandaloneMedia({ enabled: cmsEnabled, files: ['/hero.mp4'] })]
+```
+
+Astro copies `public/` verbatim into every build. That is right for a standalone template, where
+`public/hero.mp4` *is* the hero video — and wrong for a hub-driven client build, where the video is a
+tenant upload served from R2 and the committed file is never referenced by a single byte of the
+output. The landscaping template's is 9.3 MB, shipped on every deploy of every client site built
+from it.
+
+`enabled` is the caller's decision, because only the caller can see the environment
+(`!!(PAYLOAD_URL && PAYLOAD_API_KEY)`). `files` are `public/`-relative paths as they appear in the
+output; the leading slash is optional. **Nothing is deleted on the strength of the flag alone** —
+every built page, stylesheet and script chunk is read first, and a file still addressed by one of
+them is kept and logged, so a template that starts using one of these paths for something else
+cannot silently lose it. A reference has to *start* at the path: the hub serving the same basename
+from its own route (`…/api/media/file/hero.mp4?prefix=1`) is not a reference to the local copy.
+
+This is the one entry point that genuinely needs the (optional) `astro` peer — which every template
+has as a direct dependency anyway.
 
 ### `./service-icons` — for the hub, not the templates
 
@@ -122,12 +148,20 @@ export default {
 }
 ```
 
+Annotate it against the published shape rather than re-declaring one — `loadConfig` merges one level
+deep, so every key is optional and an unlisted rule keeps its default:
+
+```js
+/** @type {import('@hollandtech/site-cms/config').SiteCmsConfig} */
+export default { parity: { mediaAttributes: ['poster', 'data-hero-video'] } };
+```
+
 ## Development
 
 ```bash
 npm install
 npm run build       # tsc → dist/*.js + dist/*.d.ts
-npm test            # vitest (73 tests, no Astro pipeline needed)
+npm test            # vitest (88 tests, no Astro pipeline needed)
 npm run typecheck   # holds test/ to the same types as src/
 ```
 
