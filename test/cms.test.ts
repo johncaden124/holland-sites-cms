@@ -26,7 +26,7 @@ const json = (body: unknown, status = 200, statusText = '') =>
 const hub = (payloadUrl = 'http://hub.test', extra: Partial<CmsOptions> = {}): CmsOptions => ({
   payloadUrl,
   apiKey: 'not-a-real-key',
-  mediaHost: 'media.hollandtech.com',
+  mediaHost: 'media.hollandsites.com',
   cmsRequired: false,
   local,
   ...extra,
@@ -85,6 +85,41 @@ describe('cms', () => {
     });
   });
 
+  it('checks the local content at import, listing every problem with the fix', () => {
+    const broken = {
+      ...local,
+      site: { ...local.site, site: { ...local.site.site, name: undefined as never, copyright: 7 as never } },
+    };
+    expect(() => createCms(standalone({ local: broken }))).toThrow(
+      new Error(
+        "Local content (the template's src/data) does not match the content model — 2 problem(s):\n" +
+          '  - site.site.name: is required but missing\n' +
+          '  - site.site.copyright: must be string (got 7)\n' +
+          'Fix these values in src/data; each field is described in @hollandtech/site-cms/types.',
+      ),
+    );
+  });
+
+  it('serves hub content carrying the v0.6 groups, a null tenure included', async () => {
+    const doc = {
+      ...hubSite.docs[0],
+      copy: { businessName: hubSite.docs[0]!.name, town: 'Denver', primaryService: 'Lawn care', differentiator: 'none', tenure: null },
+    };
+    vi.stubGlobal('fetch', vi.fn(async () => json({ ...hubSite, docs: [doc] })));
+    const cms = createCms(hub('http://localhost:3000'));
+    expect((await cms.getSite()).site.copy).toStrictEqual({ ...doc.copy });
+  });
+
+  it('refuses hub content whose copy.businessName is not the site name', async () => {
+    const doc = {
+      ...hubSite.docs[0],
+      copy: { businessName: 'Someone Else', town: 'Denver', primaryService: 'Lawn care', differentiator: 'none', tenure: 3 },
+    };
+    vi.stubGlobal('fetch', vi.fn(async () => json({ ...hubSite, docs: [doc] })));
+    const cms = createCms(hub('http://localhost:3000'));
+    await expect(cms.getSite()).rejects.toThrow('  - site.site.copy.businessName: must equal site.site.name');
+  });
+
   it('refuses to load with only one of the two variables set', () => {
     expect(() => createCms({ payloadUrl: 'http://localhost:3000', cmsRequired: false, local })).toThrow(
       /PAYLOAD_URL and PAYLOAD_API_KEY/,
@@ -95,8 +130,8 @@ describe('cms', () => {
   });
 
   it('refuses a PAYLOAD_URL that is not an absolute http(s) origin, eagerly', () => {
-    expect(() => createCms(hub('hub.hollandtech.com'))).toThrow(
-      'PAYLOAD_URL must be an absolute origin, e.g. https://hub.hollandtech.com (got "hub.hollandtech.com")',
+    expect(() => createCms(hub('hub.hollandsites.com'))).toThrow(
+      'PAYLOAD_URL must be an absolute origin, e.g. https://hub.hollandsites.com (got "hub.hollandsites.com")',
     );
     expect(() => createCms(hub('ftp://hub.test'))).toThrow(/PAYLOAD_URL must be an absolute origin/);
   });
@@ -141,6 +176,18 @@ describe('cms', () => {
     await expect(cms.getFaqs()).rejects.toThrow(
       'CMS faqs: no documents for this tenant — create them in the hub admin',
     );
+  });
+
+  it('does not retry any 4xx, not only an auth failure', async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn(async () => json({ errors: [{ message: 'Not Found' }] }, 404, 'Not Found'));
+    vi.stubGlobal('fetch', fetchMock);
+    const cms = createCms(hub());
+    const result = cms.getFaqs();
+    result.catch(() => {});
+    await vi.advanceTimersByTimeAsync(5_000);
+    await expect(result).rejects.toThrow(`CMS faqs: HTTP 404 Not Found from ${FAQS_URL} (Not Found)`);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('tells the operator to create the Site document when the site collection is empty', async () => {
@@ -383,7 +430,7 @@ describe('cms', () => {
       const doc = withPoster(posterUrl).docs[0]!;
       return {
         ...hubSite,
-        docs: [{ ...doc, heroVideo: { ...doc.heroVideo, url: 'https://media.hollandtech.com/hero.mp4' } }],
+        docs: [{ ...doc, heroVideo: { ...doc.heroVideo, url: 'https://media.hollandsites.com/hero.mp4' } }],
       };
     };
 
@@ -410,6 +457,19 @@ describe('cms', () => {
       );
     });
 
+    it('names the field, the media URL, the hub URL it came from and the fix', async () => {
+      vi.stubGlobal('fetch', vi.fn(async () => json(withPoster('https://evil.example/x.jpg'))));
+      const cms = createCms(hub('http://localhost:3000'));
+      await expect(cms.getSite()).rejects.toThrow(
+        new Error(
+          'CMS site.hero.poster: media URL https://evil.example/x.jpg is not an allowed image origin' +
+            ' (expected http://localhost:3000 or http://127.0.0.1:3000) — Astro would ship it unoptimised' +
+            ' (from http://localhost:3000/api/site?depth=1&limit=100&sort=order). Set PUBLIC_MEDIA_HOST to the' +
+            ' host the hub serves media from, or re-upload the file through the hub',
+        ),
+      );
+    });
+
     it('rejects a photo on any other host, naming the field', async () => {
       vi.stubGlobal('fetch', vi.fn(async () => json(withPoster('https://evil.example/x.jpg'))));
       const cms = createCms(hub('http://localhost:3000'));
@@ -420,20 +480,20 @@ describe('cms', () => {
     });
 
     it('rejects the media host without TLS, which `remotePatterns` would not match either', async () => {
-      vi.stubGlobal('fetch', vi.fn(async () => json(withRemoteVideo('http://media.hollandtech.com/x.jpg'))));
-      const cms = createCms(hub('https://hub.hollandtech.com'));
+      vi.stubGlobal('fetch', vi.fn(async () => json(withRemoteVideo('http://media.hollandsites.com/x.jpg'))));
+      const cms = createCms(hub('https://hub.hollandsites.com'));
       await expect(cms.getSite()).rejects.toThrow(
-        'CMS site.hero.poster: media URL http://media.hollandtech.com/x.jpg is not an allowed image origin' +
-          ' (expected https://media.hollandtech.com) — Astro would ship it unoptimised',
+        'CMS site.hero.poster: media URL http://media.hollandsites.com/x.jpg is not an allowed image origin' +
+          ' (expected https://media.hollandsites.com) — Astro would ship it unoptimised',
       );
     });
 
     it('rejects loopback media once the hub is not on loopback (the hero video is checked too)', async () => {
       vi.stubGlobal('fetch', vi.fn(async () => json(hubSite)));
-      const cms = createCms(hub('https://hub.hollandtech.com'));
+      const cms = createCms(hub('https://hub.hollandsites.com'));
       await expect(cms.getSite()).rejects.toThrow(
         `CMS site.hero.video: media URL ${hubSite.docs[0].heroVideo.url} is not an allowed image origin` +
-          ' (expected https://media.hollandtech.com) — Astro would ship it unoptimised',
+          ' (expected https://media.hollandsites.com) — Astro would ship it unoptimised',
       );
     });
 
@@ -458,7 +518,32 @@ describe('cms', () => {
       // as nothing. Without this check the footer would just be empty and the build green.
       vi.stubGlobal('fetch', vi.fn(async () => json(siteWithout('copyright'))));
       const cms = createCms(hub('http://localhost:3000'));
-      await expect(cms.getSite()).rejects.toThrow(/^CMS site\.site\.copyright: the hub did not send this field/);
+      // The whole message, because it is the operator's whole experience of the failed build: the
+      // field, the URL it came from, and the fix.
+      await expect(cms.getSite()).rejects.toThrow(
+        new Error(
+          "CMS site: the hub's content does not match the content model — 1 problem(s)" +
+            ' (from http://localhost:3000/api/site?depth=1&limit=100&sort=order):\n' +
+            '  - site.site.copyright: is required but missing\n' +
+            'Fix each field in the hub admin. A field that is missing on every tenant was renamed or removed' +
+            ' in the hub: pin @hollandtech/site-cms to the version that matches the hub.',
+        ),
+      );
+    });
+
+    it('lists every mismatch in one error, not one per build', async () => {
+      const doc = hubSite.docs[0] as Record<string, unknown>;
+      const { copyright: _c, tagline: _t, ...rest } = doc;
+      vi.stubGlobal('fetch', vi.fn(async () => json({ ...hubSite, docs: [{ ...rest, name: null }] })));
+      const cms = createCms(hub('http://localhost:3000'));
+      const error = await cms.getSite().then(
+        () => undefined,
+        (e: Error) => e,
+      );
+      expect(error?.message).toContain('3 problem(s)');
+      expect(error?.message).toContain('  - site.site.name: must be string (got null)');
+      expect(error?.message).toContain('  - site.site.tagline: is required but missing');
+      expect(error?.message).toContain('  - site.site.copyright: is required but missing');
     });
 
     it('names a missing group, instead of "Cannot read properties of undefined"', async () => {
@@ -491,7 +576,9 @@ describe('cms', () => {
       const docs = hubFaqs.docs.map((d, i) => (i === 2 ? { ...d, answer: undefined } : d));
       vi.stubGlobal('fetch', vi.fn(async () => json({ ...hubFaqs, docs })));
       const cms = createCms(hub('http://localhost:3000'));
-      await expect(cms.getFaqs()).rejects.toThrow(/^CMS faqs\[2\]\.answer: the hub did not send this field/);
+      await expect(cms.getFaqs()).rejects.toThrow(
+        /^CMS faqs: the hub's content does not match the content model — 1 problem\(s\) \(from http:\/\/localhost:3000\/api\/faqs\?depth=1&limit=100&sort=order\):\n {2}- faqs\[2\]\.answer: is required but missing\n/,
+      );
     });
   });
 

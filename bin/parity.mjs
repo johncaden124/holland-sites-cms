@@ -19,12 +19,31 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { loadConfig } from './config.mjs'
 
+export const HELP = `site-cms parity — the CMS build must render the page the standalone build renders
+
+Usage:
+  PAYLOAD_URL=… PAYLOAD_API_KEY=… PUBLIC_SITE_URL=… site-cms parity
+
+Runs \`npm run build\` twice in the current repo — against the hub, then with PAYLOAD_URL and
+PAYLOAD_API_KEY emptied — and compares dist/index.html after normalising the differences listed
+in site-cms.config.mjs (hashed asset names, media URLs). On a mismatch both pages are written
+to .parity/ for diffing.
+
+Environment:
+  PAYLOAD_URL       the hub origin serving the demo tenant (http://localhost:3000 for a local hub)
+  PAYLOAD_API_KEY   that tenant's build-bot key (in the hub: pnpm bot-key <slug>)
+  PUBLIC_SITE_URL   and anything else the template's CMS build requires — one value for both
+                    builds, or the pages differ on the environment instead of the content.`
+
+/** How much of a failed build's log goes into the error. */
+const LOG_TAIL = 40
+
 /**
  * @param {string} root  The consumer repo.
  * @param {string[]} argv
  */
 export async function parity(root, argv) {
-  if (argv.length) throw new Error(`parity takes no arguments (got ${argv.join(' ')})`)
+  if (argv.length) throw new Error(`takes no arguments (got ${argv.join(' ')})`)
   const { parity: cfg } = await loadConfig(root)
 
   // ---- normalisation --------------------------------------------------------------------------
@@ -76,14 +95,25 @@ export async function parity(root, argv) {
    * @returns {string} The built `dist/index.html`.
    */
   const build = (label, env) => {
-    console.log(`\n[parity] ${label} build\n`)
-    execSync('npm run build', { cwd: root, stdio: 'inherit', env: { ...process.env, ...env } })
+    // Captured, not streamed: on failure the log tail is the error, and on success it is noise.
+    try {
+      execSync('npm run build', {
+        cwd: root,
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, ...env },
+        maxBuffer: 64 * 1024 * 1024,
+      })
+    } catch (err) {
+      const e = /** @type {{ status?: number, stdout?: Buffer, stderr?: Buffer }} */ (err)
+      const log = `${e.stdout ?? ''}${e.stderr ?? ''}`.trimEnd().split('\n').slice(-LOG_TAIL).join('\n')
+      throw new Error(`${label} build failed (npm run build exited ${e.status ?? '?'}); last ${LOG_TAIL} lines:\n${log}`)
+    }
     return readFileSync(resolve(root, 'dist/index.html'), 'utf8')
   }
 
   const hubUrl = process.env.PAYLOAD_URL
   if (!hubUrl || !process.env.PAYLOAD_API_KEY) {
-    throw new Error('export PAYLOAD_URL and PAYLOAD_API_KEY for the demo tenant')
+    throw new Error('export PAYLOAD_URL and PAYLOAD_API_KEY for the demo tenant (see site-cms parity --help)')
   }
 
   const cmsRaw = build('CMS', {})
@@ -112,8 +142,7 @@ export async function parity(root, argv) {
     writeFileSync(resolve(out, 'cms.html'), cms)
     writeFileSync(resolve(out, 'standalone.raw.html'), standaloneRaw)
     writeFileSync(resolve(out, 'cms.raw.html'), cmsRaw)
-    console.error('PARITY FAILED: diff .parity/standalone.html .parity/cms.html')
-    process.exit(1)
+    throw new Error('PARITY FAILED: diff .parity/standalone.html .parity/cms.html')
   }
 
   const token = cfg.hashedAssets[0]?.token ?? ''

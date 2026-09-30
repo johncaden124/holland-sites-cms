@@ -21,7 +21,10 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "noEmit": true
+    "noEmit": true,
+    // `bin/` is plain ESM with `// @ts-check`; typechecking it here (against the built `dist/`) holds
+    // the CLI to the same types as the library.
+    "allowJs": true
   },
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*", "test/**/*", "bin/**/*", "scripts/**/*"]
 }

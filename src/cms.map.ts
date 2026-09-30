@@ -10,8 +10,13 @@
  * asserts that those rules reproduce its own `src/data`.
  */
 import { SERVICE_ICONS } from './serviceIcons.js';
+import { TRADES } from './trades.js';
 import type { RemotePhoto } from './photo.js';
 import type {
+  BusinessProfile,
+  CopyInputs,
+  DayOfWeek,
+  Differentiator,
   Faq,
   GalleryImage,
   Intro,
@@ -20,10 +25,12 @@ import type {
   Service,
   ShortIntro,
   SiteContent,
+  SiteFlags,
   SiteSettings,
   Social,
   Stat,
   Testimonial,
+  TestimonialSource,
 } from './types.js';
 
 // ---- input (what the hub actually serves; see test/__fixtures__/) ---------------------------------
@@ -44,6 +51,39 @@ type Select = string;
  * so every optional string the hub can send is typed here, and `opt` turns both into a missing key.
  */
 type OptionalText = string | null | undefined;
+/** An optional hub number (Payload `number` field): `null` when unset, like text. */
+type OptionalNumber = number | null | undefined;
+
+/**
+ * The v0.6 business groups as the hub serves them. Payload answers an untouched group with every
+ * leaf `null` rather than omitting it, and string lists are `{ text }` rows like `bullets`, so these
+ * are the content types with every leaf nullable. `mapSite` omits a group whose defining field is
+ * unset, so v0.5 tenants (which have none of these) map exactly as before.
+ */
+export interface HubBusinessGroup {
+  trade?: Select | null;
+  town?: OptionalText;
+  serviceAreaTowns?: TextRows;
+  address?: { street?: OptionalText; locality?: OptionalText; region?: OptionalText; postalCode?: OptionalText; country?: OptionalText } | null;
+  geo?: { lat?: OptionalNumber; lng?: OptionalNumber } | null;
+  openingHours?: Row<{ dayOfWeek?: Select[] | null; opens?: OptionalText; closes?: OptionalText }>[] | null;
+  phone?: { e164?: OptionalText; display?: OptionalText } | null;
+  email?: OptionalText;
+  siteUrl?: OptionalText;
+  gbp?: { url?: OptionalText; placeId?: OptionalText } | null;
+  reviews?: { count?: OptionalNumber; rating?: OptionalNumber } | null;
+}
+export interface HubCopyGroup {
+  businessName?: OptionalText;
+  town?: OptionalText;
+  primaryService?: OptionalText;
+  differentiator?: Select | null;
+  tenure?: OptionalNumber;
+}
+export interface HubFlagsGroup {
+  reviewsFromGbp?: boolean | null;
+  isPreview?: boolean | null;
+}
 
 export interface HubSiteDoc {
   name: string;
@@ -84,6 +124,9 @@ export interface HubSiteDoc {
   faqSideCard: SiteContent['faqSideCard'];
   ctaBand: SiteContent['ctaBand'];
   ctaStrip?: Row<{ image: HubMedia; alt: string }>[] | null;
+  business?: HubBusinessGroup | null;
+  copy?: HubCopyGroup | null;
+  flags?: HubFlagsGroup | null;
 }
 export interface HubServiceDoc {
   icon: Select;
@@ -92,6 +135,7 @@ export interface HubServiceDoc {
   bullets?: TextRows;
   image: HubMedia;
   imageAlt: string;
+  priceHint?: OptionalText;
 }
 export interface HubProjectDoc {
   image: HubMedia;
@@ -105,6 +149,10 @@ export interface HubTestimonialDoc {
   image?: HubMedia | number | string | null;
   beforeImage?: HubMedia | number | string | null;
   alt: string;
+  rating?: OptionalNumber | Select;
+  /** A Payload `date` field: a full ISO timestamp, of which the content model keeps the date. */
+  date?: OptionalText;
+  source?: Select | null;
 }
 export type HubProcessStepDoc = ProcessStep;
 export interface HubStatDoc {
@@ -171,8 +219,8 @@ const at = (collection: string, i: number, title?: string) =>
   title == null ? `${collection}[${i}]` : `${collection}[${i}] ${JSON.stringify(title)}`;
 
 /** Narrow a Payload select value to the template's union, failing loudly on anything else. */
-function oneOf<T extends string>(field: string, value: unknown, allowed: readonly T[]): T {
-  if (typeof value === 'string' && (allowed as readonly string[]).includes(value)) return value as T;
+function oneOf<T extends string | number>(field: string, value: unknown, allowed: readonly T[]): T {
+  if ((allowed as readonly unknown[]).includes(value)) return value as T;
   throw new Error(`CMS ${field}: unexpected value ${JSON.stringify(value)} (allowed: ${allowed.join(', ')})`);
 }
 
@@ -192,6 +240,87 @@ const SOCIALS = keys<Social['label']>({ x: true, linkedin: true, facebook: true,
  */
 const ICONS: readonly Service['icon'][] = SERVICE_ICONS;
 const EMPHASIS = keys<GalleryImage['emphasis']>({ featured: true, standard: true });
+const DAYS = keys<DayOfWeek>({
+  Monday: true,
+  Tuesday: true,
+  Wednesday: true,
+  Thursday: true,
+  Friday: true,
+  Saturday: true,
+  Sunday: true,
+});
+const DIFFERENTIATORS = keys<Differentiator>({
+  'same-day': true,
+  '24-7': true,
+  'family-owned': true,
+  'licensed-insured': true,
+  'free-estimates': true,
+  none: true,
+});
+const SOURCES = keys<TestimonialSource>({ google: true, facebook: true, yelp: true, nextdoor: true, direct: true });
+const RATINGS = [1, 2, 3, 4, 5] as const;
+
+/**
+ * The v0.6 groups on `site`. Each is present only when its defining field is set (`trade`,
+ * `businessName`, any flag), so a tenant that never filled one in maps to exactly the v0.5 shape.
+ * Inside a present group every field the type requires is copied as sent: a required leaf the hub
+ * left `null` becomes a named `validateSiteContent` problem in `cms.ts`, not a silent blank.
+ */
+function mapBusiness(b: HubBusinessGroup | null | undefined): { business?: BusinessProfile } {
+  if (!b?.trade) return {};
+  const address = group('site.business.address', b.address);
+  const geo = group('site.business.geo', b.geo);
+  const phone = group('site.business.phone', b.phone);
+  const business = {
+    trade: oneOf('site.business.trade', b.trade, TRADES),
+    town: b.town,
+    serviceAreaTowns: texts(b.serviceAreaTowns),
+    address: {
+      street: address.street,
+      locality: address.locality,
+      region: address.region,
+      postalCode: address.postalCode,
+      country: address.country,
+    },
+    geo: { lat: geo.lat, lng: geo.lng },
+    openingHours: (b.openingHours ?? []).map((row, i) => ({
+      dayOfWeek: (row.dayOfWeek ?? []).map((d, j) =>
+        oneOf(`${at('site.business.openingHours', i)}.dayOfWeek[${j}]`, d, DAYS),
+      ),
+      opens: row.opens,
+      closes: row.closes,
+    })),
+    phone: { e164: phone.e164, ...opt('display', phone.display) },
+    email: b.email,
+    siteUrl: b.siteUrl,
+    ...(b.gbp?.url || b.gbp?.placeId ? { gbp: { url: b.gbp.url, placeId: b.gbp.placeId } } : {}),
+    ...(b.reviews?.count != null || b.reviews?.rating != null
+      ? { reviews: { count: b.reviews?.count, rating: b.reviews?.rating } }
+      : {}),
+  };
+  // Required leaves may still be `null` here, by design (see above); the validator names them.
+  return { business: business as BusinessProfile };
+}
+
+function mapCopy(c: HubCopyGroup | null | undefined): { copy?: CopyInputs } {
+  if (!c?.businessName) return {};
+  const copy = {
+    businessName: c.businessName,
+    town: c.town,
+    primaryService: c.primaryService,
+    differentiator: oneOf('site.copy.differentiator', c.differentiator, DIFFERENTIATORS),
+    // `null` is a value here ("the client has not said"), not a hole.
+    tenure: c.tenure ?? null,
+  };
+  return { copy: copy as CopyInputs };
+}
+
+function mapFlags(f: HubFlagsGroup | null | undefined): { flags?: SiteFlags } {
+  const flags: SiteFlags = {};
+  if (typeof f?.reviewsFromGbp === 'boolean') flags.reviewsFromGbp = f.reviewsFromGbp;
+  if (typeof f?.isPreview === 'boolean') flags.isPreview = f.isPreview;
+  return Object.keys(flags).length ? { flags } : {};
+}
 
 // ---- mappers ------------------------------------------------------------------------------
 
@@ -243,6 +372,9 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
         href,
       })),
       copyright: doc.copyright,
+      ...mapBusiness(doc.business),
+      ...mapCopy(doc.copy),
+      ...mapFlags(doc.flags),
     },
     hero: {
       // Optional: an unset upload is `null`/absent, and the key is then omitted entirely so a
@@ -298,6 +430,7 @@ export const mapServices = (docs: HubServiceDoc[]): Service[] =>
       bullets: texts(d.bullets),
       image: photo(`${doc}.image`, d.image),
       imageAlt: d.imageAlt,
+      ...opt('priceHint', d.priceHint),
     };
   });
 
@@ -322,6 +455,10 @@ export const mapTestimonials = (docs: HubTestimonialDoc[]): Testimonial[] =>
     ...(d.image == null ? {} : { image: photo(`${at('testimonials', i)}.image`, d.image) }),
     ...(d.beforeImage == null ? {} : { beforeImage: photo(`${at('testimonials', i)}.beforeImage`, d.beforeImage) }),
     alt: d.alt,
+    ...(d.rating == null || d.rating === '' ? {} : { rating: oneOf(`${at('testimonials', i)}.rating`, Number(d.rating), RATINGS) }),
+    // `2026-03-14T00:00:00.000Z` → `2026-03-14`; the time is Payload's, not the reviewer's.
+    ...opt('date', d.date ? d.date.slice(0, 10) : undefined),
+    ...(d.source == null || d.source === '' ? {} : { source: oneOf(`${at('testimonials', i)}.source`, d.source, SOURCES) }),
   }));
 
 export const mapProcess = (docs: HubProcessStepDoc[]): ProcessStep[] =>

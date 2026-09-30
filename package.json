@@ -1,13 +1,16 @@
 {
   "name": "@hollandtech/site-cms",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "type": "module",
   "description": "Shared Payload-hub content layer for Holland Tech's niche website templates.",
   "license": "MIT",
   "files": [
     "dist",
     "bin",
-    "README.md"
+    "schema",
+    "consumers.json",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
@@ -38,6 +41,19 @@
       "types": "./dist/types.d.ts",
       "default": "./dist/types.js"
     },
+    "./validate": {
+      "types": "./dist/validate.d.ts",
+      "default": "./dist/validate.js"
+    },
+    "./content-file": {
+      "types": "./dist/contentFile.d.ts",
+      "default": "./dist/contentFile.js"
+    },
+    "./trades": {
+      "types": "./dist/trades.d.ts",
+      "default": "./dist/trades.js"
+    },
+    "./schema": "./schema/site-content.schema.json",
     "./package.json": "./package.json"
   },
   "bin": {
@@ -45,10 +61,17 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "schema": "node scripts/build-schema.mjs",
     "prepare": "npm run build",
+    "pretest": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "prepublishOnly": "npm run build && npm test"
+    "api:report": "node scripts/api-report.mjs",
+    "api:check": "node scripts/api-report.mjs --check",
+    "check:schema": "node scripts/build-schema.mjs --check",
+    "check:service-icons": "node scripts/check-service-icons.mjs",
+    "check:version-bump": "node scripts/check-version-bump.mjs",
+    "prepublishOnly": "npm test"
   },
   "peerDependencies": {
     "astro": "^7.0.0"
@@ -62,8 +85,11 @@
     "external": true
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.59.3",
     "@types/node": "22.20.1",
+    "ajv": "^8.20.0",
     "astro": "^7.1.6",
+    "ts-json-schema-generator": "^2.9.0",
     "typescript": "^5.7.0",
     "vitest": "5.0.0"
   },

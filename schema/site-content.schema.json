@@ -1,0 +1,1073 @@
+{
+  "$id": "https://github.com/johncaden124/holland-sites-cms/schema/site-content.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/LocalContent",
+  "definitions": {
+    "LocalContent": {
+      "type": "object",
+      "properties": {
+        "site": {
+          "$ref": "#/definitions/SiteContent"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Service"
+          }
+        },
+        "projects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GalleryImage"
+          }
+        },
+        "testimonials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Testimonial"
+          }
+        },
+        "process": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProcessStep"
+          }
+        },
+        "stats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Stat"
+          }
+        },
+        "faqs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Faq"
+          }
+        }
+      },
+      "required": [
+        "site",
+        "services",
+        "projects",
+        "testimonials",
+        "process",
+        "stats",
+        "faqs"
+      ],
+      "additionalProperties": false,
+      "description": "A template's own `src/data` assembled into the shapes the mappers return, so components consume the getters without caring whether the content came from the hub or from the repo."
+    },
+    "SiteContent": {
+      "type": "object",
+      "properties": {
+        "site": {
+          "$ref": "#/definitions/SiteSettings"
+        },
+        "hero": {
+          "$ref": "#/definitions/HeroMedia"
+        },
+        "aboutHeading": {
+          "type": "string"
+        },
+        "trustCard": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            },
+            "bullets": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "title",
+            "body",
+            "bullets"
+          ],
+          "additionalProperties": false
+        },
+        "aboutCards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AboutCard"
+          }
+        },
+        "servicesIntro": {
+          "$ref": "#/definitions/Intro"
+        },
+        "workIntro": {
+          "$ref": "#/definitions/Intro"
+        },
+        "featuredProject": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "subtitle": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "subtitle"
+          ],
+          "additionalProperties": false
+        },
+        "testimonialsIntro": {
+          "$ref": "#/definitions/ShortIntro"
+        },
+        "impactIntro": {
+          "$ref": "#/definitions/ShortIntro"
+        },
+        "processIntro": {
+          "$ref": "#/definitions/Intro"
+        },
+        "faqIntro": {
+          "$ref": "#/definitions/Intro"
+        },
+        "faqSideCard": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "body": {
+              "type": "string"
+            },
+            "cta": {
+              "type": "string"
+            },
+            "href": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "body",
+            "cta",
+            "href"
+          ],
+          "additionalProperties": false
+        },
+        "ctaBand": {
+          "type": "object",
+          "properties": {
+            "heading": {
+              "type": "string"
+            },
+            "copy": {
+              "type": "string"
+            },
+            "button": {
+              "type": "string"
+            },
+            "href": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "heading",
+            "copy",
+            "button",
+            "href"
+          ],
+          "additionalProperties": false
+        },
+        "ctaStrip": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "image": {
+                "$ref": "#/definitions/Photo"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "image",
+              "alt"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "site",
+        "hero",
+        "aboutHeading",
+        "trustCard",
+        "aboutCards",
+        "servicesIntro",
+        "workIntro",
+        "featuredProject",
+        "testimonialsIntro",
+        "impactIntro",
+        "processIntro",
+        "faqIntro",
+        "faqSideCard",
+        "ctaBand",
+        "ctaStrip"
+      ],
+      "additionalProperties": false,
+      "description": "Everything on the page that is not one of the six list collections; `getSite()` returns it."
+    },
+    "SiteSettings": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tagline": {
+          "type": "string",
+          "description": "Suffix of the `<title>`, not a heading — the H1 is `heroHeadline`."
+        },
+        "description": {
+          "type": "string"
+        },
+        "heroHeadline": {
+          "type": "string",
+          "description": "The hero H1. One rendered line per `\\n`, so a client can set their own two-line headline."
+        },
+        "heroEyebrow": {
+          "type": "string",
+          "description": "The hero's chip, above the H1 — the one section that had no `chip` of its own. Optional because it is a design element, not a fact: a template renders it only when a client sets it (\"24/7 emergency · Greater Columbus\"), so a niche whose hero has no room for one omits it."
+        },
+        "nav": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NavLink"
+          }
+        },
+        "navCta": {
+          "$ref": "#/definitions/NavLink",
+          "description": "The nav pill's call to action."
+        },
+        "heroCta": {
+          "$ref": "#/definitions/NavLink",
+          "description": "The hero's primary call to action."
+        },
+        "heroPhone": {
+          "type": "object",
+          "properties": {
+            "display": {
+              "type": "string"
+            },
+            "tel": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "display",
+            "tel"
+          ],
+          "additionalProperties": false,
+          "description": "Phone shown in the hero (\"Call us\" line)"
+        },
+        "footer": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "object",
+              "properties": {
+                "display": {
+                  "type": "string"
+                },
+                "tel": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "display",
+                "tel"
+              ],
+              "additionalProperties": false
+            },
+            "address": {
+              "type": "string"
+            },
+            "serviceArea": {
+              "type": "string",
+              "description": "Where the business works (\"Greater Columbus, OH\"). Optional: emergency trades sell it as a first-class fact and templates give it a footer column, but a niche that does not show one omits it rather than inventing copy."
+            },
+            "hours": {
+              "type": "string",
+              "description": "When they answer (\"24/7\", \"Mon-Fri 7am-6pm\"). Optional for the same reason."
+            }
+          },
+          "required": [
+            "email",
+            "phone",
+            "address"
+          ],
+          "additionalProperties": false,
+          "description": "Contact details shown in the footer"
+        },
+        "review": {
+          "type": "object",
+          "properties": {
+            "summary": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "summary"
+          ],
+          "additionalProperties": false
+        },
+        "heroBadge": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "value",
+            "label"
+          ],
+          "additionalProperties": false,
+          "description": "The hero's value + label badge (\"98% / Would recommend our service\", \"24/7 / A real dispatcher\"). Named for what it is rather than what the first template put in it."
+        },
+        "licenseNumber": {
+          "type": "string",
+          "description": "Contractor licence number, displayed near the copyright. Several regulated trades must show one by law; optional because just as many have none."
+        },
+        "labels": {
+          "type": "object",
+          "properties": {
+            "callPrefix": {
+              "type": "string",
+              "description": "Precedes the phone number on the \"call us\" buttons."
+            },
+            "footerEmail": {
+              "type": "string",
+              "description": "Headings above the footer contact columns."
+            },
+            "footerPhone": {
+              "type": "string"
+            },
+            "footerAddress": {
+              "type": "string"
+            },
+            "footerServiceArea": {
+              "type": "string",
+              "description": "Headings for the two optional footer columns; unused when their field is unset."
+            },
+            "footerHours": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "callPrefix",
+            "footerEmail",
+            "footerPhone",
+            "footerAddress",
+            "footerServiceArea",
+            "footerHours"
+          ],
+          "additionalProperties": false,
+          "description": "Short interface strings components would otherwise hard-code, so every niche can reword them."
+        },
+        "socials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Social"
+          }
+        },
+        "copyright": {
+          "type": "string"
+        },
+        "business": {
+          "$ref": "#/definitions/BusinessProfile",
+          "description": "Structured business facts (v0.6). Optional: a v0.5 site has none."
+        },
+        "copy": {
+          "$ref": "#/definitions/CopyInputs",
+          "description": "The generator's copy inputs (v0.6)."
+        },
+        "flags": {
+          "$ref": "#/definitions/SiteFlags"
+        }
+      },
+      "required": [
+        "name",
+        "tagline",
+        "description",
+        "heroHeadline",
+        "nav",
+        "navCta",
+        "heroCta",
+        "heroPhone",
+        "footer",
+        "review",
+        "heroBadge",
+        "labels",
+        "socials",
+        "copyright"
+      ],
+      "additionalProperties": false,
+      "description": "Site-wide settings — the hub's `site` global, one document per tenant."
+    },
+    "NavLink": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "href": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "href"
+      ],
+      "additionalProperties": false
+    },
+    "Social": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "x",
+            "linkedin",
+            "facebook",
+            "instagram"
+          ]
+        },
+        "href": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "href"
+      ],
+      "additionalProperties": false
+    },
+    "BusinessProfile": {
+      "type": "object",
+      "properties": {
+        "trade": {
+          "$ref": "#/definitions/Trade"
+        },
+        "town": {
+          "type": "string",
+          "description": "The home town the copy leads with (\"Westerville\")."
+        },
+        "serviceAreaTowns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Every town the business serves, home town included, in the order to list them."
+        },
+        "address": {
+          "$ref": "#/definitions/PostalAddress"
+        },
+        "geo": {
+          "$ref": "#/definitions/Geo"
+        },
+        "openingHours": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OpeningHours"
+          }
+        },
+        "phone": {
+          "type": "object",
+          "properties": {
+            "e164": {
+              "type": "string",
+              "description": "E.164: `+` then country code and number, no spaces (\"+16145550123\").",
+              "pattern": "^\\+[1-9]\\d{7,14}$"
+            },
+            "display": {
+              "type": "string",
+              "description": "How to print it (\"(614) 555-0123\"). Absent: a template formats `e164` itself."
+            }
+          },
+          "required": [
+            "e164"
+          ],
+          "additionalProperties": false
+        },
+        "email": {
+          "type": "string"
+        },
+        "siteUrl": {
+          "type": "string",
+          "description": "The site's canonical origin, `https://` and no path (\"https://acme-hvac.com\").",
+          "pattern": "^https://[^/]+$"
+        },
+        "gbp": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "pattern": "^https://"
+            },
+            "placeId": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url",
+            "placeId"
+          ],
+          "additionalProperties": false,
+          "description": "Google Business Profile."
+        },
+        "reviews": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "number",
+              "minimum": 0
+            },
+            "rating": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5
+            }
+          },
+          "required": [
+            "count",
+            "rating"
+          ],
+          "additionalProperties": false,
+          "description": "The review summary the site quotes. `site.review.summary` is its rendered sentence."
+        }
+      },
+      "required": [
+        "trade",
+        "town",
+        "serviceAreaTowns",
+        "address",
+        "geo",
+        "openingHours",
+        "phone",
+        "email",
+        "siteUrl"
+      ],
+      "additionalProperties": false,
+      "description": "The business's structured facts. `phone` is the **Holland tracking number** — the one every call button dials and every call is counted on — which may differ from the client's own line."
+    },
+    "Trade": {
+      "type": "string",
+      "enum": [
+        "hvac",
+        "plumbing",
+        "pest-control",
+        "electrical",
+        "garage-door",
+        "appliance-repair",
+        "restoration",
+        "cleaning",
+        "landscaping",
+        "tree-service",
+        "junk-removal",
+        "roofing",
+        "painting",
+        "fence-deck",
+        "auto-repair",
+        "pool-service",
+        "handyman",
+        "gutters",
+        "pressure-washing",
+        "other"
+      ]
+    },
+    "PostalAddress": {
+      "type": "object",
+      "properties": {
+        "street": {
+          "type": "string",
+          "description": "`streetAddress`: \"1700 Broadway, Suite 200\"."
+        },
+        "locality": {
+          "type": "string",
+          "description": "`addressLocality`: the town or city."
+        },
+        "region": {
+          "type": "string",
+          "description": "`addressRegion`: the state, as its postal abbreviation (\"CO\")."
+        },
+        "postalCode": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string",
+          "description": "ISO 3166-1 alpha-2 country code.",
+          "pattern": "^[A-Z]{2}$"
+        }
+      },
+      "required": [
+        "street",
+        "locality",
+        "region",
+        "postalCode",
+        "country"
+      ],
+      "additionalProperties": false,
+      "description": "A postal address, in schema.org `PostalAddress` terms."
+    },
+    "Geo": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "lng": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        }
+      },
+      "required": [
+        "lat",
+        "lng"
+      ],
+      "additionalProperties": false
+    },
+    "OpeningHours": {
+      "type": "object",
+      "properties": {
+        "dayOfWeek": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DayOfWeek"
+          }
+        },
+        "opens": {
+          "type": "string",
+          "description": "24-hour `HH:MM`.",
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "closes": {
+          "type": "string",
+          "description": "24-hour `HH:MM`.",
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        }
+      },
+      "required": [
+        "dayOfWeek",
+        "opens",
+        "closes"
+      ],
+      "additionalProperties": false,
+      "description": "One row of opening hours, shaped so it serialises straight into a schema.org `OpeningHoursSpecification` (`dayOfWeek`, `opens`, `closes`). 24/7 is every day, `00:00`–`23:59`."
+    },
+    "DayOfWeek": {
+      "type": "string",
+      "enum": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ]
+    },
+    "CopyInputs": {
+      "type": "object",
+      "properties": {
+        "businessName": {
+          "type": "string",
+          "description": "Always equal to `site.name` when both are set; `validateSiteContent` enforces it."
+        },
+        "town": {
+          "type": "string"
+        },
+        "primaryService": {
+          "type": "string",
+          "description": "The service the copy leads with (\"AC repair\")."
+        },
+        "differentiator": {
+          "$ref": "#/definitions/Differentiator"
+        },
+        "tenure": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Years in business, or `null` when the client has not said — distinct from absent, which means the copy block was never filled in.",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "businessName",
+        "town",
+        "primaryService",
+        "differentiator",
+        "tenure"
+      ],
+      "additionalProperties": false,
+      "description": "The five inputs the generator interpolates into a fixed per-trade copy block. These are *inputs*, not output slots: the hero headline, subhead, about copy, CTA and meta description are derived from them when a site is generated, and stored in their own fields above, never here."
+    },
+    "Differentiator": {
+      "type": "string",
+      "enum": [
+        "same-day",
+        "24-7",
+        "family-owned",
+        "licensed-insured",
+        "free-estimates",
+        "none"
+      ],
+      "description": "The one thing a client says sets them apart; the generator picks a copy block per value."
+    },
+    "SiteFlags": {
+      "type": "object",
+      "properties": {
+        "reviewsFromGbp": {
+          "type": "boolean",
+          "description": "The review count and rating come from the Google Business Profile, not from typed copy."
+        },
+        "isPreview": {
+          "type": "boolean",
+          "description": "A preview of a site not yet sold or not yet live: templates may watermark it or noindex it."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Build-time switches the content carries rather than the environment."
+    },
+    "HeroMedia": {
+      "type": "object",
+      "properties": {
+        "video": {
+          "type": "string",
+          "description": "The background video: an absolute URL in CMS mode, a `public/` path standalone. Absent when the tenant uploaded none — stock footage is scarce for some trades, so the hub field is optional and a template must fall back to `poster` alone rather than render a `<video>` with no source."
+        },
+        "poster": {
+          "$ref": "#/definitions/Photo"
+        },
+        "avatars": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Photo"
+          }
+        }
+      },
+      "required": [
+        "poster",
+        "avatars"
+      ],
+      "additionalProperties": false,
+      "description": "The hero's media, from `site.heroVideo` / `heroPoster` / `avatars`. A template's own copy lives in `src/data/hero.ts`, which is also what `site-cms export-content` reads for the basenames to seed."
+    },
+    "Photo": {
+      "description": "An image: an absolute media URL with its intrinsic size, or — in a content file before upload — a basename with zero dimensions.",
+      "type": "object",
+      "properties": {
+        "src": {
+          "type": "string"
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0
+        },
+        "height": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "src",
+        "width",
+        "height"
+      ]
+    },
+    "AboutCard": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "body"
+      ],
+      "additionalProperties": false,
+      "description": "One card in the about section."
+    },
+    "Intro": {
+      "type": "object",
+      "properties": {
+        "chip": {
+          "type": "string"
+        },
+        "heading": {
+          "type": "string"
+        },
+        "copy": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "chip",
+        "heading",
+        "copy"
+      ],
+      "additionalProperties": false
+    },
+    "ShortIntro": {
+      "type": "object",
+      "properties": {
+        "chip": {
+          "type": "string"
+        },
+        "heading": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "chip",
+        "heading"
+      ],
+      "additionalProperties": false
+    },
+    "Service": {
+      "type": "object",
+      "properties": {
+        "icon": {
+          "$ref": "#/definitions/ServiceIcon"
+        },
+        "title": {
+          "type": "string"
+        },
+        "blurb": {
+          "type": "string"
+        },
+        "bullets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "image": {
+          "$ref": "#/definitions/Photo"
+        },
+        "imageAlt": {
+          "type": "string"
+        },
+        "priceHint": {
+          "type": "string",
+          "description": "A short price cue (\"From $89\", \"Free estimate\"). Free text: trades price too differently to type."
+        }
+      },
+      "required": [
+        "icon",
+        "title",
+        "blurb",
+        "bullets",
+        "image",
+        "imageAlt"
+      ],
+      "additionalProperties": false,
+      "description": "The hub's `services` collection."
+    },
+    "ServiceIcon": {
+      "type": "string",
+      "enum": [
+        "heating",
+        "cooling",
+        "air-flow",
+        "air-quality",
+        "water-drop",
+        "pipe",
+        "faucet",
+        "drain",
+        "power-bolt",
+        "outlet",
+        "lighting",
+        "wrench",
+        "hammer",
+        "toolbox",
+        "paint-roller",
+        "spray",
+        "pressure-wash",
+        "haul-truck",
+        "waste-bin",
+        "roof",
+        "wall",
+        "door",
+        "leaf",
+        "tree",
+        "flower",
+        "sun",
+        "mower",
+        "fence",
+        "vehicle",
+        "pest",
+        "rodent",
+        "shield",
+        "emergency",
+        "certified",
+        "schedule",
+        "phone"
+      ],
+      "description": "One icon from the shared vocabulary. The hub's `services.icon` select offers exactly these."
+    },
+    "GalleryImage": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "$ref": "#/definitions/Photo"
+        },
+        "alt": {
+          "type": "string"
+        },
+        "emphasis": {
+          "type": "string",
+          "enum": [
+            "featured",
+            "standard"
+          ],
+          "description": "How much room the image gets in the desktop gallery grid."
+        }
+      },
+      "required": [
+        "image",
+        "alt",
+        "emphasis"
+      ],
+      "additionalProperties": false,
+      "description": "The hub's `projects` collection — the work gallery."
+    },
+    "Testimonial": {
+      "type": "object",
+      "properties": {
+        "quote": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/Photo",
+          "description": "The photo for this story, if there is one. HVAC and plumbing rarely have one, so a card can be quote-only."
+        },
+        "beforeImage": {
+          "$ref": "#/definitions/Photo",
+          "description": "The same property before the work. Only meaningful alongside `image`: when both are set a template may render a before/after slider between them, otherwise `image` is shown on its own."
+        },
+        "alt": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "description": "Star rating, when the review had one."
+        },
+        "date": {
+          "type": "string",
+          "description": "When it was written, as an ISO date.",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "source": {
+          "$ref": "#/definitions/TestimonialSource",
+          "description": "Where it was posted. `direct` is a review given to the business, not on a platform."
+        }
+      },
+      "required": [
+        "quote",
+        "author",
+        "alt"
+      ],
+      "additionalProperties": false,
+      "description": "The hub's `testimonials` collection."
+    },
+    "TestimonialSource": {
+      "type": "string",
+      "enum": [
+        "google",
+        "facebook",
+        "yelp",
+        "nextdoor",
+        "direct"
+      ]
+    },
+    "ProcessStep": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "body"
+      ],
+      "additionalProperties": false,
+      "description": "The hub's `process-steps` collection."
+    },
+    "Stat": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "The hub's `stats` collection."
+    },
+    "Faq": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "answer": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "question",
+        "answer"
+      ],
+      "additionalProperties": false,
+      "description": "The hub's `faqs` collection."
+    }
+  }
+}

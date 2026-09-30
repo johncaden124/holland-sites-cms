@@ -18,7 +18,7 @@
  * `import.meta.env`. Both pass what they read in explicitly.
  */
 
-export const DEFAULT_MEDIA_HOST = 'media.hollandtech.com';
+export const DEFAULT_MEDIA_HOST = 'media.hollandsites.com';
 
 const LOOPBACK = ['localhost', '127.0.0.1'];
 
@@ -33,7 +33,7 @@ export interface MediaOrigin {
 export interface MediaOriginsInput {
   /** `PAYLOAD_URL`, if set. A loopback dev hub serves its own media over http. */
   payloadUrl?: string | undefined;
-  /** `PUBLIC_MEDIA_HOST`, if set. Defaults to `media.hollandtech.com`. */
+  /** `PUBLIC_MEDIA_HOST`, if set. Defaults to `media.hollandsites.com`. */
   mediaHost?: string | undefined;
 }
 
@@ -54,7 +54,7 @@ export interface MediaOrigins {
 export function parsePayloadUrl(value: string): URL {
   const parsed = URL.canParse(value) ? new URL(value) : undefined;
   if (!parsed || !/^https?:$/.test(parsed.protocol) || parsed.search || parsed.hash) {
-    throw new Error(`PAYLOAD_URL must be an absolute origin, e.g. https://hub.hollandtech.com (got "${value}")`);
+    throw new Error(`PAYLOAD_URL must be an absolute origin, e.g. https://hub.hollandsites.com (got "${value}")`);
   }
   return parsed;
 }

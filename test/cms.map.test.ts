@@ -227,3 +227,84 @@ describe('list mappers', () => {
     expect(() => mapProjects(projects)).toThrow('CMS projects[4].image: no image set — upload one in the hub');
   });
 });
+
+describe('v0.6 optional fields', () => {
+  /** The business groups as Payload would serve them: rows for lists, `null` for every unset leaf. */
+  const hubBusiness = {
+    trade: 'hvac',
+    town: 'Westerville',
+    serviceAreaTowns: [{ id: 'r1', text: 'Westerville' }, { id: 'r2', text: 'Dublin' }],
+    address: { street: '1 Main St', locality: 'Westerville', region: 'OH', postalCode: '43081', country: 'US' },
+    geo: { lat: 40.1, lng: -82.9 },
+    openingHours: [{ id: 'h1', dayOfWeek: ['Monday', 'Friday'], opens: '07:00', closes: '18:00' }],
+    phone: { e164: '+16145550123', display: null },
+    email: 'hello@acme.example',
+    siteUrl: 'https://acme.example',
+    gbp: { url: null, placeId: null },
+    reviews: { count: 212, rating: 4.9 },
+  };
+  const hubCopy = { businessName: 'Acme', town: 'Westerville', primaryService: 'AC repair', differentiator: '24-7', tenure: null };
+
+  it('maps nothing new for a v0.5 tenant, including the groups Payload sends all-null', () => {
+    const out = mapSite(
+      siteDoc({
+        business: { trade: null, town: null, gbp: { url: null, placeId: null } },
+        copy: { businessName: null, tenure: null },
+        flags: { reviewsFromGbp: null, isPreview: null },
+      }),
+    );
+    expect(Object.keys(out.site)).not.toContain('business');
+    expect(Object.keys(out.site)).not.toContain('copy');
+    expect(Object.keys(out.site)).not.toContain('flags');
+    expect(out).toStrictEqual(mapSite(baseSiteDoc));
+  });
+
+  it('maps the business, copy and flags groups, dropping row ids and unset optionals', () => {
+    const { site } = mapSite(siteDoc({ business: hubBusiness, copy: hubCopy, flags: { reviewsFromGbp: true, isPreview: false } }));
+    expect(site.business).toStrictEqual({
+      trade: 'hvac',
+      town: 'Westerville',
+      serviceAreaTowns: ['Westerville', 'Dublin'],
+      address: { street: '1 Main St', locality: 'Westerville', region: 'OH', postalCode: '43081', country: 'US' },
+      geo: { lat: 40.1, lng: -82.9 },
+      openingHours: [{ dayOfWeek: ['Monday', 'Friday'], opens: '07:00', closes: '18:00' }],
+      phone: { e164: '+16145550123' },
+      email: 'hello@acme.example',
+      siteUrl: 'https://acme.example',
+      reviews: { count: 212, rating: 4.9 },
+    });
+    // `null` tenure is a value ("not said"), kept as such.
+    expect(site.copy).toStrictEqual({ ...hubCopy, differentiator: '24-7', tenure: null });
+    expect(site.flags).toStrictEqual({ reviewsFromGbp: true, isPreview: false });
+  });
+
+  it('refuses a trade, day or differentiator outside the vocabulary, by field', () => {
+    expect(() => mapSite(siteDoc({ business: { ...hubBusiness, trade: 'pest' } }))).toThrow(
+      /^CMS site\.business\.trade: unexpected value "pest" \(allowed: hvac, plumbing, pest-control, /,
+    );
+    expect(() =>
+      mapSite(siteDoc({ business: { ...hubBusiness, openingHours: [{ dayOfWeek: ['Mon'], opens: '07:00', closes: '18:00' }] } })),
+    ).toThrow('CMS site.business.openingHours[0].dayOfWeek[0]: unexpected value "Mon"');
+    expect(() => mapSite(siteDoc({ copy: { ...hubCopy, differentiator: 'cheap' } }))).toThrow(
+      'CMS site.copy.differentiator: unexpected value "cheap"',
+    );
+  });
+
+  it('maps priceHint and the testimonial rating, date and source only when set', () => {
+    const [service] = mapServices([{ ...serviceDocs[0]!, priceHint: 'From $89' }]);
+    expect(service!.priceHint).toBe('From $89');
+    expect('priceHint' in mapServices([{ ...serviceDocs[0]!, priceHint: null }])[0]!).toBe(false);
+
+    const [t] = mapTestimonials([
+      { ...testimonialDocs[0]!, rating: 5, date: '2026-03-14T00:00:00.000Z', source: 'google' },
+    ]);
+    expect(t).toMatchObject({ rating: 5, date: '2026-03-14', source: 'google' });
+    // A Payload select stores the rating as a string; it maps to the number.
+    expect(mapTestimonials([{ ...testimonialDocs[0]!, rating: '4' }])[0]!.rating).toBe(4);
+    const [unset] = mapTestimonials([{ ...testimonialDocs[0]!, rating: null, date: null, source: null }]);
+    expect(Object.keys(unset!)).toStrictEqual(['quote', 'author', 'image', 'beforeImage', 'alt']);
+    expect(() => mapTestimonials([{ ...testimonialDocs[0]!, rating: 7 }])).toThrow(
+      'CMS testimonials[0].rating: unexpected value 7 (allowed: 1, 2, 3, 4, 5)',
+    );
+  });
+});

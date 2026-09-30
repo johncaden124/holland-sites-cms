@@ -1,0 +1,371 @@
+{
+  "site": {
+    "name": "LeapFly",
+    "tagline": "Make Your Yard Feel Finished",
+    "description": "From planting and fresh sod to patios, walkways, lighting, and complete landscape makeovers, our team handles the planning, installation, and cleanup.",
+    "heroHeadline": "Make Your Yard\nFeel Finished",
+    "nav": [
+      {
+        "label": "Services",
+        "href": "#services"
+      },
+      {
+        "label": "Process",
+        "href": "#process"
+      },
+      {
+        "label": "Testimonials",
+        "href": "#testimonial"
+      },
+      {
+        "label": "FAQ",
+        "href": "#faq"
+      }
+    ],
+    "navCta": {
+      "label": "Get Free Estimate",
+      "href": "#contact"
+    },
+    "heroCta": {
+      "label": "Get My Free Estimate",
+      "href": "#contact"
+    },
+    "labels": {
+      "callPrefix": "Call us:",
+      "footerEmail": "Email",
+      "footerPhone": "Contact",
+      "footerAddress": "Address",
+      "footerServiceArea": "Service area",
+      "footerHours": "Hours"
+    },
+    "socials": [
+      {
+        "label": "x",
+        "href": "#"
+      },
+      {
+        "label": "linkedin",
+        "href": "#"
+      },
+      {
+        "label": "facebook",
+        "href": "#"
+      },
+      {
+        "label": "instagram",
+        "href": "#"
+      }
+    ],
+    "footer": {
+      "email": "contact@yourbrand.com",
+      "phone": {
+        "display": "+1 (303) 555-0189",
+        "tel": "+13035550189"
+      },
+      "address": "1700 Broadway, Denver, CO 80202"
+    },
+    "copyright": "© 2026 LeapFly, All Rights Reserved",
+    "heroPhone": {
+      "display": "+1 (303) 555-0189",
+      "tel": "+13035550189"
+    },
+    "heroVideo": "hero.mp4",
+    "heroPoster": "hero-poster.jpg",
+    "avatars": [
+      {
+        "image": "avatar-1.jpg"
+      },
+      {
+        "image": "avatar-2.jpg"
+      },
+      {
+        "image": "avatar-3.jpg"
+      }
+    ],
+    "review": {
+      "summary": "4.97/5 from over 600 reviews."
+    },
+    "heroBadge": {
+      "value": "98%",
+      "label": "Would recommend our service"
+    },
+    "aboutHeading": "We create outdoor spaces that look better, work better, and stay beautiful through every season.",
+    "trustCard": {
+      "title": "Landscaping You Can Trust",
+      "body": "Every property is different. We take time to understand your space, priorities, and budget before recommending the right landscaping solution.",
+      "bullets": [
+        {
+          "text": "Experienced Local Crew"
+        },
+        {
+          "text": "Quality Materials & Plants"
+        }
+      ]
+    },
+    "aboutCards": [
+      {
+        "title": "Our Vision",
+        "body": "To create beautiful, functional outdoor spaces that add lasting value and make every property more enjoyable."
+      },
+      {
+        "title": "Our Mission",
+        "body": "To deliver dependable landscaping through thoughtful planning, skilled workmanship, quality materials, and care"
+      }
+    ],
+    "servicesIntro": {
+      "chip": "What We Do",
+      "heading": "Outdoor Spaces,\nDone Right.",
+      "copy": "From routine lawn care to complete landscape upgrades, we create and maintain outdoor spaces built around your property and needs."
+    },
+    "workIntro": {
+      "chip": "Our Work",
+      "heading": "See the Difference",
+      "copy": "Explore outdoor spaces transformed through thoughtful landscaping, quality craftsmanship, and attention to every detail."
+    },
+    "featuredProject": {
+      "title": "Coastal Garden Escape",
+      "subtitle": "Complete Landscaping"
+    },
+    "testimonialsIntro": {
+      "chip": "Client Stories",
+      "heading": "What Homeowners Say"
+    },
+    "impactIntro": {
+      "chip": "Our Impact",
+      "heading": "Landscaping Results\nYou Can See"
+    },
+    "processIntro": {
+      "chip": "Our Process",
+      "heading": "From Plan to Perfect Yard",
+      "copy": "A simple, organized process that keeps your landscaping project clear, efficient, and stress-free from start to finish."
+    },
+    "faqIntro": {
+      "chip": "Landscaping FAQs",
+      "heading": "Questions, Answered",
+      "copy": "Find quick answers about our landscaping services, project timelines, maintenance options, estimates, and what to expect."
+    },
+    "faqSideCard": {
+      "title": "Planning a Project?",
+      "body": "Tell us about your property and goals. We'll help you understand the best landscaping options for your space.",
+      "cta": "Get a Free Estimate",
+      "href": "#contact"
+    },
+    "ctaBand": {
+      "heading": "Ready to Transform Your\nOutdoor Space?",
+      "copy": "Tell us what you have in mind and get a clear plan for your landscaping project. We'll help you create an outdoor space that fits your property, goals, and budget.",
+      "button": "Get a Free Estimate",
+      "href": "#contact"
+    },
+    "ctaStrip": [
+      {
+        "image": "work-7.jpg",
+        "alt": "Covered patio lounge beside a lawn"
+      },
+      {
+        "image": "work-1.jpg",
+        "alt": "Garden path with landscape lighting at dusk"
+      },
+      {
+        "image": "work-4.jpg",
+        "alt": "Aerial view of a villa garden with pool"
+      },
+      {
+        "image": "service-lawncare.jpg",
+        "alt": "Mowing a front lawn"
+      },
+      {
+        "image": "work-2.jpg",
+        "alt": "Gardener planting a fresh bed"
+      },
+      {
+        "image": "work-6.jpg",
+        "alt": "Home with lit brick path and planting at dusk"
+      },
+      {
+        "image": "work-3.jpg",
+        "alt": "Gardener trimming a hedge"
+      },
+      {
+        "image": "work-5.jpg",
+        "alt": "Lit walkway through an evening garden"
+      }
+    ]
+  },
+  "services": [
+    {
+      "icon": "flower",
+      "title": "Landscape Design",
+      "blurb": "Thoughtful landscape plans tailored to your property, style, budget, and long-term outdoor goals.",
+      "bullets": [
+        {
+          "text": "Custom Outdoor Plans"
+        },
+        {
+          "text": "Built Around Your Space"
+        },
+        {
+          "text": "Designed to Last"
+        }
+      ],
+      "image": "service-design.jpg",
+      "imageAlt": "Modern home with a professionally designed front yard"
+    },
+    {
+      "icon": "sun",
+      "title": "Lawn & Garden Care",
+      "blurb": "Keep your yard healthy, clean, and well maintained with reliable seasonal and routine landscaping care.",
+      "bullets": [
+        {
+          "text": "Routine Maintenance"
+        },
+        {
+          "text": "Healthy, Tidy Lawns"
+        },
+        {
+          "text": "Care You Can Count On"
+        }
+      ],
+      "image": "service-lawncare.jpg",
+      "imageAlt": "Crew mowing and trimming a front yard"
+    },
+    {
+      "icon": "tree",
+      "title": "Hardscaping & Installation",
+      "blurb": "Upgrade your outdoor space with professionally installed patios, walkways, edging, planting, and landscape features.",
+      "bullets": [
+        {
+          "text": "Professional Installation"
+        },
+        {
+          "text": "Durable Outdoor Features"
+        },
+        {
+          "text": "Built for Better Living"
+        }
+      ],
+      "image": "service-hardscape.jpg",
+      "imageAlt": "Stone patio and walkway with layered planting"
+    }
+  ],
+  "projects": [
+    {
+      "image": "work-1.jpg",
+      "alt": "Garden path with landscape lighting at dusk",
+      "emphasis": "featured"
+    },
+    {
+      "image": "work-2.jpg",
+      "alt": "Gardener planting a fresh bed",
+      "emphasis": "featured"
+    },
+    {
+      "image": "work-3.jpg",
+      "alt": "Gardener trimming a hedge",
+      "emphasis": "standard"
+    },
+    {
+      "image": "work-4.jpg",
+      "alt": "Aerial view of a villa garden with pool",
+      "emphasis": "standard"
+    },
+    {
+      "image": "work-5.jpg",
+      "alt": "Lit walkway through an evening garden",
+      "emphasis": "standard"
+    },
+    {
+      "image": "work-6.jpg",
+      "alt": "Home with lit brick path and planting at dusk",
+      "emphasis": "featured"
+    },
+    {
+      "image": "work-7.jpg",
+      "alt": "Covered patio lounge beside a lawn",
+      "emphasis": "featured"
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "Our yard looks completely different now. The team was professional, on time, and the final result exceeded what we expected.",
+      "author": "William Taylor",
+      "image": "after-1.jpg",
+      "beforeImage": "before-1.jpg",
+      "alt": "Brick home lawn before and after renovation"
+    },
+    {
+      "quote": "From the first consultation to the final cleanup, everything was easy, organized, and handled with real attention to detail.",
+      "author": "Ava Moore",
+      "image": "after-2.jpg",
+      "beforeImage": "before-2.jpg",
+      "alt": "Front flower bed before and after replanting"
+    },
+    {
+      "quote": "They transformed our outdoor space beautifully and kept us informed throughout the entire project. We couldn’t be happier.",
+      "author": "John Carter",
+      "image": "after-3.jpg",
+      "beforeImage": "before-3.jpg",
+      "alt": "Sloped front lawn before and after new sod"
+    },
+    {
+      "quote": "Reliable service, quality workmanship, and a clean finish. Our lawn and garden have never looked this good.",
+      "author": "Michael Brooks",
+      "image": "after-4.jpg",
+      "beforeImage": "before-4.jpg",
+      "alt": "Colonial home lawn before and after lawn care"
+    }
+  ],
+  "processSteps": [
+    {
+      "title": "On-Site Consultation",
+      "body": "We assess your property, discuss your goals, and understand what your outdoor space needs."
+    },
+    {
+      "title": "Plan & Estimate",
+      "body": "We recommend the right approach and provide a clear plan, scope, and estimate before work begins."
+    },
+    {
+      "title": "Build & Finish",
+      "body": "Our crew completes the work with careful installation, clean execution, and attention to every detail."
+    }
+  ],
+  "stats": [
+    {
+      "value": "12",
+      "label": "Years of Experience"
+    },
+    {
+      "value": "98%",
+      "label": "Satisfied Customers"
+    },
+    {
+      "value": "500+",
+      "label": "Projects Completed"
+    }
+  ],
+  "faqs": [
+    {
+      "question": "Do you offer free landscaping estimates?",
+      "answer": "Yes. We can review your property, discuss your goals, and provide a clear estimate before any work begins."
+    },
+    {
+      "question": "What landscaping services do you provide?",
+      "answer": "We offer landscape design, lawn and garden care, planting, hardscaping, seasonal maintenance, and outdoor improvements."
+    },
+    {
+      "question": "How long does a landscaping project take?",
+      "answer": "Timelines depend on the size and scope of the project. We'll give you a clear schedule before work starts."
+    },
+    {
+      "question": "Can you work with my existing landscape?",
+      "answer": "Absolutely. We can refresh, extend, or redesign around what you already have — keeping what works and improving the rest."
+    },
+    {
+      "question": "Do you offer ongoing lawn maintenance?",
+      "answer": "Yes. We offer routine and seasonal maintenance plans to keep your lawn and garden healthy year-round."
+    },
+    {
+      "question": "How do I get started?",
+      "answer": "Contact us to request a free estimate. We'll schedule an on-site consultation and walk you through the next steps."
+    }
+  ]
+}

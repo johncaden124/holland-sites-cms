@@ -12,10 +12,13 @@
  */
 import type { Photo } from './photo.js';
 import type { ServiceIcon } from './serviceIcons.js';
+import type { Trade } from './trades.js';
 
 export type { Photo, RemotePhoto } from './photo.js';
 export type { ServiceIcon } from './serviceIcons.js';
+export type { Trade } from './trades.js';
 export { SERVICE_ICONS } from './serviceIcons.js';
+export { TRADES } from './trades.js';
 
 // ---- site settings ---------------------------------------------------------------------------
 
@@ -27,6 +30,140 @@ export interface NavLink {
 export interface Social {
   label: 'x' | 'linkedin' | 'facebook' | 'instagram';
   href: string;
+}
+
+// ---- the business behind the site (optional, v0.6) -------------------------------------------
+//
+// The strings above (`footer.address`, `footer.hours`, `heroPhone.display`) are what a template
+// *renders*. The shapes below are the same facts in machine-readable form — for LocalBusiness
+// structured data, the map embed, click-to-call tracking and the generator — so a template reads
+// the structured value when it needs one and the display string when it prints one. Every group is
+// optional: v0.5 content without them is still valid content.
+
+/** A postal address, in schema.org `PostalAddress` terms. */
+export interface PostalAddress {
+  /** `streetAddress`: "1700 Broadway, Suite 200". */
+  street: string;
+  /** `addressLocality`: the town or city. */
+  locality: string;
+  /** `addressRegion`: the state, as its postal abbreviation ("CO"). */
+  region: string;
+  postalCode: string;
+  /**
+   * ISO 3166-1 alpha-2 country code.
+   * @pattern ^[A-Z]{2}$
+   */
+  country: string;
+}
+
+export interface Geo {
+  /**
+   * @minimum -90
+   * @maximum 90
+   */
+  lat: number;
+  /**
+   * @minimum -180
+   * @maximum 180
+   */
+  lng: number;
+}
+
+export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+
+/**
+ * One row of opening hours, shaped so it serialises straight into a schema.org
+ * `OpeningHoursSpecification` (`dayOfWeek`, `opens`, `closes`). 24/7 is every day, `00:00`–`23:59`.
+ */
+export interface OpeningHours {
+  dayOfWeek: DayOfWeek[];
+  /**
+   * 24-hour `HH:MM`.
+   * @pattern ^([01]\d|2[0-3]):[0-5]\d$
+   */
+  opens: string;
+  /**
+   * 24-hour `HH:MM`.
+   * @pattern ^([01]\d|2[0-3]):[0-5]\d$
+   */
+  closes: string;
+}
+
+/**
+ * The business's structured facts. `phone` is the **Holland tracking number** — the one every call
+ * button dials and every call is counted on — which may differ from the client's own line.
+ */
+export interface BusinessProfile {
+  trade: Trade;
+  /** The home town the copy leads with ("Westerville"). */
+  town: string;
+  /** Every town the business serves, home town included, in the order to list them. */
+  serviceAreaTowns: string[];
+  address: PostalAddress;
+  geo: Geo;
+  openingHours: OpeningHours[];
+  phone: {
+    /**
+     * E.164: `+` then country code and number, no spaces ("+16145550123").
+     * @pattern ^\+[1-9]\d{7,14}$
+     */
+    e164: string;
+    /** How to print it ("(614) 555-0123"). Absent: a template formats `e164` itself. */
+    display?: string;
+  };
+  email: string;
+  /**
+   * The site's canonical origin, `https://` and no path ("https://acme-hvac.com").
+   * @pattern ^https://[^/]+$
+   */
+  siteUrl: string;
+  /** Google Business Profile. */
+  gbp?: {
+    /** @pattern ^https:// */
+    url: string;
+    placeId: string;
+  };
+  /** The review summary the site quotes. `site.review.summary` is its rendered sentence. */
+  reviews?: {
+    /** @minimum 0 */
+    count: number;
+    /**
+     * @minimum 0
+     * @maximum 5
+     */
+    rating: number;
+  };
+}
+
+/** The one thing a client says sets them apart; the generator picks a copy block per value. */
+export type Differentiator = 'same-day' | '24-7' | 'family-owned' | 'licensed-insured' | 'free-estimates' | 'none';
+
+/**
+ * The five inputs the generator interpolates into a fixed per-trade copy block. These are *inputs*,
+ * not output slots: the hero headline, subhead, about copy, CTA and meta description are derived
+ * from them when a site is generated, and stored in their own fields above, never here.
+ */
+export interface CopyInputs {
+  /** Always equal to `site.name` when both are set; `validateSiteContent` enforces it. */
+  businessName: string;
+  town: string;
+  /** The service the copy leads with ("AC repair"). */
+  primaryService: string;
+  differentiator: Differentiator;
+  /**
+   * Years in business, or `null` when the client has not said — distinct from absent, which means
+   * the copy block was never filled in.
+   * @minimum 0
+   */
+  tenure: number | null;
+}
+
+/** Build-time switches the content carries rather than the environment. */
+export interface SiteFlags {
+  /** The review count and rating come from the Google Business Profile, not from typed copy. */
+  reviewsFromGbp?: boolean;
+  /** A preview of a site not yet sold or not yet live: templates may watermark it or noindex it. */
+  isPreview?: boolean;
 }
 
 /** Site-wide settings — the hub's `site` global, one document per tenant. */
@@ -89,6 +226,11 @@ export interface SiteSettings {
   };
   socials: Social[];
   copyright: string;
+  /** Structured business facts (v0.6). Optional: a v0.5 site has none. */
+  business?: BusinessProfile;
+  /** The generator's copy inputs (v0.6). */
+  copy?: CopyInputs;
+  flags?: SiteFlags;
 }
 
 // ---- list collections -------------------------------------------------------------------------
@@ -107,6 +249,8 @@ export interface Service {
   bullets: string[];
   image: Photo;
   imageAlt: string;
+  /** A short price cue ("From $89", "Free estimate"). Free text: trades price too differently to type. */
+  priceHint?: string;
 }
 
 /** The hub's `projects` collection — the work gallery. */
@@ -132,7 +276,18 @@ export interface Testimonial {
    */
   beforeImage?: Photo;
   alt: string;
+  /** Star rating, when the review had one. */
+  rating?: 1 | 2 | 3 | 4 | 5;
+  /**
+   * When it was written, as an ISO date.
+   * @pattern ^\d{4}-\d{2}-\d{2}$
+   */
+  date?: string;
+  /** Where it was posted. `direct` is a review given to the business, not on a platform. */
+  source?: TestimonialSource;
 }
+
+export type TestimonialSource = 'google' | 'facebook' | 'yelp' | 'nextdoor' | 'direct';
 
 /** The hub's `process-steps` collection. */
 export interface ProcessStep {
