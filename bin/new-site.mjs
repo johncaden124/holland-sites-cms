@@ -12,6 +12,11 @@
  *    client repo must never publish the template's placeholder content.
  * 4. Point `.env.example` at the hub: `PAYLOAD_URL`, `PUBLIC_MEDIA_HOST`, and `PUBLIC_SITE_URL` from
  *    `business.siteUrl`. Every other variable in the template's copy is kept as it is.
+ * 5. `git init -b main` and make one first commit, "Create <dir> from <repo>@<ref>", so the new repo
+ *    records which template commit it came from — the template's own history is dropped in step 1,
+ *    and this is the only place that provenance survives — and later template upgrades have a
+ *    baseline to diff against. `--no-git` leaves a plain directory. No remote, no push: creating the
+ *    client's GitHub repo is the generator's job.
  *
  * Nothing is left behind on failure: the output directory is removed if any step fails.
  */
@@ -30,13 +35,15 @@ export const HELP = `site-cms new-site — content file + template → a client 
 
 Usage:
   site-cms new-site --from <content.json> --template <name|owner/repo|git-url> --out <dir>
-                    [--ref <sha|tag>] [--media dir] [--hub url] [--no-cms-required]
+                    [--ref <sha|tag>] [--media dir] [--hub url] [--no-cms-required] [--no-git]
 
 --template  a name from this package's consumers.json (cloned at its pinned ref), or any
             owner/repo or git URL together with --ref.
 --media     defaults to the media/ folder next to the content file.
 --hub       PAYLOAD_URL written to .env.example (default ${DEFAULT_HUB_URL}).
 --no-cms-required  leave CMS_REQUIRED false (a demo, not a client site).
+--no-git    don't initialise a git repository; by default the output is a repo on main with
+            one commit, "Create <dir> from <template>@<ref>" (no remote is added).
 
 A private template is cloned with SITE_CMS_GIT_TOKEN (a GitHub token with read access to it)
 when set, otherwise with git's own credentials. --out must not exist, or be empty.`
@@ -71,16 +78,19 @@ function resolveTemplate(template, ref) {
 /**
  * @param {string[]} args
  * @param {string} cwd
+ * @returns {string} stdout
  */
 function git(args, cwd) {
   try {
-    execFileSync('git', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] })
+    return execFileSync('git', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' })
   } catch (err) {
     const stderr = String(/** @type {{ stderr?: Buffer }} */ (err).stderr ?? '').trim()
     // Never echo a token back, whichever line git put it on.
     const token = process.env.SITE_CMS_GIT_TOKEN
     const safe = token ? stderr.split(token).join('***') : stderr
-    throw new Error(`git ${args[0]} failed${safe ? `: ${safe.split('\n').pop()}` : ''}`)
+    // Name the subcommand, not a leading `-c key=value` override.
+    const sub = args.find((arg, i) => !arg.startsWith('-') && args[i - 1] !== '-c') ?? args[0]
+    throw new Error(`git ${sub} failed${safe ? `: ${safe.split('\n').pop()}` : ''}`)
   }
 }
 
@@ -102,6 +112,22 @@ export function setEnv(text, values) {
 
 const CMS_REQUIRED_RE = /^export const CMS_REQUIRED(: boolean)? = (true|false);$/m
 
+/** Who the first commit is by when the machine has no git identity (a bare CI runner, a container). */
+const FALLBACK_IDENTITY = ['-c', 'user.name=site-cms', '-c', 'user.email=site-cms@hollandsites.com']
+
+/**
+ * `git config <key>` as git itself resolves it there, or '' when unset.
+ * @param {string} key
+ * @param {string} cwd
+ */
+function gitConfig(key, cwd) {
+  try {
+    return execFileSync('git', ['config', key], { cwd, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' }).trim()
+  } catch {
+    return ''
+  }
+}
+
 /**
  * @param {string} cwd
  * @param {string[]} argv
@@ -110,7 +136,7 @@ export async function newSite(cwd, argv) {
   const args = parseArgs('new-site', argv, {
     values: ['from', 'template', 'out', 'ref', 'media', 'hub'],
     flags: [],
-    negatable: ['cms-required'],
+    negatable: ['cms-required', 'git'],
   })
   for (const required of /** @type {const} */ (['from', 'template', 'out'])) {
     if (!args[required]) throw new Error(`--${required} is required (see site-cms new-site --help)`)
@@ -118,6 +144,7 @@ export async function newSite(cwd, argv) {
   const from = resolve(cwd, /** @type {string} */ (args.from))
   const out = resolve(cwd, /** @type {string} */ (args.out))
   const cmsRequired = args['cms-required'] !== false
+  const initGit = args.git !== false
   if (!existsSync(from)) throw new Error(`content file not found: ${from}`)
   if (existsSync(out) && readdirSync(out).length) throw new Error(`${out} already exists and is not empty`)
   const template = resolveTemplate(/** @type {string} */ (args.template), args.ref)
@@ -161,12 +188,24 @@ export async function newSite(cwd, argv) {
       }),
     )
 
+    // 5. a repository with one commit that names its template
+    let commit = ''
+    if (initGit) {
+      const name = relative(dirname(out), out)
+      git(['init', '--quiet', '-b', 'main'], out)
+      git(['add', '-A'], out)
+      const identity = gitConfig('user.name', out) && gitConfig('user.email', out) ? [] : FALLBACK_IDENTITY
+      git([...identity, 'commit', '--quiet', '--no-verify', '-m', `Create ${name} from ${template.label}`], out)
+      commit = git(['rev-parse', '--short', 'HEAD'], out).trim()
+    }
+
     console.log(
       [
         `created ${relative(cwd, out)} from ${template.label}`,
         ...lines,
         `  CMS_REQUIRED   ${cmsRequired}`,
         `  .env.example   PAYLOAD_URL, PUBLIC_MEDIA_HOST${siteUrl ? ', PUBLIC_SITE_URL' : ' (PUBLIC_SITE_URL left empty: no business.siteUrl)'}`,
+        `  git            ${initGit ? `main @ ${commit} (no remote)` : 'not initialised (--no-git)'}`,
       ].join('\n'),
     )
   } catch (err) {

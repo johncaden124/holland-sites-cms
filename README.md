@@ -244,7 +244,11 @@ Every command keeps the same contract, because the generator shells out to them:
   (or `--ref`) without its history, imports the content and media (from `--media` or the `media/`
   folder next to the file), and sets `CMS_REQUIRED` to `true` (`--no-cms-required` for a demo).
   It also sets `PAYLOAD_URL`, `PUBLIC_MEDIA_HOST` and `PUBLIC_SITE_URL` (from `business.siteUrl`)
-  in `.env.example`, keeping every other variable. On failure it removes what it created.
+  in `.env.example`, keeping every other variable. Finally it runs `git init -b main` and makes one
+  commit, `Create <dir> from <repo>@<ref>`, which is where the template provenance survives once the
+  template's own history is dropped. It adds no remote; creating and pushing the client's GitHub repo
+  is the generator's job. `--no-git` leaves a plain directory. On failure it removes what it
+  created.
 - **`capture-fixtures`** GETs each of the seven collections at exactly the URL the fetch layer
   builds, and writes the responses verbatim. **Nothing is stripped**: `tenant`, media `url`s and
   array-row `id`s all look like noise and are all read by assertions.
