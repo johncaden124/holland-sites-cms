@@ -750,7 +750,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Build-time switches the content carries rather than the environment."
+      "description": "Build-time switches the content carries rather than the environment. Each is off unless present and `true`; content mapped from the hub carries a flag only when it is on."
     },
     "HeroMedia": {
       "type": "object",

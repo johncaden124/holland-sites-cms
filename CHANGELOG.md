@@ -24,6 +24,8 @@ outside TypeScript, breaking changes can't ship by accident, and the CLI can fil
 - `Service.priceHint?`.
 - On `Testimonial`: `rating?` (1–5), `date?` (ISO date) and `source?` (`google | facebook | yelp | nextdoor | direct`).
 - The mappers carry all of the above from the hub when a tenant sets them. An unset group maps to nothing, so v0.5 tenants map exactly as before.
+- A flag maps only when it is on. The hub stores flags as checkboxes, which are `false` by default, so `false` maps to no key.
+- In a content file, `business.serviceAreaTowns` travels as `{ text }` rows, like `bullets`, matching the hub's array field.
 - `HeroMedia` is now exported from the root as well as `./types`.
 
 ### Added: validation and schema

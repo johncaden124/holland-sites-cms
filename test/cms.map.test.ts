@@ -253,10 +253,19 @@ describe('v0.6 optional fields', () => {
         flags: { reviewsFromGbp: null, isPreview: null },
       }),
     );
-    expect(Object.keys(out.site)).not.toContain('business');
-    expect(Object.keys(out.site)).not.toContain('copy');
-    expect(Object.keys(out.site)).not.toContain('flags');
     expect(out).toStrictEqual(mapSite(baseSiteDoc));
+    // What a v0.5 tenant actually has once the hub adds the checkboxes: both `false`.
+    const unchecked = mapSite(
+      siteDoc({
+        business: { trade: null, town: null, gbp: { url: null, placeId: null } },
+        copy: { businessName: null, tenure: null },
+        flags: { reviewsFromGbp: false, isPreview: false },
+      }),
+    );
+    expect(Object.keys(unchecked.site)).not.toContain('business');
+    expect(Object.keys(unchecked.site)).not.toContain('copy');
+    expect(Object.keys(unchecked.site)).not.toContain('flags');
+    expect(unchecked).toStrictEqual(mapSite(baseSiteDoc));
   });
 
   it('maps the business, copy and flags groups, dropping row ids and unset optionals', () => {
@@ -275,7 +284,7 @@ describe('v0.6 optional fields', () => {
     });
     // `null` tenure is a value ("not said"), kept as such.
     expect(site.copy).toStrictEqual({ ...hubCopy, differentiator: '24-7', tenure: null });
-    expect(site.flags).toStrictEqual({ reviewsFromGbp: true, isPreview: false });
+    expect(site.flags).toStrictEqual({ reviewsFromGbp: true });
   });
 
   it('refuses a trade, day or differentiator outside the vocabulary, by field', () => {

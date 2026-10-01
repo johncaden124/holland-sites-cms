@@ -168,7 +168,9 @@ export function toContentFile(data: DataModules): ContentFile {
       ctaBand: data.cta.ctaBand,
       ctaStrip: data.gallery.ctaStrip.map((c) => ({ image: img(c.image), alt: c.alt })),
       // Business facts and generator inputs (v0.6), only when the template has them.
-      ...(s.business ? { business: s.business } : {}),
+      // `serviceAreaTowns` travels as `{ text }` rows, like `bullets`: the hub stores a string list
+      // as an array field, and the seed writes this object as-is.
+      ...(s.business ? { business: { ...s.business, serviceAreaTowns: texts(s.business.serviceAreaTowns) } } : {}),
       ...(s.copy ? { copy: s.copy } : {}),
       ...(s.flags ? { flags: s.flags } : {}),
     },
@@ -217,7 +219,9 @@ export function fromContentFile(file: ContentFile): DataModules {
     labels: s.labels,
     socials: s.socials,
     copyright: s.copyright,
-    ...(s.business ? { business: s.business } : {}),
+    ...(s.business
+      ? { business: { ...s.business, serviceAreaTowns: untexts(s.business.serviceAreaTowns as unknown as TextRow[]) } }
+      : {}),
     ...(s.copy ? { copy: s.copy } : {}),
     ...(s.flags ? { flags: s.flags } : {}),
   };

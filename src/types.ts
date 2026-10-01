@@ -158,7 +158,10 @@ export interface CopyInputs {
   tenure: number | null;
 }
 
-/** Build-time switches the content carries rather than the environment. */
+/**
+ * Build-time switches the content carries rather than the environment. Each is off unless present
+ * and `true`; content mapped from the hub carries a flag only when it is on.
+ */
 export interface SiteFlags {
   /** The review count and rating come from the Google Business Profile, not from typed copy. */
   reviewsFromGbp?: boolean;

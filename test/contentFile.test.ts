@@ -27,13 +27,15 @@ describe('toContentFile / fromContentFile', () => {
 
   it('carry the v0.6 business, copy and flags groups and the new list fields through', () => {
     const file = fixture();
-    file.site.business = { trade: 'landscaping', town: 'Denver' };
+    file.site.business = { trade: 'landscaping', town: 'Denver', serviceAreaTowns: [{ text: 'Denver' }, { text: 'Aurora' }] };
     file.site.copy = { businessName: 'LeapFly', town: 'Denver', primaryService: 'Lawn care', differentiator: 'none', tenure: null };
     file.site.flags = { isPreview: true };
     file.services[0]!.priceHint = 'From $49';
     Object.assign(file.testimonials[0]!, { rating: 5, date: '2026-01-02', source: 'google' });
     const back = toContentFile(fromContentFile(file));
     expect(back.site.business).toStrictEqual(file.site.business);
+    // In the data modules the towns are a plain list, as in `BusinessProfile`.
+    expect(fromContentFile(file).site.site.business?.serviceAreaTowns).toStrictEqual(['Denver', 'Aurora']);
     expect(back.site.copy).toStrictEqual(file.site.copy);
     expect(back.site.flags).toStrictEqual({ isPreview: true });
     expect(back.services[0]!.priceHint).toBe('From $49');

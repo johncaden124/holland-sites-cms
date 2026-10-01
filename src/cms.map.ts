@@ -315,10 +315,15 @@ function mapCopy(c: HubCopyGroup | null | undefined): { copy?: CopyInputs } {
   return { copy: copy as CopyInputs };
 }
 
+/**
+ * Only a flag that is on is kept. The hub stores the flags as checkboxes, which every tenant has as
+ * `false` from the moment the field exists, so mapping `false` through would add a `flags` group to
+ * every v0.5 site's content. Absent and `false` mean the same thing to a template.
+ */
 function mapFlags(f: HubFlagsGroup | null | undefined): { flags?: SiteFlags } {
   const flags: SiteFlags = {};
-  if (typeof f?.reviewsFromGbp === 'boolean') flags.reviewsFromGbp = f.reviewsFromGbp;
-  if (typeof f?.isPreview === 'boolean') flags.isPreview = f.isPreview;
+  if (f?.reviewsFromGbp === true) flags.reviewsFromGbp = true;
+  if (f?.isPreview === true) flags.isPreview = true;
   return Object.keys(flags).length ? { flags } : {};
 }
 
