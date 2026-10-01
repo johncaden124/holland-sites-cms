@@ -23,7 +23,18 @@ const git = (...args: string[]) =>
     encoding: 'utf8',
     env: { ...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t' },
   }).trim();
-const newSite = (...args: string[]) => spawnSync('node', [BIN, 'new-site', ...args], { cwd: TMP, encoding: 'utf8' });
+/**
+ * The CLI, run with no git identity anywhere (an empty HOME, no system config): what a bare CI box
+ * has, and the case the first commit must survive.
+ */
+const newSite = (...args: string[]) =>
+  spawnSync('node', [BIN, 'new-site', ...args], {
+    cwd: TMP,
+    encoding: 'utf8',
+    env: { ...process.env, HOME: resolve(TMP, 'home'), XDG_CONFIG_HOME: resolve(TMP, 'home'), GIT_CONFIG_NOSYSTEM: '1' },
+  });
+/** git in a generated site. */
+const gitIn = (dir: string, ...args: string[]) => execFileSync('git', args, { cwd: dir, encoding: 'utf8' }).trim();
 
 /** A template's commit: the files `new-site` touches, and one it must leave alone. */
 function commitTemplate(cmsRequired: string) {
@@ -47,6 +58,7 @@ let pinned: string;
 beforeAll(() => {
   rmSync(TMP, { recursive: true, force: true });
   mkdirSync(TEMPLATE, { recursive: true });
+  mkdirSync(resolve(TMP, 'home'), { recursive: true });
   git('init', '--quiet');
   pinned = commitTemplate('false');
   // A later commit on the template that the pinned ref must NOT pick up.
@@ -67,7 +79,13 @@ describe('new-site', () => {
     const out = resolve(TMP, 'acme');
 
     expect(r.stdout).toContain(`created acme from ${TEMPLATE}@${pinned}`);
-    expect(existsSync(resolve(out, '.git'))).toBe(false);
+    // A fresh repository, not the template's: one commit on main naming the template and its ref,
+    // a clean tree, and no remote.
+    expect(gitIn(out, 'rev-parse', '--abbrev-ref', 'HEAD')).toBe('main');
+    expect(gitIn(out, 'log', '--format=%s|%an')).toBe(`Create acme from ${TEMPLATE}@${pinned}|site-cms`);
+    expect(gitIn(out, 'status', '--porcelain')).toBe('');
+    expect(gitIn(out, 'remote')).toBe('');
+    expect(r.stdout).toMatch(/ {2}git {12}main @ [0-9a-f]{7,} \(no remote\)/);
     expect(readFileSync(resolve(out, 'src/lib/cms.config.ts'), 'utf8')).toBe(
       '/** Per-repo switch. */\nexport const CMS_REQUIRED: boolean = true;\n',
     );
@@ -80,11 +98,14 @@ describe('new-site', () => {
     );
   });
 
-  it('leaves CMS_REQUIRED false with --no-cms-required', () => {
+  it('leaves CMS_REQUIRED false with --no-cms-required, and no repository with --no-git', () => {
     const r = newSite(
       '--from', 'clients/acme/content.json', '--template', TEMPLATE, '--ref', pinned, '--out', 'demo', '--no-cms-required',
+      '--no-git',
     );
     expect(r.status).toBe(0);
+    expect(existsSync(resolve(TMP, 'demo/.git'))).toBe(false);
+    expect(r.stdout).toContain('  git            not initialised (--no-git)');
     expect(readFileSync(resolve(TMP, 'demo/src/lib/cms.config.ts'), 'utf8')).toContain('CMS_REQUIRED: boolean = false;');
   });
 

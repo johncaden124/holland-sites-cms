@@ -7,6 +7,24 @@ bump.
 
 Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
+## 0.7.0 — 2026-10-01
+
+### Added
+- `Social['label']` gains `yelp`, `nextdoor`, `youtube` and `tiktok`, and the mapper accepts them.
+  There is no `google` label: the Google Business Profile link is `business.gbp.url`.
+  - Templates map the label to a glyph and an accessible name. A template whose map has no entry
+    for a new label renders an empty icon, so add artwork for all four when bumping.
+  - The hub's `socials.label` select needs the same four values.
+- `new-site` now initialises the output as a git repository: `git init -b main` plus one commit,
+  `Create <dir> from <repo>@<ref>`. This records which template commit the site came from. It adds
+  no remote. `--no-git` restores the old plain directory.
+
+### Changed
+- `check-version-bump` ignores documentation. It compares `etc/` and `schema/` with comment lines
+  and `description`s stripped, so a doc-only change needs no version bump. Regenerating and
+  committing those files is still enforced by `api:check` / `check:schema`.
+- `consumers.json` pins template-landscaping to `d27e033`: its bump to v0.6.0 plus footer icons for the four new networks (template-landscaping#5, #6).
+
 ## 0.6.0 — 2026-09-30
 
 The contract review: the content model now covers the whole business, content can be validated

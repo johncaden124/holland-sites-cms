@@ -310,8 +310,7 @@ export interface SiteSettings {
 export interface Social {
     // (undocumented)
     href: string;
-    // (undocumented)
-    label: 'x' | 'linkedin' | 'facebook' | 'instagram';
+    label: 'x' | 'linkedin' | 'facebook' | 'instagram' | 'yelp' | 'nextdoor' | 'youtube' | 'tiktok';
 }
 
 // @public
