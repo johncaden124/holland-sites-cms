@@ -16,9 +16,9 @@ import type { Trade } from './trades.js';
 
 export type { Photo, RemotePhoto } from './photo.js';
 export type { ServiceIcon } from './serviceIcons.js';
-export type { Trade } from './trades.js';
+export type { Trade, TradeInfo } from './trades.js';
 export { SERVICE_ICONS } from './serviceIcons.js';
-export { TRADES } from './trades.js';
+export { TRADE_INFO, TRADES } from './trades.js';
 
 // ---- site settings ---------------------------------------------------------------------------
 
@@ -128,6 +128,11 @@ export interface BusinessProfile {
     url: string;
     placeId: string;
   };
+  /**
+   * schema.org `priceRange` as a dollar scale, for LocalBusiness structured data (v0.8). Free-text
+   * price cues belong in `Service.priceHint`; this is the one coarse signal search engines show.
+   */
+  priceRange?: '$' | '$$' | '$$$' | '$$$$';
   /** The review summary the site quotes. `site.review.summary` is its rendered sentence. */
   reviews?: {
     /** @minimum 0 */
@@ -172,6 +177,50 @@ export interface SiteFlags {
   reviewsFromGbp?: boolean;
   /** A preview of a site not yet sold or not yet live: templates may watermark it or noindex it. */
   isPreview?: boolean;
+}
+
+/** Names of a template's pages, as links, breadcrumbs and titles print them (v0.8). */
+export interface PageLabels {
+  home: string;
+  services: string;
+  contact: string;
+  privacy: string;
+  terms: string;
+}
+
+/** The contact section and lead form (v0.8). Every string a form shows, so each niche can reword it. */
+export interface FormLabels {
+  /** The section's chip, above the heading. */
+  chip: string;
+  heading: string;
+  intro: string;
+  name: string;
+  phone: string;
+  email: string;
+  /** The service `<select>`'s label and its empty first option. */
+  service: string;
+  servicePlaceholder: string;
+  message: string;
+  submit: string;
+  /** The submit button while the request is in flight. */
+  sending: string;
+  /** Shown when neither a phone number nor an email was given. */
+  required: string;
+  success: string;
+  failure: string;
+}
+
+/**
+ * Wording a lawyer writes, per client (v0.8). The Holland tracking number may record calls and text
+ * back, and some states require notice of both; these are the slots for it.
+ */
+export interface LegalText {
+  /** The registered legal entity, when it differs from `site.name` ("Acme Services LLC"). */
+  legalName?: string;
+  /** Call-recording notice, shown near the phone number and the form. */
+  callRecordingNotice?: string;
+  /** SMS consent wording, shown under the lead form. */
+  smsConsent?: string;
 }
 
 /** Site-wide settings — the hub's `site` global, one document per tenant. */
@@ -231,9 +280,21 @@ export interface SiteSettings {
     /** Headings for the two optional footer columns; unused when their field is unset. */
     footerServiceArea: string;
     footerHours: string;
+    /**
+     * Page names (v0.8): footer page links, breadcrumbs, `<title>`s, llms.txt. Absent: a template
+     * uses its own defaults.
+     */
+    pages?: PageLabels;
+    /** The contact section's heading and the lead form's copy (v0.8). Absent: template defaults. */
+    form?: FormLabels;
   };
   socials: Social[];
   copyright: string;
+  /**
+   * Per-client legal wording (v0.8). Every field renders only when set, and **each is attorney
+   * text**: a template must never ship a default for any of them.
+   */
+  legal?: LegalText;
   /** Structured business facts (v0.6). Optional: a v0.5 site has none. */
   business?: BusinessProfile;
   /** The generator's copy inputs (v0.6). */

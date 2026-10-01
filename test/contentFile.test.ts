@@ -42,6 +42,17 @@ describe('toContentFile / fromContentFile', () => {
     expect(back.testimonials[0]).toMatchObject({ rating: 5, date: '2026-01-02', source: 'google' });
   });
 
+  it('carry the v0.8 legal text and label groups through, and leave them out when unset', () => {
+    const file = fixture();
+    expect('legal' in toContentFile(fromContentFile(file)).site).toBe(false);
+    file.site.legal = { callRecordingNotice: 'Calls may be recorded.' };
+    const pages = { home: 'Home', services: 'Services', contact: 'Contact', privacy: 'Privacy', terms: 'Terms' };
+    file.site.labels = { ...(file.site.labels as Record<string, unknown>), pages };
+    const back = toContentFile(fromContentFile(file));
+    expect(back.site.legal).toStrictEqual({ callRecordingNotice: 'Calls may be recorded.' });
+    expect((back.site.labels as { pages?: unknown }).pages).toStrictEqual(pages);
+  });
+
   it('turns images into basename refs and the hero video into a public/ path', () => {
     const data = fromContentFile(fixture());
     expect(data.hero.hero.video).toBe('/hero.mp4');

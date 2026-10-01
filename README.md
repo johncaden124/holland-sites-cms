@@ -98,6 +98,14 @@ v0.6 added the facts a generated site needs. They are all optional, so v0.5 cont
 - **`site.flags`** holds `reviewsFromGbp` and `isPreview`.
 - **`Service.priceHint`**, and **`Testimonial.rating` / `date` / `source`**.
 
+v0.8 added the rest of what a template had been keeping in its own files, again all optional:
+
+- **`TRADE_INFO`**: per trade, the `noun` for titles and the schema.org `schemaType` to publish.
+- **`site.business.priceRange`** (`$`–`$$$$`).
+- **`site.legal`**: `legalName`, `callRecordingNotice`, `smsConsent`. Attorney text, rendered only
+  when set.
+- **`site.labels.pages`** and **`site.labels.form`**: page names and every string of the lead form.
+
 ## Using it from a template
 
 ```ts

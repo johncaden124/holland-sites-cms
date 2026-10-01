@@ -371,6 +371,14 @@
             },
             "footerHours": {
               "type": "string"
+            },
+            "pages": {
+              "$ref": "#/definitions/PageLabels",
+              "description": "Page names (v0.8): footer page links, breadcrumbs, `<title>`s, llms.txt. Absent: a template uses its own defaults."
+            },
+            "form": {
+              "$ref": "#/definitions/FormLabels",
+              "description": "The contact section's heading and the lead form's copy (v0.8). Absent: template defaults."
             }
           },
           "required": [
@@ -392,6 +400,10 @@
         },
         "copyright": {
           "type": "string"
+        },
+        "legal": {
+          "$ref": "#/definitions/LegalText",
+          "description": "Per-client legal wording (v0.8). Every field renders only when set, and **each is attorney text**: a template must never ship a default for any of them."
         },
         "business": {
           "$ref": "#/definitions/BusinessProfile",
@@ -440,6 +452,104 @@
       ],
       "additionalProperties": false
     },
+    "PageLabels": {
+      "type": "object",
+      "properties": {
+        "home": {
+          "type": "string"
+        },
+        "services": {
+          "type": "string"
+        },
+        "contact": {
+          "type": "string"
+        },
+        "privacy": {
+          "type": "string"
+        },
+        "terms": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "home",
+        "services",
+        "contact",
+        "privacy",
+        "terms"
+      ],
+      "additionalProperties": false,
+      "description": "Names of a template's pages, as links, breadcrumbs and titles print them (v0.8)."
+    },
+    "FormLabels": {
+      "type": "object",
+      "properties": {
+        "chip": {
+          "type": "string",
+          "description": "The section's chip, above the heading."
+        },
+        "heading": {
+          "type": "string"
+        },
+        "intro": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "service": {
+          "type": "string",
+          "description": "The service `<select>`'s label and its empty first option."
+        },
+        "servicePlaceholder": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "submit": {
+          "type": "string"
+        },
+        "sending": {
+          "type": "string",
+          "description": "The submit button while the request is in flight."
+        },
+        "required": {
+          "type": "string",
+          "description": "Shown when neither a phone number nor an email was given."
+        },
+        "success": {
+          "type": "string"
+        },
+        "failure": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "chip",
+        "heading",
+        "intro",
+        "name",
+        "phone",
+        "email",
+        "service",
+        "servicePlaceholder",
+        "message",
+        "submit",
+        "sending",
+        "required",
+        "success",
+        "failure"
+      ],
+      "additionalProperties": false,
+      "description": "The contact section and lead form (v0.8). Every string a form shows, so each niche can reword it."
+    },
     "Social": {
       "type": "object",
       "properties": {
@@ -466,6 +576,25 @@
         "href"
       ],
       "additionalProperties": false
+    },
+    "LegalText": {
+      "type": "object",
+      "properties": {
+        "legalName": {
+          "type": "string",
+          "description": "The registered legal entity, when it differs from `site.name` (\"Acme Services LLC\")."
+        },
+        "callRecordingNotice": {
+          "type": "string",
+          "description": "Call-recording notice, shown near the phone number and the form."
+        },
+        "smsConsent": {
+          "type": "string",
+          "description": "SMS consent wording, shown under the lead form."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Wording a lawyer writes, per client (v0.8). The Holland tracking number may record calls and text back, and some states require notice of both; these are the slots for it."
     },
     "BusinessProfile": {
       "type": "object",
@@ -539,6 +668,16 @@
           ],
           "additionalProperties": false,
           "description": "Google Business Profile."
+        },
+        "priceRange": {
+          "type": "string",
+          "enum": [
+            "$",
+            "$$",
+            "$$$",
+            "$$$$"
+          ],
+          "description": "schema.org `priceRange` as a dollar scale, for LocalBusiness structured data (v0.8). Free-text price cues belong in `Service.priceHint`; this is the one coarse signal search engines show."
         },
         "reviews": {
           "type": "object",

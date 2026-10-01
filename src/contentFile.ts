@@ -173,6 +173,8 @@ export function toContentFile(data: DataModules): ContentFile {
       ...(s.business ? { business: { ...s.business, serviceAreaTowns: texts(s.business.serviceAreaTowns) } } : {}),
       ...(s.copy ? { copy: s.copy } : {}),
       ...(s.flags ? { flags: s.flags } : {}),
+      // Legal wording (v0.8): only when a client's lawyer has written some.
+      ...(s.legal ? { legal: s.legal } : {}),
     },
     services: data.services.services.map((x) => ({ ...x, image: img(x.image), bullets: texts(x.bullets) })),
     projects: data.gallery.gallery.map((g) => ({ image: img(g.image), alt: g.alt, emphasis: g.emphasis })),
@@ -224,6 +226,7 @@ export function fromContentFile(file: ContentFile): DataModules {
       : {}),
     ...(s.copy ? { copy: s.copy } : {}),
     ...(s.flags ? { flags: s.flags } : {}),
+    ...(s.legal ? { legal: s.legal } : {}),
   };
   const f = file.site as Record<string, unknown> as {
     aboutHeading: string;
