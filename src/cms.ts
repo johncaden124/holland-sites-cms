@@ -28,6 +28,7 @@
  * collection or field, the URL it hit, and the fix. The API key is never printed.
  */
 import { mediaOrigins, parsePayloadUrl } from './mediaOrigins.js';
+import { formatProblems, validateSiteContent, type ContentDefinition, type ContentProblem } from './validate.js';
 import {
   mapFaqs,
   mapProcess,
@@ -90,7 +91,7 @@ export interface CmsOptions {
   payloadUrl?: string | undefined;
   /** `PAYLOAD_API_KEY`, the build-bot key scoped to one tenant. Never printed. */
   apiKey?: string | undefined;
-  /** `PUBLIC_MEDIA_HOST`. Defaults to `media.hollandtech.com`. */
+  /** `PUBLIC_MEDIA_HOST`. Defaults to `media.hollandsites.com`. */
   mediaHost?: string | undefined;
   /**
    * Does this repo's build *require* the hub? `false` in a template repo, which is a standalone
@@ -143,6 +144,18 @@ export function createCms(options: CmsOptions): Cms {
       'CMS_REQUIRED is set but PAYLOAD_URL / PAYLOAD_API_KEY are missing — this build would publish' +
         " the template's placeholder content. Set both (on BOTH the Production and Preview" +
         ' environments in Cloudflare Pages).',
+    );
+  }
+
+  // The template's own content, checked once against the contract. `tsc` already holds a TypeScript
+  // template to the types; this catches the rest — a JS template, a `// @ts-ignore`, content built
+  // at runtime — at import, with every problem listed, rather than as a blank on the page.
+  const localResult = validateSiteContent(local);
+  if (!localResult.ok) {
+    throw new Error(
+      `Local content (the template's src/data) does not match the content model — ` +
+        `${localResult.problems.length} problem(s):\n${formatProblems(localResult.problems)}\n` +
+        'Fix these values in src/data; each field is described in @hollandtech/site-cms/types.',
     );
   }
 
@@ -328,14 +341,18 @@ export function createCms(options: CmsOptions): Cms {
   // knows the field — against `mediaOrigins.ts`, the same list `astro.config.mjs` configures, so a
   // URL this accepts is exactly a URL Astro will optimise.
 
-  function assertMediaUrl(field: string, src: string): void {
+  function assertMediaUrl(field: string, src: string, from: string): void {
     if (!URL.canParse(src)) {
-      throw new Error(`CMS ${field}: media URL "${src}" is not absolute — is the hub's serverURL set?`);
+      throw new Error(
+        `CMS ${field}: media URL "${src}" is not absolute (from ${from}) — set the hub's serverURL` +
+          ' (MEDIA_PUBLIC_URL in production) so media URLs carry their origin',
+      );
     }
     if (ORIGINS.isAllowedMediaUrl(src)) return;
     throw new Error(
       `CMS ${field}: media URL ${src} is not an allowed image origin (expected ${ORIGINS.describe()})` +
-        ' — Astro would ship it unoptimised',
+        ` — Astro would ship it unoptimised (from ${from}). Set PUBLIC_MEDIA_HOST to the host the hub` +
+        ' serves media from, or re-upload the file through the hub',
     );
   }
 
@@ -343,52 +360,63 @@ export function createCms(options: CmsOptions): Cms {
   const MAX_DEPTH = 12;
 
   /**
-   * Walk mapped content once, for two things:
+   * Hub content is checked in two passes, both before a getter returns:
    *
-   * 1. **Holes.** TypeScript describes the hub's JSON but cannot check it — `fetchDocs<HubSiteDoc>`
-   *    is an assertion about a parsed response, not a guarantee. So if the hub renames or drops a
-   *    field, `doc.copyright` is simply `undefined`, the mapper hands it on, and the page ships with
-   *    a blank footer and a green build. Nothing else catches that: the value is only ever
-   *    interpolated into HTML, where `undefined` renders as nothing.
+   * 1. **The contract.** TypeScript describes the hub's JSON but cannot check it —
+   *    `fetchDocs<HubSiteDoc>` is an assertion about a parsed response, not a guarantee. So if the
+   *    hub renames or drops a field, `doc.copyright` is simply `undefined`, the mapper hands it on,
+   *    and the page ships with a blank footer and a green build. `validateSiteContent` checks the
+   *    mapped result against the schema generated from `types.ts` and reports *every* mismatch at
+   *    once — a missing field, a `null`, a wrong type, a value outside an enum — with its path.
    *
-   *    A hole is unambiguous here *because* the mappers omit optional keys entirely rather than
-   *    setting them to `undefined` (see `opt` in `cms.map.ts`), so any `undefined` or `null` still
-   *    present is a field the mapper expected and the hub did not send.
+   *    A missing field is unambiguous *because* the mappers omit optional keys entirely rather than
+   *    setting them to `undefined` (see `opt` in `cms.map.ts`), so anything the schema requires and
+   *    does not find is a field the hub did not send.
    *
-   *    This catches renames and removals, which is the realistic drift. It does not catch a field
-   *    that changed *type* — the walk has no schema to check against — but that is a deliberate
-   *    model change, and one that moves the template too.
-   *
-   * 2. **Media origins**, for every `RemotePhoto` (`{ src, width, height }`), whatever field it
-   *    sits in.
+   * 2. **Media origins**, for every `RemotePhoto` (`{ src, width, height }`), whatever field it sits
+   *    in — the walk below.
    */
-  function checkContent(value: unknown, path: string, depth = 0): void {
+  function assertContract(collection: string, from: string, parts: [ContentDefinition, string, unknown][]): void {
+    const problems: ContentProblem[] = [];
+    for (const [root, path, value] of parts) problems.push(...validateSiteContent(value, { root, path }).problems);
+    if (!problems.length) return;
+    throw new Error(
+      `CMS ${collection}: the hub's content does not match the content model — ${problems.length} problem(s)` +
+        ` (from ${from}):\n${formatProblems(problems)}\n` +
+        'Fix each field in the hub admin. A field that is missing on every tenant was renamed or removed' +
+        ' in the hub: pin @hollandtech/site-cms to the version that matches the hub.',
+    );
+  }
+
+  function checkMedia(value: unknown, path: string, from: string, depth = 0): void {
     if (depth > MAX_DEPTH) {
       throw new Error(`CMS ${path}: content nested more than ${MAX_DEPTH} levels deep — check the mappers`);
     }
-    if (value === undefined || value === null) {
-      throw new Error(
-        `CMS ${path}: the hub did not send this field (got ${value}) — it was renamed or removed.` +
-          ' Optional fields are omitted by the mappers, so this is always a mismatch, not an empty value.',
-      );
-    }
+    if (value === null || typeof value !== 'object') return;
     if (Array.isArray(value)) {
-      value.forEach((item, i) => checkContent(item, `${path}[${i}]`, depth + 1));
-    } else if (typeof value === 'object') {
-      // `'format' in value` first, before any property *read*: a local `ImageMetadata` is a Proxy in
-      // a production build whose `get` trap copies the unoptimised original into `dist/`, and `in`
-      // goes through `has`, which it does not trap. See `photo.ts`.
-      if (!('format' in value) && 'src' in value && typeof value.src === 'string' && 'width' in value) {
-        assertMediaUrl(path, value.src);
-      } else {
-        for (const [key, child] of Object.entries(value)) checkContent(child, `${path}.${key}`, depth + 1);
-      }
+      value.forEach((item, i) => checkMedia(item, `${path}[${i}]`, from, depth + 1));
+      return;
+    }
+    // `'format' in value` first, before any property *read*: a local `ImageMetadata` is a Proxy in a
+    // production build whose `get` trap copies the unoptimised original into `dist/`, and `in` goes
+    // through `has`, which it does not trap. See `photo.ts`.
+    if (!('format' in value) && 'src' in value && typeof value.src === 'string' && 'width' in value) {
+      assertMediaUrl(path, value.src, from);
+    } else {
+      for (const [key, child] of Object.entries(value)) checkMedia(child, `${path}.${key}`, from, depth + 1);
     }
   }
 
-  function checked<T>(collection: string, content: T): T {
-    checkContent(content, collection);
-    return content;
+  /** A mapped list: every item validated against `definition`, then its media checked. */
+  function checkedList<T>(collection: string, hubCollection: string, definition: ContentDefinition, items: T[]): T[] {
+    const from = collectionUrl(BASE as string, hubCollection);
+    assertContract(
+      collection,
+      from,
+      items.map((item, i) => [definition, `${collection}[${i}]`, item]),
+    );
+    checkMedia(items, collection, from);
+    return items;
   }
 
   // ---- warnings ------------------------------------------------------------------------------
@@ -406,34 +434,46 @@ export function createCms(options: CmsOptions): Cms {
       if (!cmsEnabled) return local.site;
       return memo('site:content', async () => {
         const content = mapSite((await fetchDocs<HubSiteDoc>('site'))[0] as HubSiteDoc);
+        const from = collectionUrl(BASE as string, 'site');
+        assertContract('site', from, [['SiteContent', 'site', content]]);
         // The hero video is the one media URL that never reaches `<Image>` (a `<video>` source is a
-        // raw URL), so `checked` below cannot see it — assert it here. Absent when the tenant set no
-        // video, which is allowed: the template falls back to the poster.
-        if (content.hero.video !== undefined) assertMediaUrl('site.hero.video', content.hero.video);
-        return checked('site', content);
+        // raw URL), so the photo walk below cannot see it — assert it here. Absent when the tenant
+        // set no video, which is allowed: the template falls back to the poster.
+        if (content.hero.video !== undefined) assertMediaUrl('site.hero.video', content.hero.video, from);
+        checkMedia(content, 'site', from);
+        return content;
       });
     },
     async getServices() {
-      return cmsEnabled ? checked('services', mapServices(await fetchDocs<HubServiceDoc>('services'))) : local.services;
+      return cmsEnabled
+        ? checkedList('services', 'services', 'Service', mapServices(await fetchDocs<HubServiceDoc>('services')))
+        : local.services;
     },
     async getProjects() {
-      return cmsEnabled ? checked('projects', mapProjects(await fetchDocs<HubProjectDoc>('projects'))) : local.projects;
+      return cmsEnabled
+        ? checkedList('projects', 'projects', 'GalleryImage', mapProjects(await fetchDocs<HubProjectDoc>('projects')))
+        : local.projects;
     },
     async getTestimonials() {
       return cmsEnabled
-        ? checked('testimonials', mapTestimonials(await fetchDocs<HubTestimonialDoc>('testimonials')))
+        ? checkedList(
+            'testimonials',
+            'testimonials',
+            'Testimonial',
+            mapTestimonials(await fetchDocs<HubTestimonialDoc>('testimonials')),
+          )
         : local.testimonials;
     },
     async getProcess() {
       return cmsEnabled
-        ? checked('process', mapProcess(await fetchDocs<HubProcessStepDoc>('process-steps')))
+        ? checkedList('process', 'process-steps', 'ProcessStep', mapProcess(await fetchDocs<HubProcessStepDoc>('process-steps')))
         : local.process;
     },
     async getStats() {
-      return cmsEnabled ? checked('stats', mapStats(await fetchDocs<HubStatDoc>('stats'))) : local.stats;
+      return cmsEnabled ? checkedList('stats', 'stats', 'Stat', mapStats(await fetchDocs<HubStatDoc>('stats'))) : local.stats;
     },
     async getFaqs() {
-      return cmsEnabled ? checked('faqs', mapFaqs(await fetchDocs<HubFaqDoc>('faqs'))) : local.faqs;
+      return cmsEnabled ? checkedList('faqs', 'faqs', 'Faq', mapFaqs(await fetchDocs<HubFaqDoc>('faqs'))) : local.faqs;
     },
 
     warnMissingIcon(icon) {

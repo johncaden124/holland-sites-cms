@@ -1,0 +1,79 @@
+name: Consumer smoke
+
+# Install this commit, as a packed tarball, into every template in consumers.json at its pinned ref,
+# and run that template's own `npm test` and `npm run parity`. Parity runs against
+# scripts/mock-hub.mjs, which serves the template's captured hub fixtures, so no hub or hub secret is
+# needed.
+#
+# The templates are private: checking one out needs the CONSUMERS_TOKEN repository secret, a
+# fine-grained GitHub token with read-only "Contents" access to each template repo (README →
+# "Consumer smoke test").
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      templates: ${{ steps.read.outputs.templates }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: echo "templates=$(jq -c '.templates' consumers.json)" >> "$GITHUB_OUTPUT"
+
+  smoke:
+    needs: matrix
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        template: ${{ fromJSON(needs.matrix.outputs.templates) }}
+    name: ${{ matrix.template.name }}
+    env:
+      HAS_TOKEN: ${{ secrets.CONSUMERS_TOKEN != '' }}
+    steps:
+      - name: Require CONSUMERS_TOKEN
+        if: env.HAS_TOKEN != 'true'
+        run: |
+          echo "::error::The CONSUMERS_TOKEN secret is not set, so ${{ matrix.template.repo }} (private) cannot be checked out. See README → Consumer smoke test."
+          exit 1
+      - uses: actions/checkout@v4
+        with:
+          path: site-cms
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.template.repo }}
+          ref: ${{ matrix.template.ref }}
+          token: ${{ secrets.CONSUMERS_TOKEN }}
+          path: template
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: site-cms/.node-version
+      - name: Pack this commit
+        working-directory: site-cms
+        run: |
+          npm ci
+          npm pack
+      - name: Install the template, then this package over its pinned one
+        working-directory: template
+        run: |
+          npm ci
+          npm install --no-save ../site-cms/hollandtech-site-cms-*.tgz
+          node -p "'@hollandtech/site-cms ' + require('@hollandtech/site-cms/package.json').version"
+      - name: npm test
+        working-directory: template
+        run: npm test
+      - name: npm run parity (against the mock hub)
+        working-directory: template
+        env:
+          PAYLOAD_URL: http://localhost:3000
+          PAYLOAD_API_KEY: mock-hub-key
+          PUBLIC_SITE_URL: https://smoke.example.com
+        run: |
+          node ../site-cms/scripts/mock-hub.mjs . --port 3000 &
+          for i in $(seq 1 20); do curl -s -o /dev/null http://localhost:3000/ && break; sleep 1; done
+          npm run parity

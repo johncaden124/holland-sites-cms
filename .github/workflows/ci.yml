@@ -9,12 +9,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The version-bump check diffs the contract against the base branch.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
           cache: npm
       - run: npm ci
       - run: npm run build
+      # The schema and its compiled validator are generated from src/types.ts and committed.
+      - run: npm run check:schema
+      # Every exported type, as committed text: a change fails here until etc/ is regenerated.
+      - run: npm run api:check
+      # ...and a regenerated etc/ or schema/ needs the version bump it calls for.
+      - if: github.event_name == 'pull_request'
+        run: npm run check:version-bump
       - run: npm test
-      # `build` only compiles `src/`; this holds `test/` to the same types.
+      # `build` only compiles `src/`; this holds `test/`, `bin/` and `scripts/` to the same types.
       - run: npm run typecheck
+      # The hub imports ./service-icons from plain Node: no Astro, no DOM.
+      - run: npm run check:service-icons

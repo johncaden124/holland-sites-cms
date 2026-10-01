@@ -6,31 +6,31 @@ import { mediaOrigins, parseMediaHost, parsePayloadUrl } from '../src/mediaOrigi
 
 describe('parsePayloadUrl', () => {
   it('accepts an https origin, a loopback origin and a sub-path mount', () => {
-    expect(parsePayloadUrl('https://hub.hollandtech.com').origin).toBe('https://hub.hollandtech.com');
+    expect(parsePayloadUrl('https://hub.hollandsites.com').origin).toBe('https://hub.hollandsites.com');
     expect(parsePayloadUrl('http://localhost:3000').port).toBe('3000');
-    expect(parsePayloadUrl('https://hollandtech.com/hub').pathname).toBe('/hub');
+    expect(parsePayloadUrl('https://hollandsites.com/hub').pathname).toBe('/hub');
   });
 
   it.each([
-    ['hub.hollandtech.com', 'a bare hostname'],
+    ['hub.hollandsites.com', 'a bare hostname'],
     ['ftp://hub.test', 'a non-http(s) scheme'],
     ['/hub', 'a path'],
     ['https://hub.test?tenant=leapfly', 'a query string'],
     ['https://hub.test#admin', 'a fragment'],
   ])('rejects %s (%s) with the one documented message', (value) => {
     expect(() => parsePayloadUrl(value)).toThrow(
-      `PAYLOAD_URL must be an absolute origin, e.g. https://hub.hollandtech.com (got "${value}")`,
+      `PAYLOAD_URL must be an absolute origin, e.g. https://hub.hollandsites.com (got "${value}")`,
     );
   });
 });
 
 describe('parseMediaHost', () => {
   it('defaults to the hub media domain', () => {
-    expect(parseMediaHost(undefined)).toBe('media.hollandtech.com');
-    expect(parseMediaHost('')).toBe('media.hollandtech.com');
+    expect(parseMediaHost(undefined)).toBe('media.hollandsites.com');
+    expect(parseMediaHost('')).toBe('media.hollandsites.com');
   });
 
-  it.each(['https://media.hollandtech.com', 'media.hollandtech.com:8080', 'media.hollandtech.com/files'])(
+  it.each(['https://media.hollandsites.com', 'media.hollandsites.com:8080', 'media.hollandsites.com/files'])(
     'rejects "%s", which is not a bare hostname',
     (value) => {
       expect(() => parseMediaHost(value)).toThrow(
@@ -42,14 +42,14 @@ describe('parseMediaHost', () => {
 
 describe('mediaOrigins', () => {
   it('allows only https on PUBLIC_MEDIA_HOST for a remote hub', () => {
-    const origins = mediaOrigins({ payloadUrl: 'https://hub.hollandtech.com', mediaHost: undefined });
+    const origins = mediaOrigins({ payloadUrl: 'https://hub.hollandsites.com', mediaHost: undefined });
     expect(origins.remotePatterns).toStrictEqual([
-      { protocol: 'https', hostname: 'media.hollandtech.com', port: '' },
+      { protocol: 'https', hostname: 'media.hollandsites.com', port: '' },
     ]);
-    expect(origins.describe()).toBe('https://media.hollandtech.com');
-    expect(origins.isAllowedMediaUrl('https://media.hollandtech.com/x.jpg')).toBe(true);
+    expect(origins.describe()).toBe('https://media.hollandsites.com');
+    expect(origins.isAllowedMediaUrl('https://media.hollandsites.com/x.jpg')).toBe(true);
     // The bug this module exists for: same hostname, no TLS — `remotePatterns` would not match it.
-    expect(origins.isAllowedMediaUrl('http://media.hollandtech.com/x.jpg')).toBe(false);
+    expect(origins.isAllowedMediaUrl('http://media.hollandsites.com/x.jpg')).toBe(false);
     expect(origins.isAllowedMediaUrl('https://evil.example/x.jpg')).toBe(false);
     expect(origins.isAllowedMediaUrl('http://localhost:3000/x.jpg')).toBe(false);
     expect(origins.isAllowedMediaUrl('/x.jpg')).toBe(false);
@@ -67,7 +67,7 @@ describe('mediaOrigins', () => {
     // A hub on 3000 whose media is served from another port is not covered by `remotePatterns`.
     expect(origins.isAllowedMediaUrl('http://localhost:3001/api/media/file/hero.jpg')).toBe(false);
     expect(origins.isAllowedMediaUrl('https://localhost:3000/api/media/file/hero.jpg')).toBe(false);
-    expect(origins.isAllowedMediaUrl('https://media.hollandtech.com/x.jpg')).toBe(false);
+    expect(origins.isAllowedMediaUrl('https://media.hollandsites.com/x.jpg')).toBe(false);
   });
 
   it('treats an https hub on loopback as remote (only TLS-less dev hubs serve their own media)', () => {
@@ -78,6 +78,6 @@ describe('mediaOrigins', () => {
 
   it('validates PUBLIC_MEDIA_HOST and PAYLOAD_URL through the shared rules', () => {
     expect(() => mediaOrigins({ mediaHost: 'https://media.example.com' })).toThrow(/bare hostname/);
-    expect(() => mediaOrigins({ payloadUrl: 'hub.hollandtech.com' })).toThrow(/absolute origin/);
+    expect(() => mediaOrigins({ payloadUrl: 'hub.hollandsites.com' })).toThrow(/absolute origin/);
   });
 });

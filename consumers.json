@@ -1,0 +1,10 @@
+{
+  "$comment": "The templates this package is tested against and generates from, each pinned to one commit. The consumer smoke workflow checks each out at `ref` and runs its tests and parity against this package; `site-cms new-site --template <name>` clones the same ref. Bump a ref deliberately, in its own commit, after that template's CI is green.",
+  "templates": [
+    {
+      "name": "template-landscaping",
+      "repo": "johncaden124/template-landscaping",
+      "ref": "a95d5cf8820c73e278f6d4c424b7afaa96add481"
+    }
+  ]
+}
