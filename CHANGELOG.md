@@ -7,7 +7,36 @@ bump.
 
 Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
-## Unreleased
+## 0.8.0 — 2026-10-01
+
+The rest of template-landscaping's proposed `types.ts` diff (its TEMPLATE-AUDIT, approved by the
+owner). Everything is optional, so v0.7 content is still valid content.
+
+### Added
+- `TRADE_INFO` (root, `./trades` and `./types`): one `{ noun, schemaType }` per `TRADES` value.
+  - `noun` is how the trade reads in titles ("Landscaping in Westerville").
+  - `schemaType` is the schema.org `LocalBusiness` subtype to publish. Only types that exist in
+    schema.org: trades without a subtype (landscaping, pest control, cleaning, …) are
+    `HomeAndConstructionBusiness`, never an invented `LandscapingBusiness`. A test holds every entry
+    to a known list and requires one entry per trade.
+- `BusinessProfile.priceRange?`: `$ | $$ | $$$ | $$$$`, for LocalBusiness structured data. The
+  mapper refuses any other value by field.
+- `SiteSettings.legal?: LegalText` (`legalName?`, `callRecordingNotice?`, `smsConsent?`): per-client
+  legal wording for the Holland tracking number's call recording and text-back. Attorney text: a
+  template renders each only when set and ships no default.
+- `labels.pages?: PageLabels` (`home`, `services`, `contact`, `privacy`, `terms`) and
+  `labels.form?: FormLabels` (the contact section's chip, heading and intro, and every string the
+  lead form shows), so a niche can reword its interface from the hub.
+- The mappers carry all of the above when a tenant sets them. A label or legal group whose every
+  leaf is `null` (what Payload sends for an untouched group) maps to no key, so v0.7 tenants map
+  exactly as before. A half-filled label group is kept whole, so `validateSiteContent` names the
+  empty labels instead of a template printing blanks.
+- Content files carry `legal` both ways; the label groups travel inside `labels` as they are.
+
+### The hub needs
+- `site.business.priceRange`: select, options `$`, `$$`, `$$$`, `$$$$`.
+- `site.labels.pages` and `site.labels.form`: groups of text fields with the names above.
+- `site.legal`: group of three textareas.
 
 ### Changed
 - `consumers.json` pins template-landscaping to `a067b56`: its bump to v0.7.0 (template-landscaping#7). The smoke test uses the new pin as soon as this merges. `new-site` reads the copy shipped in the package, so it picks up the new pin only from the next tag.

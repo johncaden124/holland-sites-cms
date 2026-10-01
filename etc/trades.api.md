@@ -8,6 +8,15 @@
 export type Trade = (typeof TRADES)[number];
 
 // @public
+export const TRADE_INFO: Readonly<Record<Trade, TradeInfo>>;
+
+// @public
+export interface TradeInfo {
+    noun: string;
+    schemaType: string;
+}
+
+// @public
 export const TRADES: readonly ["hvac", "plumbing", "pest-control", "electrical", "garage-door", "appliance-repair", "restoration", "cleaning", "landscaping", "tree-service", "junk-removal", "roofing", "painting", "fence-deck", "auto-repair", "pool-service", "handyman", "gutters", "pressure-washing", "other"];
 
 // (No @packageDocumentation comment for this package)

@@ -322,3 +322,53 @@ describe('v0.6 optional fields', () => {
     );
   });
 });
+
+describe('v0.8 optional fields', () => {
+  const nullPages = { home: null, services: null, contact: null, privacy: null, terms: null };
+  const pages = { home: 'Home', services: 'Services', contact: 'Contact', privacy: 'Privacy', terms: 'Terms' };
+  const form = {
+    chip: 'Get in touch', heading: 'Tell us', intro: 'Send a few details.', name: 'Name', phone: 'Phone', email: 'Email',
+    service: 'Service', servicePlaceholder: 'Pick one', message: 'Message', submit: 'Send', sending: 'Sending…',
+    required: 'Leave a phone or an email.', success: 'Thanks.', failure: 'Please call us.',
+  };
+
+  it('maps nothing new for a tenant that never set them, including all-null groups', () => {
+    const out = mapSite(
+      siteDoc({
+        labels: { ...baseSiteDoc.labels, pages: nullPages, form: null },
+        legal: { legalName: null, callRecordingNotice: null, smsConsent: null },
+        business: { trade: null, priceRange: null },
+      }),
+    );
+    expect(out).toStrictEqual(mapSite(baseSiteDoc));
+  });
+
+  it('maps page and form labels, legal text and priceRange when set', () => {
+    const { site } = mapSite(
+      siteDoc({
+        labels: { ...baseSiteDoc.labels, pages, form },
+        legal: { legalName: 'Acme Services LLC', callRecordingNotice: null, smsConsent: 'Reply STOP to opt out.' },
+      }),
+    );
+    expect(site.labels.pages).toStrictEqual(pages);
+    expect(site.labels.form).toStrictEqual(form);
+    // Only the leaves a lawyer filled in.
+    expect(site.legal).toStrictEqual({ legalName: 'Acme Services LLC', smsConsent: 'Reply STOP to opt out.' });
+  });
+
+  it('keeps a half-filled label group whole, so the validator names the empty labels', () => {
+    const { site } = mapSite(siteDoc({ labels: { ...baseSiteDoc.labels, pages: { ...nullPages, home: 'Home' } } }));
+    expect(site.labels.pages).toStrictEqual({ ...nullPages, home: 'Home' });
+  });
+
+  it('maps priceRange and refuses one outside the dollar scale', () => {
+    const business = {
+      trade: 'hvac', town: 'Westerville', serviceAreaTowns: [], address: { street: '1 Main St', locality: 'Westerville', region: 'OH', postalCode: '43081', country: 'US' },
+      geo: { lat: 40.1, lng: -82.9 }, openingHours: [], phone: { e164: '+16145550123' }, email: 'a@b.example', siteUrl: 'https://acme.example',
+    };
+    expect(mapSite(siteDoc({ business: { ...business, priceRange: '$$' } })).site.business!.priceRange).toBe('$$');
+    expect(() => mapSite(siteDoc({ business: { ...business, priceRange: 'cheap' } }))).toThrow(
+      'CMS site.business.priceRange: unexpected value "cheap" (allowed: $, $$, $$$, $$$$)',
+    );
+  });
+});
