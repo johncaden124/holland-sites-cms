@@ -8,7 +8,7 @@ did not, and v0.6.0 changes that). The branch is `claude/contract-review-v0.6.0`
 - The contract now covers the whole business, and every addition is optional.
 - There is a generated JSON Schema and a runtime validator that reports every problem at once.
 - API and schema drift fails CI unless the version is bumped by the documented rule.
-- Both templates are smoke-tested against each change.
+- The approved template (template-landscaping) is smoke-tested against each change.
 - The CLI has `import-content` and `new-site` for the generator.
 - 88 → 147 tests.
 - Both existing templates and the hub type-check and pass against v0.6.0 unchanged, and parity
@@ -99,18 +99,22 @@ How it was verified, besides this repo's own suite:
   - 0.5.1 → 0.6.0 passes;
   - 0.5.1 → 0.5.2 fails with "needs a minor bump… (pre-1.0: any contract change is a minor)".
 
-### 2.2 Consumer smoke test: FIXED (needs a secret; see decisions)
+### 2.2 Consumer smoke test: FIXED
 - `.github/workflows/consumer-smoke.yml` does the following for each template in `consumers.json`
-  (landscaping and HVAC, each pinned by SHA because neither repo has tags):
+  (today only template-landscaping, pinned by SHA because the repo has no tags):
   1. checks it out at the pinned ref;
   2. `npm pack`s this commit and installs it over the template's own version;
   3. runs `npm test`, then `npm run parity` against `scripts/mock-hub.mjs`.
 - The mock hub serves the template's own captured fixtures, and its media, on `:3000`, so no hub
   secret is needed.
 - The templates are **private**, so the workflow needs a `CONSUMERS_TOKEN` repository secret: a
-  fine-grained PAT with read-only Contents on both template repos. Until it is set, the job fails
-  with an explicit error saying so. Setup is documented in the README.
-- The exact steps were run locally for both templates, and all passed.
+  fine-grained PAT with read-only Contents on each template repo in `consumers.json`. Without it,
+  the job fails with an explicit error saying so. Setup is documented in the README.
+- **CI evidence:** with the secret set, the `template-landscaping` smoke job passed on this PR
+  (tests and parity).
+- **template-hvac is not a smoke target.** It is not approved and is due for a full rewrite, so
+  it was taken out of `consumers.json` (and the token doesn't cover it). Adding the rewritten
+  template back is one entry in `consumers.json`, plus adding that repo to the token.
 
 ### 2.3 Retry, cache, one-tenant and media-host tests: PASS
 Each already had a test that fails if the behaviour breaks:
@@ -218,7 +222,7 @@ and was run for real against GitHub:
   and their annotations, plus 0.6.0.
 - **4.4 Tag `v0.6.0`: pending merge.** I'll tag the merge commit on `main` once the PR merges,
   so the tag isn't on a branch-only commit. The bump lines:
-  - **template-landscaping** (and template-hvac): `"@hollandtech/site-cms": "github:johncaden124/holland-sites-cms#v0.6.0"`, then `npm install`.
+  - **template-landscaping**: `"@hollandtech/site-cms": "github:johncaden124/holland-sites-cms#v0.6.0"`, then `npm install`.
   - **holland-sites-hub**: `pnpm add github:johncaden124/holland-sites-cms#v0.6.0`.
 
 ---
@@ -295,10 +299,9 @@ The generator's call is:
    `testimonials` collections need `business`, `copy`, `flags`, `priceHint`, `rating`, `date` and
    `source`, plus a migration, before any tenant can set them. The mappers are ready and expect
    Payload's shapes: `{ text }` rows for `serviceAreaTowns`, a `hasMany` select for `dayOfWeek`,
-   and a date field for `date`. That is a hub PR; I didn't open it.
-2. **`CONSUMERS_TOKEN` secret.** Create a fine-grained PAT (read-only Contents on template-landscaping
-   and template-hvac) and add it as a repository secret. Until then the smoke workflow fails with an
-   explicit error.
+   and a date field for `date`. That hub change is open as holland-sites-hub#4.
+2. **`CONSUMERS_TOKEN` secret.** Done: the token covers template-landscaping. When a rewritten
+   template joins `consumers.json`, add its repo to the same token.
 3. **Stricter `createCms` at import.** `local` is now validated, and the schema rejects unknown
    keys. Both templates pass. A future template with an extra key in `src/data` will fail at
    import, naming the key. That is intended, but it is a behaviour change worth knowing about.

@@ -182,9 +182,9 @@ vitest instead of `getViteConfig` + `vi.stubEnv` + `vi.resetModules`.
 
 ```bash
 npx site-cms parity                                         # CMS build vs standalone build, diffed
-npx site-cms export-content --client acme-hvac --validate   # src/data → clients/acme-hvac/{tenant.json,content.json,media/}
-npx site-cms import-content clients/acme-hvac/content.json --media clients/acme-hvac/media
-npx site-cms new-site --from clients/acme-hvac/content.json --template template-hvac --out ../acme-hvac
+npx site-cms export-content --client acme-lawn --validate   # src/data → clients/acme-lawn/{tenant.json,content.json,media/}
+npx site-cms import-content clients/acme-lawn/content.json --media clients/acme-lawn/media
+npx site-cms new-site --from clients/acme-lawn/content.json --template template-landscaping --out ../acme-lawn
 npx site-cms capture-fixtures --out src/lib/__fixtures__
 ```
 
