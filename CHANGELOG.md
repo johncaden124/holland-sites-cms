@@ -7,6 +7,11 @@ bump.
 
 Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
+## Unreleased
+
+### Changed
+- `consumers.json` pins template-landscaping to `a067b56`: its bump to v0.7.0 (template-landscaping#7). The smoke test uses the new pin as soon as this merges. `new-site` reads the copy shipped in the package, so it picks up the new pin only from the next tag.
+
 ## 0.7.0 — 2026-10-01
 
 ### Added
