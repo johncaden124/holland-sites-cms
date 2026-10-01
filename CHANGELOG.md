@@ -23,7 +23,7 @@ Entries before 0.6.0 were backfilled from the git tags and their annotations.
 - `check-version-bump` ignores documentation. It compares `etc/` and `schema/` with comment lines
   and `description`s stripped, so a doc-only change needs no version bump. Regenerating and
   committing those files is still enforced by `api:check` / `check:schema`.
-- `consumers.json` pins template-landscaping to `0830f4b`, the template's bump to v0.6.0.
+- `consumers.json` pins template-landscaping to its commit with footer icons for the four new networks (template-landscaping#6), on top of its bump to v0.6.0.
 
 ## 0.6.0 — 2026-09-30
 
