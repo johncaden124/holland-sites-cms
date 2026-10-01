@@ -6,11 +6,13 @@
  *   node scripts/check-version-bump.mjs [--base <git-ref>]
  *
  * The contract is what `etc/*.api.md` (every exported type and signature) and
- * `schema/site-content.schema.json` (the content model) say. Compared with the base ref — on a pull
- * request `origin/$GITHUB_BASE_REF`, otherwise `--base` — the rule is:
+ * `schema/site-content.schema.json` (the content model) say, compared with the base ref — on a pull
+ * request `origin/$GITHUB_BASE_REF`, otherwise `--base`. Documentation inside those files (doc
+ * comments in the reports, `description`s in the schema) is not contract: a doc-only change needs no
+ * bump (`contract.mjs` says exactly what is ignored). For everything else the rule is:
  *
- * - **Before 1.0** (`0.y.z`): any change to either needs at least a **minor** bump (`0.6.0 → 0.7.0`).
- *   A patch bump is refused, because consumers pin `#v0.y.z` tags and a `0.y` line is the only
+ * - **Before 1.0** (`0.y.z`): any change needs at least a **minor** bump (`0.6.0 → 0.7.0`). A patch
+ *   bump is refused, because consumers pin `#v0.y.z` tags and a `0.y` line is the only
  *   compatibility promise there is.
  * - **From 1.0**: a change that only adds lines needs a minor bump; one that removes or alters any
  *   line (a removed field, a narrowed union, a changed signature) needs a **major** bump.
@@ -22,6 +24,7 @@ import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { compareContract } from './contract.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const CONTRACT = ['etc', 'schema']
@@ -43,16 +46,36 @@ const parse = (v) => {
   return { major: Number(m[1]), minor: Number(m[2]), patch: Number(m[3]) }
 }
 
+/** The contract files at `ref`, path → text. */
+const atRef = (/** @type {string} */ ref) =>
+  Object.fromEntries(
+    git('ls-tree', '-r', '--name-only', ref, '--', ...CONTRACT)
+      .split('\n')
+      .filter(Boolean)
+      .map((path) => [path, git('show', `${ref}:${path}`)]),
+  )
+/** The contract files in the working tree, path → text. */
+const inTree = () =>
+  Object.fromEntries(
+    git('ls-files', '--cached', '--others', '--exclude-standard', '--', ...CONTRACT)
+      .split('\n')
+      .filter(Boolean)
+      .map((path) => [path, readFileSync(resolve(ROOT, path), 'utf8')]),
+  )
+
 const headVersion = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')).version
 const baseVersion = JSON.parse(git('show', `${base}:package.json`)).version
-const diff = git('diff', '--unified=0', base, '--', ...CONTRACT)
+const { changed, docOnly, removesOrAlters } = compareContract(atRef(base), inTree())
 
-if (!diff.trim()) {
-  console.log(`check-version-bump: the contract is unchanged since ${base} — any version is fine (${headVersion})`)
+if (!changed.length) {
+  console.log(
+    docOnly.length
+      ? `check-version-bump: documentation-only change since ${base} (${docOnly.join(', ')}) — no bump needed (${headVersion})`
+      : `check-version-bump: the contract is unchanged since ${base} — any version is fine (${headVersion})`,
+  )
   process.exit(0)
 }
 
-const removesOrAlters = diff.split('\n').some((line) => line.startsWith('-') && !line.startsWith('---'))
 const from = parse(baseVersion)
 const to = parse(headVersion)
 const bumped = {
@@ -63,7 +86,6 @@ const bumped = {
 /** @type {'minor' | 'major'} */
 const needed = from.major === 0 ? 'minor' : removesOrAlters ? 'major' : 'minor'
 const ok = needed === 'major' ? bumped.major : bumped.major || bumped.minor
-const changed = [...new Set(diff.split('\n').filter((l) => l.startsWith('diff --git')).map((l) => l.split(' b/')[1]))]
 
 if (!ok) {
   console.error(
