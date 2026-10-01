@@ -449,8 +449,13 @@
             "x",
             "linkedin",
             "facebook",
-            "instagram"
-          ]
+            "instagram",
+            "yelp",
+            "nextdoor",
+            "youtube",
+            "tiktok"
+          ],
+          "description": "Which network; a template picks the glyph and the accessible name by it. There is deliberately no `google`: the Google Business Profile link is `business.gbp.url`, and a template that shows a Google icon renders it from there rather than from a second copy of the same URL."
         },
         "href": {
           "type": "string"

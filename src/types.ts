@@ -28,7 +28,12 @@ export interface NavLink {
 }
 
 export interface Social {
-  label: 'x' | 'linkedin' | 'facebook' | 'instagram';
+  /**
+   * Which network; a template picks the glyph and the accessible name by it. There is deliberately
+   * no `google`: the Google Business Profile link is `business.gbp.url`, and a template that shows
+   * a Google icon renders it from there rather than from a second copy of the same URL.
+   */
+  label: 'x' | 'linkedin' | 'facebook' | 'instagram' | 'yelp' | 'nextdoor' | 'youtube' | 'tiktok';
   href: string;
 }
 

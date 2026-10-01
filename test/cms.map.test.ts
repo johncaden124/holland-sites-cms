@@ -144,8 +144,13 @@ describe('mapSite', () => {
   it('names the document and the allowed values for an unknown select', () => {
     const socials = (baseSiteDoc.socials ?? []).map((s, i) => (i === 1 ? { ...s, label: 'myspace' } : s));
     expect(() => mapSite(siteDoc({ socials }))).toThrow(
-      'CMS site.socials[1].label: unexpected value "myspace" (allowed: x, linkedin, facebook, instagram)',
+      'CMS site.socials[1].label: unexpected value "myspace" (allowed: x, linkedin, facebook, instagram, yelp, nextdoor, youtube, tiktok)',
     );
+  });
+
+  it('maps the v0.7 social networks', () => {
+    const socials = ['yelp', 'nextdoor', 'youtube', 'tiktok'].map((label) => ({ label, href: `https://${label}.example/acme` }));
+    expect(mapSite(siteDoc({ socials })).site.socials).toStrictEqual(socials);
   });
 
   it('keeps the CTA strip in hub order, with remote images', () => {

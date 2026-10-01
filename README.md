@@ -30,8 +30,8 @@ be in every client build.
 Until the `@hollandtech` npm scope exists, templates depend on this repo from git:
 
 ```bash
-npm i github:johncaden124/holland-sites-cms#v0.6.0      # a template (npm)
-pnpm add github:johncaden124/holland-sites-cms#v0.6.0   # the hub (pnpm)
+npm i github:johncaden124/holland-sites-cms#v0.7.0      # a template (npm)
+pnpm add github:johncaden124/holland-sites-cms#v0.7.0   # the hub (pnpm)
 ```
 
 npm clones the repo, installs its devDependencies and runs `prepare`, which is `npm run build` —
@@ -43,7 +43,7 @@ one-line change to the dependency spec in each template; nothing else moves.
 1. Read the version's entry in `CHANGELOG.md`. Before 1.0 a minor bump can change types, so check
    what it says.
 2. Change the tag in the consumer's `package.json`
-   (`"@hollandtech/site-cms": "github:johncaden124/holland-sites-cms#v0.6.0"`), then `npm install`
+   (`"@hollandtech/site-cms": "github:johncaden124/holland-sites-cms#v0.7.0"`), then `npm install`
    (a template) or `pnpm install` (the hub).
 3. In a template, run `npm run check`, `npm test`, and `npm run parity` against the demo tenant (see
    [The CLI](#the-cli) for its environment). In the hub, run `pnpm typecheck` and `pnpm test`.

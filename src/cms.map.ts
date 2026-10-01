@@ -231,7 +231,16 @@ function oneOf<T extends string | number>(field: string, value: unknown, allowed
  */
 const keys = <U extends string>(r: Record<U, true>): U[] => Object.keys(r) as U[];
 
-const SOCIALS = keys<Social['label']>({ x: true, linkedin: true, facebook: true, instagram: true });
+const SOCIALS = keys<Social['label']>({
+  x: true,
+  linkedin: true,
+  facebook: true,
+  instagram: true,
+  yelp: true,
+  nextdoor: true,
+  youtube: true,
+  tiktok: true,
+});
 /**
  * The shared vocabulary itself, not a copy: `Service['icon']` is derived from `SERVICE_ICONS`, so
  * the allowed list can never drift from the type. A value here may still have no artwork in a given
