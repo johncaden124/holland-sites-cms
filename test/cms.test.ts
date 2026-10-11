@@ -304,7 +304,58 @@ describe('cms', () => {
     const cms = createCms(hub('http://localhost:3000'));
     const first = await cms.getSite();
     expect(await cms.getSite()).toBe(first);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // One request each for `site` and (v0.8) `offers`, however many calls.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  describe('offers (v0.8, optional)', () => {
+    const OFFERS = 'http://localhost:3000/api/offers?depth=1&limit=100&sort=order';
+    const offersDoc = {
+      id: 1,
+      tenant: hubSite.docs[0]!.tenant,
+      pricing: {
+        intro: { chip: 'Pricing', heading: 'Plans', copy: 'Two ways.' },
+        plans: [{ id: 'p1', name: 'Tune-Up', price: 89, cadence: 'visit', blurb: null, features: [], cta: { label: 'Book', href: '#quote' }, recommended: false }],
+      },
+      promos: [{ id: 'r1', text: 'Check-up $89' }],
+    };
+    /** `site` from the fixture; `offers` answered by `respond`. */
+    const routed = (respond: () => Response) =>
+      vi.fn(async (url: string | URL) => (String(url) === OFFERS ? respond() : json(hubSite)));
+
+    it('merges the offers document onto site', async () => {
+      vi.stubGlobal('fetch', routed(() => json({ docs: [offersDoc], hasNextPage: false })));
+      const { site } = await createCms(hub('http://localhost:3000')).getSite();
+      expect(site.pricing?.plans.map((p) => p.name)).toStrictEqual(['Tune-Up']);
+      expect(site.promos).toStrictEqual(['Check-up $89']);
+    });
+
+    it('maps a tenant with no offers document, or a hub without the collection, exactly as v0.7', async () => {
+      const v07 = async (respond: () => Response) => {
+        vi.stubGlobal('fetch', routed(respond));
+        return createCms(hub('http://localhost:3000')).getSite();
+      };
+      const none = await v07(() => json({ docs: [], hasNextPage: false }));
+      expect(Object.keys(none.site)).not.toContain('pricing');
+      expect(Object.keys(none.site)).not.toContain('promos');
+      expect(await v07(() => json({ errors: [{ message: 'Not Found' }] }, 404))).toStrictEqual(none);
+    });
+
+    it('refuses more than one offers document, naming the key', async () => {
+      vi.stubGlobal('fetch', routed(() => json({ docs: [offersDoc, { ...offersDoc, id: 2 }], hasNextPage: false })));
+      await expect(createCms(hub('http://localhost:3000')).getSite()).rejects.toThrow(
+        'CMS offers: expected at most 1 document for this tenant, got 2 — is PAYLOAD_API_KEY a build-bot key scoped to one tenant?',
+      );
+    });
+
+    it('still fails on a server error for offers, rather than reading it as empty', async () => {
+      vi.useFakeTimers();
+      vi.stubGlobal('fetch', routed(() => json({}, 500, 'Internal Server Error')));
+      const result = createCms(hub('http://localhost:3000')).getSite();
+      const assertion = expect(result).rejects.toThrow(`CMS offers: HTTP 500 Internal Server Error from ${OFFERS}`);
+      await vi.advanceTimersByTimeAsync(1_000);
+      await assertion;
+    });
   });
 
   it('recovers when only the first attempt is refused', async () => {

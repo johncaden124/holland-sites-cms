@@ -324,7 +324,7 @@ describe('v0.6 optional fields', () => {
 });
 
 describe('v0.8 optional fields', () => {
-  /** The pricing group as Payload would serve it: rows for lists, `null` for every unset leaf. */
+  /** The `offers` pricing group as Payload would serve it: rows for lists, `null` for every unset leaf. */
   const hubPricing = {
     intro: { chip: 'Pricing', heading: 'Proactive care, predictable costs', copy: 'Two ways to keep it running.' },
     plans: [
@@ -351,21 +351,18 @@ describe('v0.8 optional fields', () => {
     ],
   };
 
-  it('maps nothing new for a v0.7 tenant, including an untouched pricing group and empty promos', () => {
-    const out = mapSite(
-      siteDoc({
-        pricing: { intro: { chip: null, heading: null, copy: null }, plans: [] },
-        promos: [],
-        business: null,
-      }),
-    );
+  it('maps nothing new for a v0.7 tenant, including an untouched offers document', () => {
+    const out = mapSite(siteDoc({ business: null }), {
+      pricing: { intro: { chip: null, heading: null, copy: null }, plans: [] },
+      promos: [],
+    });
     expect(out).toStrictEqual(mapSite(baseSiteDoc));
     expect(Object.keys(out.site)).not.toContain('pricing');
     expect(Object.keys(out.site)).not.toContain('promos');
   });
 
   it('maps pricing plans in order, dropping row ids, an unset blurb and a false recommended', () => {
-    const { site } = mapSite(siteDoc({ pricing: hubPricing, promos: [{ id: 'r1', text: 'Furnace check-up $89' }] }));
+    const { site } = mapSite(baseSiteDoc, { pricing: hubPricing, promos: [{ id: 'r1', text: 'Furnace check-up $89' }] });
     expect(site.pricing).toStrictEqual({
       intro: hubPricing.intro,
       plans: [
@@ -392,8 +389,8 @@ describe('v0.8 optional fields', () => {
 
   it('refuses a cadence outside the vocabulary, naming the plan', () => {
     const plans = [{ ...hubPricing.plans[0]!, cadence: 'weekly' }];
-    expect(() => mapSite(siteDoc({ pricing: { ...hubPricing, plans } }))).toThrow(
-      'CMS site.pricing.plans[0] "Standard Tune-Up".cadence: unexpected value "weekly" (allowed: visit, month, year, one-time)',
+    expect(() => mapSite(baseSiteDoc, { pricing: { ...hubPricing, plans } })).toThrow(
+      'CMS offers.pricing.plans[0] "Standard Tune-Up".cadence: unexpected value "weekly" (allowed: visit, month, year, one-time)',
     );
   });
 

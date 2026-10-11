@@ -44,11 +44,14 @@ describe('toContentFile / fromContentFile', () => {
 
   it('carry the v0.8 pricing, promos, project and service fields through', () => {
     const file = fixture();
-    file.site.pricing = {
-      intro: { chip: 'Pricing', heading: 'Plans', copy: 'Two ways.' },
-      plans: [{ name: 'Tune-Up', price: 89, cadence: 'visit', features: [{ text: 'Diagnostic' }], cta: { label: 'Book', href: '#quote' } }],
+    // Prices and promos travel in the hub's `offers` document, not on `site`.
+    file.offers = {
+      pricing: {
+        intro: { chip: 'Pricing', heading: 'Plans', copy: 'Two ways.' },
+        plans: [{ name: 'Tune-Up', price: 89, cadence: 'visit', features: [{ text: 'Diagnostic' }], cta: { label: 'Book', href: '#quote' } }],
+      },
+      promos: [{ text: 'Spring aeration $59' }],
     };
-    file.site.promos = [{ text: 'Spring aeration $59' }];
     Object.assign(file.services[0]!, { slug: 'lawn-care', answer: 'A direct answer.' });
     Object.assign(file.projects[0]!, {
       title: 'Backyard rebuild',
@@ -67,6 +70,10 @@ describe('toContentFile / fromContentFile', () => {
     });
     expect(JSON.stringify(toContentFile(data))).toBe(JSON.stringify(file));
     expect(contentFileMedia(file).images).toContain('before-1.jpg');
+    expect(contentFileProblems(file)).toStrictEqual([]);
+    // A site with neither gets no `offers` key at all.
+    expect('offers' in toContentFile(fromContentFile(fixture()))).toBe(false);
+    expect(contentFileProblems({ ...fixture(), offers: [] })).toStrictEqual(['"offers" must be an object']);
   });
 
   it('turns images into basename refs and the hero video into a public/ path', () => {

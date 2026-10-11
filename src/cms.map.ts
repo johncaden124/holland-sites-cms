@@ -78,8 +78,9 @@ export interface HubBusinessGroup {
   priceRange?: OptionalText;
 }
 /**
- * The v0.8 `pricing` group on `site`. An untouched group arrives as an all-`null` intro and an empty
- * `plans` array, so the section is present only when at least one plan exists.
+ * The v0.8 `pricing` group on the tenant's `offers` document. An untouched group arrives as an
+ * all-`null` intro and an empty `plans` array, so the section is present only when at least one plan
+ * exists.
  */
 export interface HubPricingGroup {
   intro?: { chip?: OptionalText; heading?: OptionalText; copy?: OptionalText } | null;
@@ -149,6 +150,14 @@ export interface HubSiteDoc {
   business?: HubBusinessGroup | null;
   copy?: HubCopyGroup | null;
   flags?: HubFlagsGroup | null;
+}
+/**
+ * The tenant's `offers` document (v0.8): published prices and promo lines. A second per-tenant
+ * document rather than more fields on `site`, because D1 refuses a query returning more than 100
+ * columns and Payload reads `site` — 95 columns before v0.8 — in one query. Optional: a tenant may
+ * have none, and `mapSite` then maps exactly what a v0.7 tenant gets.
+ */
+export interface HubOffersDoc {
   pricing?: HubPricingGroup | null;
   promos?: TextRows;
 }
@@ -359,7 +368,7 @@ function mapPricing(p: HubPricingGroup | null | undefined): { pricing?: PricingS
     plans: plans.map((plan, i) => ({
       name: plan.name,
       price: plan.price,
-      cadence: oneOf(`${at('site.pricing.plans', i, plan.name)}.cadence`, plan.cadence, CADENCES),
+      cadence: oneOf(`${at('offers.pricing.plans', i, plan.name)}.cadence`, plan.cadence, CADENCES),
       ...opt('blurb', plan.blurb),
       features: texts(plan.features),
       cta: { label: plan.cta?.label, href: plan.cta?.href },
@@ -402,7 +411,11 @@ function mapFlags(f: HubFlagsGroup | null | undefined): { flags?: SiteFlags } {
 
 // ---- mappers ------------------------------------------------------------------------------
 
-export function mapSite(doc: HubSiteDoc): SiteContent {
+/**
+ * `site` plus, from v0.8, the tenant's optional `offers` document, whose fields land on `site`: the
+ * content model has one `SiteSettings`, however the hub splits its storage.
+ */
+export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteContent {
   // Every group is read through `group()` so a hub-side rename fails by name instead of as a
   // `Cannot read properties of undefined` from somewhere inside this object literal.
   const footer = group('site.footer', doc.footer);
@@ -453,8 +466,8 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
       ...mapBusiness(doc.business),
       ...mapCopy(doc.copy),
       ...mapFlags(doc.flags),
-      ...mapPricing(doc.pricing),
-      ...mapPromos(doc.promos),
+      ...mapPricing(offers?.pricing),
+      ...mapPromos(offers?.promos),
     },
     hero: {
       // Optional: an unset upload is `null`/absent, and the key is then omitted entirely so a

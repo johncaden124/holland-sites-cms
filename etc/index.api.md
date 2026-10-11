@@ -78,7 +78,7 @@ export interface CmsOptions {
 }
 
 // @public
-export const COLLECTIONS: readonly ["site", "services", "projects", "testimonials", "process-steps", "stats", "faqs"];
+export const COLLECTIONS: readonly ["site", "offers", "services", "projects", "testimonials", "process-steps", "stats", "faqs"];
 
 // @public
 export const collectionUrl: (base: string, collection: string) => string;
@@ -242,6 +242,37 @@ export interface HubMedia {
     width: number | null;
 }
 
+// @public
+export interface HubOffersDoc {
+    // (undocumented)
+    pricing?: HubPricingGroup | null;
+    // (undocumented)
+    promos?: TextRows;
+}
+
+// @public
+export interface HubPricingGroup {
+    // (undocumented)
+    intro?: {
+        chip?: OptionalText;
+        heading?: OptionalText;
+        copy?: OptionalText;
+    } | null;
+    // (undocumented)
+    plans?: Row<{
+        name: string;
+        price: number;
+        cadence: Select;
+        blurb?: OptionalText;
+        features?: TextRows;
+        cta?: {
+            label?: OptionalText;
+            href?: OptionalText;
+        } | null;
+        recommended?: boolean | null;
+    }>[] | null;
+}
+
 // @public (undocumented)
 export type HubProcessStepDoc = ProcessStep;
 
@@ -350,11 +381,7 @@ export interface HubSiteDoc {
     // (undocumented)
     navCta: NavLink;
     // (undocumented)
-    pricing?: HubPricingGroup | null;
-    // (undocumented)
     processIntro: Intro;
-    // (undocumented)
-    promos?: TextRows;
     // (undocumented)
     review: SiteSettings['review'];
     // (undocumented)
@@ -463,8 +490,8 @@ export const mapProjects: (docs: HubProjectDoc[]) => GalleryImage[];
 // @public (undocumented)
 export const mapServices: (docs: HubServiceDoc[]) => Service[];
 
-// @public (undocumented)
-export function mapSite(doc: HubSiteDoc): SiteContent;
+// @public
+export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteContent;
 
 // @public (undocumented)
 export const mapStats: (docs: HubStatDoc[]) => Stat[];
@@ -515,6 +542,9 @@ export interface OpeningHours {
     dayOfWeek: DayOfWeek[];
     opens: string;
 }
+
+// @public
+export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][];
 
 // @public
 export function parseMediaHost(value: string | undefined): string;

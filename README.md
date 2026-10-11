@@ -104,9 +104,14 @@ render a field ignores it:
 
 - **`site.pricing`** is `{ intro, plans[] }`. Each plan has `name`, `price` (a number, so it can
   become a schema.org `Offer`), `cadence` (`visit | month | year | one-time`), an optional
-  `blurb`, `features[]`, a `cta` link and `recommended`. Plans live on `site`, not in a
-  collection: a site publishes a handful at most, and many publish none.
+  `blurb`, `features[]`, a `cta` link and `recommended`.
 - **`site.promos`** holds short lines for a ticker or banner.
+- Both are `site` fields in the content model, but **the hub stores them on a separate per-tenant
+  `offers` document**. Cloudflare D1 refuses a query returning more than 100 columns, and Payload
+  reads `site` in one query, which was at 95 columns. `getSite()` fetches both and merges them.
+  `offers` is the one optional collection (`OPTIONAL_COLLECTIONS`): zero documents, or a 404 from
+  a hub that predates it, maps to no pricing and no promos. In a content file it is an optional
+  top-level `offers` object.
 - **`business.foundingYear`** (for `foundingDate`) and **`business.priceRange`** (`$`–`$$$$`).
 - **`Service.slug`** (a stable URL segment for a service page) and **`Service.answer`** (the 40–60
   word direct answer the page opens with).

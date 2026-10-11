@@ -24,6 +24,8 @@ import type {
   HeroMedia,
   Intro,
   LocalContent,
+  PricingPlan,
+  PricingSection,
   ProcessStep,
   Service,
   ShortIntro,
@@ -112,10 +114,20 @@ export interface ContentFile {
   processSteps: ProcessStep[];
   stats: Stat[];
   faqs: Faq[];
+  /**
+   * The hub's per-tenant `offers` document (v0.8), present only when the site has prices or promos.
+   * In the data modules both live on `site`; the hub stores them apart (see `HubOffersDoc`).
+   */
+  offers?: {
+    pricing?: Omit<PricingSection, 'plans'> & { plans: (Omit<PricingPlan, 'features'> & { features: TextRow[] })[] };
+    promos?: TextRow[];
+  };
 }
 
 /** The content file's top-level keys: the hub's collection slugs, camelCased (`processSteps`). */
 export const CONTENT_FILE_KEYS = ['site', 'services', 'projects', 'testimonials', 'processSteps', 'stats', 'faqs'] as const;
+/** Keys a content file may omit (v0.8): one-per-tenant documents for optional sections. */
+export const OPTIONAL_CONTENT_FILE_KEYS = ['offers'] as const;
 const LISTS = CONTENT_FILE_KEYS.filter((k) => k !== 'site');
 
 /** `/hero.mp4`, `hero.mp4` or `/videos/hero.mp4` → `hero.mp4`. */
@@ -177,11 +189,6 @@ export function toContentFile(data: DataModules): ContentFile {
       ...(s.business ? { business: { ...s.business, serviceAreaTowns: texts(s.business.serviceAreaTowns) } } : {}),
       ...(s.copy ? { copy: s.copy } : {}),
       ...(s.flags ? { flags: s.flags } : {}),
-      // v0.8. String lists travel as `{ text }` rows here too.
-      ...(s.pricing
-        ? { pricing: { ...s.pricing, plans: s.pricing.plans.map((p) => ({ ...p, features: texts(p.features) })) } }
-        : {}),
-      ...(s.promos?.length ? { promos: texts(s.promos) } : {}),
     },
     services: data.services.services.map((x) => ({ ...x, image: img(x.image), bullets: texts(x.bullets) })),
     // Rebuilt key by key, like testimonials, so the v0.8 optionals keep the source's key order and an
@@ -210,6 +217,18 @@ export function toContentFile(data: DataModules): ContentFile {
     processSteps: data.process.processSteps,
     stats: data.stats.stats,
     faqs: data.faqs.faqs,
+    // v0.8: prices and promos go to the hub's `offers` document, and only when the site has either.
+    // String lists travel as `{ text }` rows here too.
+    ...(s.pricing || s.promos?.length
+      ? {
+          offers: {
+            ...(s.pricing
+              ? { pricing: { ...s.pricing, plans: s.pricing.plans.map((p) => ({ ...p, features: texts(p.features) })) } }
+              : {}),
+            ...(s.promos?.length ? { promos: texts(s.promos) } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -244,15 +263,10 @@ export function fromContentFile(file: ContentFile): DataModules {
       : {}),
     ...(s.copy ? { copy: s.copy } : {}),
     ...(s.flags ? { flags: s.flags } : {}),
-    ...(s.pricing
-      ? {
-          pricing: {
-            ...s.pricing,
-            plans: s.pricing.plans.map((p) => ({ ...p, features: untexts(p.features as unknown as TextRow[]) })),
-          },
-        }
+    ...(file.offers?.pricing
+      ? { pricing: { ...file.offers.pricing, plans: file.offers.pricing.plans.map((p) => ({ ...p, features: untexts(p.features) })) } }
       : {}),
-    ...(s.promos ? { promos: untexts(s.promos as unknown as TextRow[]) } : {}),
+    ...(file.offers?.promos?.length ? { promos: untexts(file.offers.promos) } : {}),
   };
   const f = file.site as Record<string, unknown> as {
     aboutHeading: string;
@@ -354,7 +368,8 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 
 /**
  * The structural rules the hub's `seed:tenant` applies to a content file (`src/seed/client.ts`
- * there), so a file that passes here is one the seed accepts: exactly the seven top-level keys,
+ * there), so a file that passes here is one the seed accepts: exactly the seven top-level keys (plus
+ * an optional `offers` object, v0.8),
  * `site` an object, every list a non-empty array of objects (a client build fails on an empty
  * collection), and no list item carrying `order`. Field-level rules are `validateSiteContent`'s job.
  */
@@ -362,10 +377,12 @@ export function contentFileProblems(raw: unknown): string[] {
   if (!isObject(raw)) return ['the content file must be a JSON object'];
   const problems: string[] = [];
   for (const key of CONTENT_FILE_KEYS) if (raw[key] === undefined) problems.push(`missing "${key}"`);
+  const known: readonly string[] = [...CONTENT_FILE_KEYS, ...OPTIONAL_CONTENT_FILE_KEYS];
   for (const key of Object.keys(raw)) {
-    if (!(CONTENT_FILE_KEYS as readonly string[]).includes(key)) problems.push(`unknown key "${key}" — the hub has no such collection`);
+    if (!known.includes(key)) problems.push(`unknown key "${key}" — the hub has no such collection`);
   }
   if (raw.site !== undefined && !isObject(raw.site)) problems.push('"site" must be an object');
+  if (raw.offers !== undefined && !isObject(raw.offers)) problems.push('"offers" must be an object');
   for (const key of LISTS) {
     const value = raw[key];
     if (value === undefined) continue;
