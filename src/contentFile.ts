@@ -76,7 +76,7 @@ export interface DataModules {
   gallery: {
     workIntro: Intro;
     featuredProject: SiteContent['featuredProject'];
-    gallery: (Omit<GalleryImage, 'image'> & { image: ImageRef })[];
+    gallery: (Omit<GalleryImage, 'image' | 'beforeImage'> & { image: ImageRef; beforeImage?: ImageRef })[];
     ctaStrip: { image: ImageRef; alt: string }[];
   };
   testimonials: {
@@ -103,7 +103,11 @@ export interface ContentFile {
     ctaStrip: { image: string; alt: string }[];
   };
   services: (Omit<Service, 'image' | 'bullets'> & { image: string; bullets: TextRow[] })[];
-  projects: (Omit<GalleryImage, 'image'> & { image: string })[];
+  projects: (Omit<GalleryImage, 'image' | 'beforeImage' | 'servicesProvided'> & {
+    image: string;
+    beforeImage?: string;
+    servicesProvided?: TextRow[];
+  })[];
   testimonials: (Omit<Testimonial, 'image' | 'beforeImage'> & { image?: string; beforeImage?: string })[];
   processSteps: ProcessStep[];
   stats: Stat[];
@@ -173,9 +177,25 @@ export function toContentFile(data: DataModules): ContentFile {
       ...(s.business ? { business: { ...s.business, serviceAreaTowns: texts(s.business.serviceAreaTowns) } } : {}),
       ...(s.copy ? { copy: s.copy } : {}),
       ...(s.flags ? { flags: s.flags } : {}),
+      // v0.8. String lists travel as `{ text }` rows here too.
+      ...(s.pricing
+        ? { pricing: { ...s.pricing, plans: s.pricing.plans.map((p) => ({ ...p, features: texts(p.features) })) } }
+        : {}),
+      ...(s.promos?.length ? { promos: texts(s.promos) } : {}),
     },
     services: data.services.services.map((x) => ({ ...x, image: img(x.image), bullets: texts(x.bullets) })),
-    projects: data.gallery.gallery.map((g) => ({ image: img(g.image), alt: g.alt, emphasis: g.emphasis })),
+    // Rebuilt key by key, like testimonials, so the v0.8 optionals keep the source's key order and an
+    // absent one stays absent.
+    projects: data.gallery.gallery.map((g) => {
+      const doc: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(g)) {
+        if (value === undefined) continue;
+        if (key === 'image' || key === 'beforeImage') doc[key] = img(value as ImageRef);
+        else if (key === 'servicesProvided') doc[key] = texts(value as string[]);
+        else doc[key] = value;
+      }
+      return doc as ContentFile['projects'][number];
+    }),
     // `image` / `beforeImage` are optional: a niche with no before/after photography omits them, and
     // an omitted key must not survive as an ImageMetadata stub.
     // Rebuilt key by key so the JSON keeps the source's key order.
@@ -224,6 +244,15 @@ export function fromContentFile(file: ContentFile): DataModules {
       : {}),
     ...(s.copy ? { copy: s.copy } : {}),
     ...(s.flags ? { flags: s.flags } : {}),
+    ...(s.pricing
+      ? {
+          pricing: {
+            ...s.pricing,
+            plans: s.pricing.plans.map((p) => ({ ...p, features: untexts(p.features as unknown as TextRow[]) })),
+          },
+        }
+      : {}),
+    ...(s.promos ? { promos: untexts(s.promos as unknown as TextRow[]) } : {}),
   };
   const f = file.site as Record<string, unknown> as {
     aboutHeading: string;
@@ -260,7 +289,16 @@ export function fromContentFile(file: ContentFile): DataModules {
     gallery: {
       workIntro: f.workIntro,
       featuredProject: f.featuredProject,
-      gallery: file.projects.map((g) => ({ image: ref(g.image), alt: g.alt, emphasis: g.emphasis })),
+      gallery: file.projects.map((g) => {
+        const doc: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(g)) {
+          if (value === undefined) continue;
+          if (key === 'image' || key === 'beforeImage') doc[key] = ref(value as string);
+          else if (key === 'servicesProvided') doc[key] = untexts(value as TextRow[]);
+          else doc[key] = value;
+        }
+        return doc as DataModules['gallery']['gallery'][number];
+      }),
       ctaStrip: s.ctaStrip.map((c) => ({ image: ref(c.image), alt: c.alt })),
     },
     testimonials: {
@@ -346,7 +384,10 @@ export function contentFileMedia(file: ContentFile): { images: string[]; videos:
   s.avatars.forEach((a) => images.add(a.image));
   s.ctaStrip.forEach((c) => images.add(c.image));
   file.services.forEach((x) => images.add(x.image));
-  file.projects.forEach((g) => images.add(g.image));
+  file.projects.forEach((g) => {
+    images.add(g.image);
+    if (g.beforeImage) images.add(g.beforeImage);
+  });
   file.testimonials.forEach((t) => {
     if (t.image) images.add(t.image);
     if (t.beforeImage) images.add(t.beforeImage);

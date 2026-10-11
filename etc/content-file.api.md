@@ -30,8 +30,10 @@ export interface ContentFile {
     // (undocumented)
     processSteps: ProcessStep[];
     // (undocumented)
-    projects: (Omit<GalleryImage, 'image'> & {
+    projects: (Omit<GalleryImage, 'image' | 'beforeImage' | 'servicesProvided'> & {
         image: string;
+        beforeImage?: string;
+        servicesProvided?: TextRow[];
     })[];
     // (undocumented)
     services: (Omit<Service, 'image' | 'bullets'> & {
@@ -97,8 +99,9 @@ export interface DataModules {
     gallery: {
         workIntro: Intro;
         featuredProject: SiteContent['featuredProject'];
-        gallery: (Omit<GalleryImage, 'image'> & {
+        gallery: (Omit<GalleryImage, 'image' | 'beforeImage'> & {
             image: ImageRef;
+            beforeImage?: ImageRef;
         })[];
         ctaStrip: {
             image: ImageRef;

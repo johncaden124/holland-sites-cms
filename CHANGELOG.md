@@ -9,6 +9,21 @@ Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
 ## Unreleased
 
+## 0.8.0 — 2026-10-11
+
+### Added: content model (all optional, so v0.7 content is still valid)
+- `SiteSettings.pricing?: PricingSection`, which is `{ intro: Intro; plans: PricingPlan[] }` (at least one plan).
+  - A `PricingPlan` has `name`, `price` (a number ≥ 0), `cadence` (`PricingCadence`: `visit | month | year | one-time`), optional `blurb`, `features[]`, `cta` (`NavLink`) and optional `recommended`.
+  - The mapper keeps the section only when the tenant has at least one plan, so the all-`null` group Payload sends for an untouched tenant maps to nothing. `recommended: false` maps to no key.
+  - Plans are a group on `site`, not a new collection. A site publishes a handful of prices at most, and many publish none, which a collection could not express: the fetch layer refuses an empty collection.
+- `SiteSettings.promos?: string[]`: ticker or banner lines. Empty maps to no key.
+- `BusinessProfile.foundingYear?` (1800–2100) and `BusinessProfile.priceRange?` (`$`–`$$$$`), for schema.org `foundingDate` / `priceRange`.
+- `Service.slug?` (lowercase, hyphenated) and `Service.answer?` (the direct answer a service page opens with).
+- `GalleryImage.title?`, `summary?`, `servicesProvided?: string[]` and `beforeImage?: Photo`. A project that sets none of them maps to exactly its v0.7 three fields.
+- `Testimonial.role?`.
+- `PricingCadence`, `PricingPlan` and `PricingSection` are exported from the root and from `./types`.
+- In a content file, `pricing.plans[].features`, `promos` and `projects[].servicesProvided` travel as `{ text }` rows, like `bullets`. A project's `beforeImage` is a media basename, and `contentFileMedia` lists it.
+
 ### Changed
 - `consumers.json` pins template-landscaping to `a067b56`: its bump to v0.7.0 (template-landscaping#7). The smoke test uses the new pin as soon as this merges. `new-site` reads the copy shipped in the package, so it picks up the new pin only from the next tag.
 

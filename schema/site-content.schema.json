@@ -397,6 +397,17 @@
           "$ref": "#/definitions/BusinessProfile",
           "description": "Structured business facts (v0.6). Optional: a v0.5 site has none."
         },
+        "pricing": {
+          "$ref": "#/definitions/PricingSection",
+          "description": "Published prices (v0.8). Absent for a business that quotes every job; a template then renders no pricing section rather than an empty one."
+        },
+        "promos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Short promotional lines for a ticker or banner (v0.8): \"Furnace check-up $89 this month\". Absent or empty means no ticker."
+        },
         "copy": {
           "$ref": "#/definitions/CopyInputs",
           "description": "The generator's copy inputs (v0.6)."
@@ -559,6 +570,17 @@
           ],
           "additionalProperties": false,
           "description": "The review summary the site quotes. `site.review.summary` is its rendered sentence."
+        },
+        "foundingYear": {
+          "type": "number",
+          "description": "The year the business started (v0.8), for schema.org `foundingDate`. Distinct from `copy.tenure`, which is a copy input that goes stale every January.",
+          "minimum": 1800,
+          "maximum": 2100
+        },
+        "priceRange": {
+          "type": "string",
+          "description": "schema.org `priceRange` (v0.8): `$` to `$$$$`. Optional because most clients never state one.",
+          "pattern": "^\\${1,4}$"
         }
       },
       "required": [
@@ -694,6 +716,100 @@
         "Sunday"
       ]
     },
+    "PricingSection": {
+      "type": "object",
+      "properties": {
+        "intro": {
+          "$ref": "#/definitions/Intro"
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PricingPlan"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "intro",
+        "plans"
+      ],
+      "additionalProperties": false,
+      "description": "The pricing section: its intro and the plans, in display order."
+    },
+    "Intro": {
+      "type": "object",
+      "properties": {
+        "chip": {
+          "type": "string"
+        },
+        "heading": {
+          "type": "string"
+        },
+        "copy": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "chip",
+        "heading",
+        "copy"
+      ],
+      "additionalProperties": false
+    },
+    "PricingPlan": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number",
+          "description": "In whole currency units or with cents (89, 19.5). A number, not a string, so it can become a schema.org `Offer.price`; a template formats it.",
+          "minimum": 0
+        },
+        "cadence": {
+          "$ref": "#/definitions/PricingCadence"
+        },
+        "blurb": {
+          "type": "string",
+          "description": "One or two sentences under the price."
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "What the plan includes, one line each."
+        },
+        "cta": {
+          "$ref": "#/definitions/NavLink"
+        },
+        "recommended": {
+          "type": "boolean",
+          "description": "The plan a template highlights. At most one should set it; templates highlight the first."
+        }
+      },
+      "required": [
+        "name",
+        "price",
+        "cadence",
+        "features",
+        "cta"
+      ],
+      "additionalProperties": false,
+      "description": "One published plan or price (\"Standard Tune-Up, $89 per visit\"; \"Comfort Club, $19 a month\"). A handful per site at most, so plans live on the `site` document rather than in a collection of their own."
+    },
+    "PricingCadence": {
+      "type": "string",
+      "enum": [
+        "visit",
+        "month",
+        "year",
+        "one-time"
+      ],
+      "description": "How often a plan's `price` is charged."
+    },
     "CopyInputs": {
       "type": "object",
       "properties": {
@@ -820,26 +936,6 @@
       "additionalProperties": false,
       "description": "One card in the about section."
     },
-    "Intro": {
-      "type": "object",
-      "properties": {
-        "chip": {
-          "type": "string"
-        },
-        "heading": {
-          "type": "string"
-        },
-        "copy": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "chip",
-        "heading",
-        "copy"
-      ],
-      "additionalProperties": false
-    },
     "ShortIntro": {
       "type": "object",
       "properties": {
@@ -883,6 +979,15 @@
         "priceHint": {
           "type": "string",
           "description": "A short price cue (\"From $89\", \"Free estimate\"). Free text: trades price too differently to type."
+        },
+        "slug": {
+          "type": "string",
+          "description": "The service's URL segment (v0.8), for templates that give each service its own page. Absent: a template derives one from `title`. Set it to keep a URL stable when the title changes.",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "answer": {
+          "type": "string",
+          "description": "A direct 40–60 word answer to \"what is this service and who needs it\" (v0.8), which a service page opens with — the passage answer engines quote."
         }
       },
       "required": [
@@ -954,6 +1059,25 @@
             "standard"
           ],
           "description": "How much room the image gets in the desktop gallery grid."
+        },
+        "title": {
+          "type": "string",
+          "description": "The job's name (v0.8): \"High-efficiency AC retrofit\". Absent: the project is a photo only, which is all a v0.7 gallery has."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One or two sentences on what was done (v0.8)."
+        },
+        "servicesProvided": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "The services the job involved, one short line each (v0.8)."
+        },
+        "beforeImage": {
+          "$ref": "#/definitions/Photo",
+          "description": "The same spot before the work (v0.8). When set, a template may render a before/after slider between it and `image`; `alt` must then describe both."
         }
       },
       "required": [
@@ -1003,6 +1127,10 @@
         "source": {
           "$ref": "#/definitions/TestimonialSource",
           "description": "Where it was posted. `direct` is a review given to the business, not on a platform."
+        },
+        "role": {
+          "type": "string",
+          "description": "Who the reviewer is to the business (v0.8): \"Homeowner\", \"Property manager\"."
         }
       },
       "required": [

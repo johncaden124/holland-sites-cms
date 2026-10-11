@@ -42,6 +42,33 @@ describe('toContentFile / fromContentFile', () => {
     expect(back.testimonials[0]).toMatchObject({ rating: 5, date: '2026-01-02', source: 'google' });
   });
 
+  it('carry the v0.8 pricing, promos, project and service fields through', () => {
+    const file = fixture();
+    file.site.pricing = {
+      intro: { chip: 'Pricing', heading: 'Plans', copy: 'Two ways.' },
+      plans: [{ name: 'Tune-Up', price: 89, cadence: 'visit', features: [{ text: 'Diagnostic' }], cta: { label: 'Book', href: '#quote' } }],
+    };
+    file.site.promos = [{ text: 'Spring aeration $59' }];
+    Object.assign(file.services[0]!, { slug: 'lawn-care', answer: 'A direct answer.' });
+    Object.assign(file.projects[0]!, {
+      title: 'Backyard rebuild',
+      summary: 'New sod and edging.',
+      servicesProvided: [{ text: 'Sod' }],
+      beforeImage: 'before-1.jpg',
+    });
+    Object.assign(file.testimonials[0]!, { role: 'Homeowner' });
+    const data = fromContentFile(file);
+    // In the data modules the string lists are plain lists and the photo is an image ref.
+    expect(data.site.site.pricing?.plans[0]!.features).toStrictEqual(['Diagnostic']);
+    expect(data.site.site.promos).toStrictEqual(['Spring aeration $59']);
+    expect(data.gallery.gallery[0]).toMatchObject({
+      servicesProvided: ['Sod'],
+      beforeImage: { src: 'before-1.jpg', width: 0, height: 0 },
+    });
+    expect(JSON.stringify(toContentFile(data))).toBe(JSON.stringify(file));
+    expect(contentFileMedia(file).images).toContain('before-1.jpg');
+  });
+
   it('turns images into basename refs and the hero video into a public/ path', () => {
     const data = fromContentFile(fixture());
     expect(data.hero.hero.video).toBe('/hero.mp4');

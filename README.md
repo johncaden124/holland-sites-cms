@@ -98,6 +98,22 @@ v0.6 added the facts a generated site needs. They are all optional, so v0.5 cont
 - **`site.flags`** holds `reviewsFromGbp` and `isPreview`.
 - **`Service.priceHint`**, and **`Testimonial.rating` / `date` / `source`**.
 
+v0.8 added what a template needs for published prices, real project write-ups and service pages.
+These fields are also all optional, so v0.7 content is still valid, and a template that doesn't
+render a field ignores it:
+
+- **`site.pricing`** is `{ intro, plans[] }`. Each plan has `name`, `price` (a number, so it can
+  become a schema.org `Offer`), `cadence` (`visit | month | year | one-time`), an optional
+  `blurb`, `features[]`, a `cta` link and `recommended`. Plans live on `site`, not in a
+  collection: a site publishes a handful at most, and many publish none.
+- **`site.promos`** holds short lines for a ticker or banner.
+- **`business.foundingYear`** (for `foundingDate`) and **`business.priceRange`** (`$`–`$$$$`).
+- **`Service.slug`** (a stable URL segment for a service page) and **`Service.answer`** (the 40–60
+  word direct answer the page opens with).
+- **`GalleryImage.title` / `summary` / `servicesProvided` / `beforeImage`**, for project write-ups
+  and before/after sliders. A v0.7 project is still just a photo.
+- **`Testimonial.role`** ("Homeowner").
+
 ## Using it from a template
 
 ```ts
