@@ -98,6 +98,27 @@ v0.6 added the facts a generated site needs. They are all optional, so v0.5 cont
 - **`site.flags`** holds `reviewsFromGbp` and `isPreview`.
 - **`Service.priceHint`**, and **`Testimonial.rating` / `date` / `source`**.
 
+v0.8 added what a template needs for published prices, real project write-ups and service pages.
+These fields are also all optional, so v0.7 content is still valid, and a template that doesn't
+render a field ignores it:
+
+- **`site.pricing`** is `{ intro, plans[] }`. Each plan has `name`, `price` (a number, so it can
+  become a schema.org `Offer`), `cadence` (`visit | month | year | one-time`), an optional
+  `blurb`, `features[]`, a `cta` link and `recommended`.
+- **`site.promos`** holds short lines for a ticker or banner.
+- Both are `site` fields in the content model, but **the hub stores them on a separate per-tenant
+  `offers` document**. Cloudflare D1 refuses a query returning more than 100 columns, and Payload
+  reads `site` in one query, which was at 95 columns. `getSite()` fetches both and merges them.
+  `offers` is the one optional collection (`OPTIONAL_COLLECTIONS`): zero documents, or a 404 from
+  a hub that predates it, maps to no pricing and no promos. In a content file it is an optional
+  top-level `offers` object.
+- **`business.foundingYear`** (for `foundingDate`) and **`business.priceRange`** (`$`–`$$$$`).
+- **`Service.slug`** (a stable URL segment for a service page) and **`Service.answer`** (the 40–60
+  word direct answer the page opens with).
+- **`GalleryImage.title` / `summary` / `servicesProvided` / `beforeImage`**, for project write-ups
+  and before/after sliders. A v0.7 project is still just a photo.
+- **`Testimonial.role`** ("Homeowner").
+
 ## Using it from a template
 
 ```ts

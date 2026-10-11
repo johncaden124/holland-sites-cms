@@ -20,6 +20,7 @@ export interface BusinessProfile {
     address: PostalAddress;
     // (undocumented)
     email: string;
+    foundingYear?: number;
     gbp?: {
         url: string;
         placeId: string;
@@ -33,6 +34,7 @@ export interface BusinessProfile {
         e164: string;
         display?: string;
     };
+    priceRange?: string;
     reviews?: {
         count: number;
         rating: number;
@@ -73,9 +75,13 @@ export interface Faq {
 export interface GalleryImage {
     // (undocumented)
     alt: string;
+    beforeImage?: Photo;
     emphasis: 'featured' | 'standard';
     // (undocumented)
     image: Photo;
+    servicesProvided?: string[];
+    summary?: string;
+    title?: string;
 }
 
 // @public (undocumented)
@@ -151,6 +157,31 @@ export interface PostalAddress {
 }
 
 // @public
+export type PricingCadence = 'visit' | 'month' | 'year' | 'one-time';
+
+// @public
+export interface PricingPlan {
+    blurb?: string;
+    // (undocumented)
+    cadence: PricingCadence;
+    // (undocumented)
+    cta: NavLink;
+    features: string[];
+    // (undocumented)
+    name: string;
+    price: number;
+    recommended?: boolean;
+}
+
+// @public
+export interface PricingSection {
+    // (undocumented)
+    intro: Intro;
+    // (undocumented)
+    plans: PricingPlan[];
+}
+
+// @public
 export interface ProcessStep {
     // (undocumented)
     body: string;
@@ -168,6 +199,7 @@ export type RemotePhoto = {
 
 // @public
 export interface Service {
+    answer?: string;
     // (undocumented)
     blurb: string;
     // (undocumented)
@@ -179,6 +211,7 @@ export interface Service {
     // (undocumented)
     imageAlt: string;
     priceHint?: string;
+    slug?: string;
     // (undocumented)
     title: string;
 }
@@ -297,6 +330,8 @@ export interface SiteSettings {
     // (undocumented)
     nav: NavLink[];
     navCta: NavLink;
+    pricing?: PricingSection;
+    promos?: string[];
     // (undocumented)
     review: {
         summary: string;
@@ -333,6 +368,7 @@ export interface Testimonial {
     // (undocumented)
     quote: string;
     rating?: 1 | 2 | 3 | 4 | 5;
+    role?: string;
     source?: TestimonialSource;
 }
 

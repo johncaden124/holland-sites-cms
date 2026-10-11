@@ -27,11 +27,21 @@ export const CONTENT_MODULES: {
 export interface ContentFile {
     // (undocumented)
     faqs: Faq[];
+    offers?: {
+        pricing?: Omit<PricingSection, 'plans'> & {
+            plans: (Omit<PricingPlan, 'features'> & {
+                features: TextRow[];
+            })[];
+        };
+        promos?: TextRow[];
+    };
     // (undocumented)
     processSteps: ProcessStep[];
     // (undocumented)
-    projects: (Omit<GalleryImage, 'image'> & {
+    projects: (Omit<GalleryImage, 'image' | 'beforeImage' | 'servicesProvided'> & {
         image: string;
+        beforeImage?: string;
+        servicesProvided?: TextRow[];
     })[];
     // (undocumented)
     services: (Omit<Service, 'image' | 'bullets'> & {
@@ -97,8 +107,9 @@ export interface DataModules {
     gallery: {
         workIntro: Intro;
         featuredProject: SiteContent['featuredProject'];
-        gallery: (Omit<GalleryImage, 'image'> & {
+        gallery: (Omit<GalleryImage, 'image' | 'beforeImage'> & {
             image: ImageRef;
+            beforeImage?: ImageRef;
         })[];
         ctaStrip: {
             image: ImageRef;
@@ -157,6 +168,9 @@ export interface ImageRef {
     // (undocumented)
     width: number;
 }
+
+// @public
+export const OPTIONAL_CONTENT_FILE_KEYS: readonly ["offers"];
 
 // @public
 export function renderDataModules(data: DataModules): Record<string, string>;
