@@ -20,6 +20,7 @@ export interface BusinessProfile {
     address: PostalAddress;
     // (undocumented)
     email: string;
+    foundingYear?: number;
     gbp?: {
         url: string;
         placeId: string;
@@ -33,7 +34,7 @@ export interface BusinessProfile {
         e164: string;
         display?: string;
     };
-    priceRange?: '$' | '$$' | '$$$' | '$$$$';
+    priceRange?: string;
     reviews?: {
         count: number;
         rating: number;
@@ -77,7 +78,7 @@ export interface CmsOptions {
 }
 
 // @public
-export const COLLECTIONS: readonly ["site", "services", "projects", "testimonials", "process-steps", "stats", "faqs"];
+export const COLLECTIONS: readonly ["site", "offers", "services", "projects", "testimonials", "process-steps", "stats", "faqs"];
 
 // @public
 export const collectionUrl: (base: string, collection: string) => string;
@@ -158,9 +159,13 @@ export interface FormLabels {
 export interface GalleryImage {
     // (undocumented)
     alt: string;
+    beforeImage?: Photo;
     emphasis: 'featured' | 'standard';
     // (undocumented)
     image: Photo;
+    servicesProvided?: string[];
+    summary?: string;
+    title?: string;
 }
 
 // @public (undocumented)
@@ -191,6 +196,8 @@ export interface HubBusinessGroup {
     // (undocumented)
     email?: OptionalText;
     // (undocumented)
+    foundingYear?: OptionalNumber;
+    // (undocumented)
     gbp?: {
         url?: OptionalText;
         placeId?: OptionalText;
@@ -211,7 +218,8 @@ export interface HubBusinessGroup {
         e164?: OptionalText;
         display?: OptionalText;
     } | null;
-    priceRange?: Select | null;
+    // (undocumented)
+    priceRange?: OptionalText;
     // (undocumented)
     reviews?: {
         count?: OptionalNumber;
@@ -265,6 +273,37 @@ export interface HubMedia {
     width: number | null;
 }
 
+// @public
+export interface HubOffersDoc {
+    // (undocumented)
+    pricing?: HubPricingGroup | null;
+    // (undocumented)
+    promos?: TextRows;
+}
+
+// @public
+export interface HubPricingGroup {
+    // (undocumented)
+    intro?: {
+        chip?: OptionalText;
+        heading?: OptionalText;
+        copy?: OptionalText;
+    } | null;
+    // (undocumented)
+    plans?: Row<{
+        name: string;
+        price: number;
+        cadence: Select;
+        blurb?: OptionalText;
+        features?: TextRows;
+        cta?: {
+            label?: OptionalText;
+            href?: OptionalText;
+        } | null;
+        recommended?: boolean | null;
+    }>[] | null;
+}
+
 // @public (undocumented)
 export type HubProcessStepDoc = ProcessStep;
 
@@ -273,13 +312,23 @@ export interface HubProjectDoc {
     // (undocumented)
     alt: string;
     // (undocumented)
+    beforeImage?: HubMedia | number | string | null;
+    // (undocumented)
     emphasis: Select;
     // (undocumented)
     image: HubMedia;
+    // (undocumented)
+    servicesProvided?: TextRows;
+    // (undocumented)
+    summary?: OptionalText;
+    // (undocumented)
+    title?: OptionalText;
 }
 
 // @public (undocumented)
 export interface HubServiceDoc {
+    // (undocumented)
+    answer?: OptionalText;
     // (undocumented)
     blurb: string;
     // (undocumented)
@@ -292,6 +341,8 @@ export interface HubServiceDoc {
     imageAlt: string;
     // (undocumented)
     priceHint?: OptionalText;
+    // (undocumented)
+    slug?: OptionalText;
     // (undocumented)
     title: string;
 }
@@ -412,6 +463,8 @@ export interface HubTestimonialDoc {
     // (undocumented)
     rating?: OptionalNumber | Select;
     // (undocumented)
+    role?: OptionalText;
+    // (undocumented)
     source?: Select | null;
 }
 
@@ -479,8 +532,8 @@ export const mapProjects: (docs: HubProjectDoc[]) => GalleryImage[];
 // @public (undocumented)
 export const mapServices: (docs: HubServiceDoc[]) => Service[];
 
-// @public (undocumented)
-export function mapSite(doc: HubSiteDoc): SiteContent;
+// @public
+export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteContent;
 
 // @public (undocumented)
 export const mapStats: (docs: HubStatDoc[]) => Stat[];
@@ -533,6 +586,9 @@ export interface OpeningHours {
 }
 
 // @public
+export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][];
+
+// @public
 export interface PageLabels {
     // (undocumented)
     contact: string;
@@ -569,6 +625,31 @@ export interface PostalAddress {
 }
 
 // @public
+export type PricingCadence = 'visit' | 'month' | 'year' | 'one-time';
+
+// @public
+export interface PricingPlan {
+    blurb?: string;
+    // (undocumented)
+    cadence: PricingCadence;
+    // (undocumented)
+    cta: NavLink;
+    features: string[];
+    // (undocumented)
+    name: string;
+    price: number;
+    recommended?: boolean;
+}
+
+// @public
+export interface PricingSection {
+    // (undocumented)
+    intro: Intro;
+    // (undocumented)
+    plans: PricingPlan[];
+}
+
+// @public
 export interface ProcessStep {
     // (undocumented)
     body: string;
@@ -586,6 +667,7 @@ export type RemotePhoto = {
 
 // @public
 export interface Service {
+    answer?: string;
     // (undocumented)
     blurb: string;
     // (undocumented)
@@ -597,6 +679,7 @@ export interface Service {
     // (undocumented)
     imageAlt: string;
     priceHint?: string;
+    slug?: string;
     // (undocumented)
     title: string;
 }
@@ -718,6 +801,8 @@ export interface SiteSettings {
     // (undocumented)
     nav: NavLink[];
     navCta: NavLink;
+    pricing?: PricingSection;
+    promos?: string[];
     // (undocumented)
     review: {
         summary: string;
@@ -754,6 +839,7 @@ export interface Testimonial {
     // (undocumented)
     quote: string;
     rating?: 1 | 2 | 3 | 4 | 5;
+    role?: string;
     source?: TestimonialSource;
 }
 

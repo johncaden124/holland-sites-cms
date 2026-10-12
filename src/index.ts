@@ -24,7 +24,7 @@
  * });
  * ```
  */
-export { createCms, COLLECTIONS, collectionUrl, type Cms, type CmsOptions } from './cms.js';
+export { createCms, COLLECTIONS, OPTIONAL_COLLECTIONS, collectionUrl, type Cms, type CmsOptions } from './cms.js';
 export {
   mapFaqs,
   mapProcess,
@@ -41,6 +41,8 @@ export {
   type HubFlagsGroup,
   type HubLegalGroup,
   type HubMedia,
+  type HubOffersDoc,
+  type HubPricingGroup,
   type HubProcessStepDoc,
   type HubProjectDoc,
   type HubServiceDoc,
@@ -86,6 +88,9 @@ export type {
   OpeningHours,
   PageLabels,
   PostalAddress,
+  PricingCadence,
+  PricingPlan,
+  PricingSection,
   ProcessStep,
   Service,
   ShortIntro,

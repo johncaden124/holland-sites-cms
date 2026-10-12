@@ -343,7 +343,7 @@ describe('v0.8 optional fields', () => {
     expect(out).toStrictEqual(mapSite(baseSiteDoc));
   });
 
-  it('maps page and form labels, legal text and priceRange when set', () => {
+  it('maps page and form labels and legal text when set', () => {
     const { site } = mapSite(
       siteDoc({
         labels: { ...baseSiteDoc.labels, pages, form },
@@ -361,14 +361,129 @@ describe('v0.8 optional fields', () => {
     expect(site.labels.pages).toStrictEqual({ ...nullPages, home: 'Home' });
   });
 
-  it('maps priceRange and refuses one outside the dollar scale', () => {
+  /** The `offers` pricing group as Payload would serve it: rows for lists, `null` for every unset leaf. */
+  const hubPricing = {
+    intro: { chip: 'Pricing', heading: 'Proactive care, predictable costs', copy: 'Two ways to keep it running.' },
+    plans: [
+      {
+        id: 'p1',
+        name: 'Standard Tune-Up',
+        price: 89,
+        cadence: 'visit',
+        blurb: null,
+        features: [{ id: 'f1', text: 'Full system diagnostic' }],
+        cta: { label: 'Book a tune-up', href: '#quote' },
+        recommended: false,
+      },
+      {
+        id: 'p2',
+        name: 'Comfort Club',
+        price: 19,
+        cadence: 'month',
+        blurb: 'Never pay a dispatch fee again.',
+        features: [{ id: 'f2', text: 'Two tune-ups a year' }, { id: 'f3', text: '15% off repairs' }],
+        cta: { label: 'Join the club', href: '#quote' },
+        recommended: true,
+      },
+    ],
+  };
+
+  it('maps nothing new for a v0.7 tenant, including an untouched offers document', () => {
+    const out = mapSite(siteDoc({ business: null }), {
+      pricing: { intro: { chip: null, heading: null, copy: null }, plans: [] },
+      promos: [],
+    });
+    expect(out).toStrictEqual(mapSite(baseSiteDoc));
+    expect(Object.keys(out.site)).not.toContain('pricing');
+    expect(Object.keys(out.site)).not.toContain('promos');
+  });
+
+  it('maps pricing plans in order, dropping row ids, an unset blurb and a false recommended', () => {
+    const { site } = mapSite(baseSiteDoc, { pricing: hubPricing, promos: [{ id: 'r1', text: 'Furnace check-up $89' }] });
+    expect(site.pricing).toStrictEqual({
+      intro: hubPricing.intro,
+      plans: [
+        {
+          name: 'Standard Tune-Up',
+          price: 89,
+          cadence: 'visit',
+          features: ['Full system diagnostic'],
+          cta: { label: 'Book a tune-up', href: '#quote' },
+        },
+        {
+          name: 'Comfort Club',
+          price: 19,
+          cadence: 'month',
+          blurb: 'Never pay a dispatch fee again.',
+          features: ['Two tune-ups a year', '15% off repairs'],
+          cta: { label: 'Join the club', href: '#quote' },
+          recommended: true,
+        },
+      ],
+    });
+    expect(site.promos).toStrictEqual(['Furnace check-up $89']);
+  });
+
+  it('refuses a cadence outside the vocabulary, naming the plan', () => {
+    const plans = [{ ...hubPricing.plans[0]!, cadence: 'weekly' }];
+    expect(() => mapSite(baseSiteDoc, { pricing: { ...hubPricing, plans } })).toThrow(
+      'CMS offers.pricing.plans[0] "Standard Tune-Up".cadence: unexpected value "weekly" (allowed: visit, month, year, one-time)',
+    );
+  });
+
+  it('maps foundingYear and priceRange on business only when set', () => {
     const business = {
-      trade: 'hvac', town: 'Westerville', serviceAreaTowns: [], address: { street: '1 Main St', locality: 'Westerville', region: 'OH', postalCode: '43081', country: 'US' },
-      geo: { lat: 40.1, lng: -82.9 }, openingHours: [], phone: { e164: '+16145550123' }, email: 'a@b.example', siteUrl: 'https://acme.example',
+      trade: 'hvac',
+      town: 'Westerville',
+      serviceAreaTowns: [],
+      address: { street: '1 Main St', locality: 'Westerville', region: 'OH', postalCode: '43081', country: 'US' },
+      geo: { lat: 40.1, lng: -82.9 },
+      openingHours: [],
+      phone: { e164: '+16145550123' },
+      email: 'hello@acme.example',
+      siteUrl: 'https://acme.example',
     };
-    expect(mapSite(siteDoc({ business: { ...business, priceRange: '$$' } })).site.business!.priceRange).toBe('$$');
-    expect(() => mapSite(siteDoc({ business: { ...business, priceRange: 'cheap' } }))).toThrow(
-      'CMS site.business.priceRange: unexpected value "cheap" (allowed: $, $$, $$$, $$$$)',
+    const set = mapSite(siteDoc({ business: { ...business, foundingYear: 2009, priceRange: '$$' } })).site.business!;
+    expect(set).toMatchObject({ foundingYear: 2009, priceRange: '$$' });
+    const unset = mapSite(siteDoc({ business: { ...business, foundingYear: null, priceRange: null } })).site.business!;
+    expect(Object.keys(unset)).not.toContain('foundingYear');
+    expect(Object.keys(unset)).not.toContain('priceRange');
+  });
+
+  it('maps service slug and answer, and testimonial role, only when set', () => {
+    const [service] = mapServices([{ ...serviceDocs[0]!, slug: 'ac-repair', answer: 'A direct answer.' }]);
+    expect(service).toMatchObject({ slug: 'ac-repair', answer: 'A direct answer.' });
+    const [bare] = mapServices([{ ...serviceDocs[0]!, slug: null, answer: '' }]);
+    expect(Object.keys(bare!)).not.toContain('slug');
+    expect(Object.keys(bare!)).not.toContain('answer');
+
+    expect(mapTestimonials([{ ...testimonialDocs[0]!, role: 'Homeowner' }])[0]!.role).toBe('Homeowner');
+    expect('role' in mapTestimonials([{ ...testimonialDocs[0]!, role: null }])[0]!).toBe(false);
+  });
+
+  it('maps a titled project with a before photo, and a v0.7 project to exactly its three fields', () => {
+    const [titled] = mapProjects([
+      {
+        ...projectDocs[0]!,
+        title: 'AC retrofit',
+        summary: 'Swapped a 1998 condenser for a variable-speed unit.',
+        servicesProvided: [{ id: 's1', text: 'Removed old hardware' }],
+        beforeImage: projectDocs[1]!.image,
+      },
+    ]);
+    expect(titled).toStrictEqual({
+      image: remote,
+      alt: projectDocs[0]!.alt,
+      emphasis: projectDocs[0]!.emphasis,
+      title: 'AC retrofit',
+      summary: 'Swapped a 1998 condenser for a variable-speed unit.',
+      servicesProvided: ['Removed old hardware'],
+      beforeImage: remote,
+    });
+    const [plain] = mapProjects([{ ...projectDocs[0]!, title: null, summary: null, servicesProvided: [], beforeImage: null }]);
+    expect(Object.keys(plain!)).toStrictEqual(['image', 'alt', 'emphasis']);
+    expect(() => mapProjects([{ ...projectDocs[0]!, beforeImage: 7 }])).toThrow(
+      'CMS projects[0].beforeImage: relation not populated',
     );
   });
 });

@@ -24,6 +24,8 @@ import type {
   GalleryImage,
   Intro,
   NavLink,
+  PricingCadence,
+  PricingSection,
   ProcessStep,
   Service,
   ShortIntro,
@@ -75,8 +77,27 @@ export interface HubBusinessGroup {
   siteUrl?: OptionalText;
   gbp?: { url?: OptionalText; placeId?: OptionalText } | null;
   reviews?: { count?: OptionalNumber; rating?: OptionalNumber } | null;
-  /** v0.8. A select; `null` when unset. */
-  priceRange?: Select | null;
+  foundingYear?: OptionalNumber;
+  priceRange?: OptionalText;
+}
+/**
+ * The v0.8 `pricing` group on the tenant's `offers` document. An untouched group arrives as an
+ * all-`null` intro and an empty `plans` array, so the section is present only when at least one plan
+ * exists.
+ */
+export interface HubPricingGroup {
+  intro?: { chip?: OptionalText; heading?: OptionalText; copy?: OptionalText } | null;
+  plans?:
+    | Row<{
+        name: string;
+        price: number;
+        cadence: Select;
+        blurb?: OptionalText;
+        features?: TextRows;
+        cta?: { label?: OptionalText; href?: OptionalText } | null;
+        recommended?: boolean | null;
+      }>[]
+    | null;
 }
 export interface HubCopyGroup {
   businessName?: OptionalText;
@@ -142,6 +163,16 @@ export interface HubSiteDoc {
   flags?: HubFlagsGroup | null;
   legal?: HubLegalGroup;
 }
+/**
+ * The tenant's `offers` document (v0.8): published prices and promo lines. A second per-tenant
+ * document rather than more fields on `site`, because D1 refuses a query returning more than 100
+ * columns and Payload reads `site` — 95 columns before v0.8 — in one query. Optional: a tenant may
+ * have none, and `mapSite` then maps exactly what a v0.7 tenant gets.
+ */
+export interface HubOffersDoc {
+  pricing?: HubPricingGroup | null;
+  promos?: TextRows;
+}
 export interface HubServiceDoc {
   icon: Select;
   title: string;
@@ -150,11 +181,17 @@ export interface HubServiceDoc {
   image: HubMedia;
   imageAlt: string;
   priceHint?: OptionalText;
+  slug?: OptionalText;
+  answer?: OptionalText;
 }
 export interface HubProjectDoc {
   image: HubMedia;
   alt: string;
   emphasis: Select;
+  title?: OptionalText;
+  summary?: OptionalText;
+  servicesProvided?: TextRows;
+  beforeImage?: HubMedia | number | string | null;
 }
 export interface HubTestimonialDoc {
   quote: string;
@@ -167,6 +204,7 @@ export interface HubTestimonialDoc {
   /** A Payload `date` field: a full ISO timestamp, of which the content model keeps the date. */
   date?: OptionalText;
   source?: Select | null;
+  role?: OptionalText;
 }
 export type HubProcessStepDoc = ProcessStep;
 export interface HubStatDoc {
@@ -282,8 +320,6 @@ const DIFFERENTIATORS = keys<Differentiator>({
 });
 const SOURCES = keys<TestimonialSource>({ google: true, facebook: true, yelp: true, nextdoor: true, direct: true });
 const RATINGS = [1, 2, 3, 4, 5] as const;
-const PRICE_RANGES = keys<NonNullable<BusinessProfile['priceRange']>>({ $: true, $$: true, $$$: true, $$$$: true });
-
 /**
  * An optional group of strings (v0.8): omitted when every leaf is unset, so a tenant that never
  * touched it maps to no key at all. Once any leaf is set the group is copied whole, `null`s included,
@@ -308,6 +344,7 @@ function mapLegal(l: HubLegalGroup): { legal?: LegalText } {
   };
   return Object.keys(legal).length ? { legal } : {};
 }
+const CADENCES = keys<PricingCadence>({ visit: true, month: true, year: true, 'one-time': true });
 
 /**
  * The v0.6 groups on `site`. Each is present only when its defining field is set (`trade`,
@@ -346,10 +383,41 @@ function mapBusiness(b: HubBusinessGroup | null | undefined): { business?: Busin
     ...(b.reviews?.count != null || b.reviews?.rating != null
       ? { reviews: { count: b.reviews?.count, rating: b.reviews?.rating } }
       : {}),
-    ...(b.priceRange ? { priceRange: oneOf('site.business.priceRange', b.priceRange, PRICE_RANGES) } : {}),
+    ...(b.foundingYear != null ? { foundingYear: b.foundingYear } : {}),
+    ...opt('priceRange', b.priceRange),
   };
   // Required leaves may still be `null` here, by design (see above); the validator names them.
   return { business: business as BusinessProfile };
+}
+
+/**
+ * The v0.8 pricing group: present only when the tenant has at least one plan. Inside a present
+ * section the intro is copied as sent, so a plan with no heading becomes a named validator problem
+ * rather than a section with a blank title.
+ */
+function mapPricing(p: HubPricingGroup | null | undefined): { pricing?: PricingSection } {
+  const plans = p?.plans ?? [];
+  if (!plans.length) return {};
+  const intro = p?.intro ?? {};
+  const pricing = {
+    intro: { chip: intro.chip, heading: intro.heading, copy: intro.copy },
+    plans: plans.map((plan, i) => ({
+      name: plan.name,
+      price: plan.price,
+      cadence: oneOf(`${at('offers.pricing.plans', i, plan.name)}.cadence`, plan.cadence, CADENCES),
+      ...opt('blurb', plan.blurb),
+      features: texts(plan.features),
+      cta: { label: plan.cta?.label, href: plan.cta?.href },
+      ...(plan.recommended === true ? { recommended: true } : {}),
+    })),
+  };
+  return { pricing: pricing as PricingSection };
+}
+
+/** Promo lines, present only when there is at least one. */
+function mapPromos(rows: TextRows): { promos?: string[] } {
+  const promos = texts(rows).filter(Boolean);
+  return promos.length ? { promos } : {};
 }
 
 function mapCopy(c: HubCopyGroup | null | undefined): { copy?: CopyInputs } {
@@ -379,7 +447,11 @@ function mapFlags(f: HubFlagsGroup | null | undefined): { flags?: SiteFlags } {
 
 // ---- mappers ------------------------------------------------------------------------------
 
-export function mapSite(doc: HubSiteDoc): SiteContent {
+/**
+ * `site` plus, from v0.8, the tenant's optional `offers` document, whose fields land on `site`: the
+ * content model has one `SiteSettings`, however the hub splits its storage.
+ */
+export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteContent {
   // Every group is read through `group()` so a hub-side rename fails by name instead of as a
   // `Cannot read properties of undefined` from somewhere inside this object literal.
   const footer = group('site.footer', doc.footer);
@@ -435,6 +507,8 @@ export function mapSite(doc: HubSiteDoc): SiteContent {
       ...mapCopy(doc.copy),
       ...mapFlags(doc.flags),
       ...mapLegal(doc.legal),
+      ...mapPricing(offers?.pricing),
+      ...mapPromos(offers?.promos),
     },
     hero: {
       // Optional: an unset upload is `null`/absent, and the key is then omitted entirely so a
@@ -491,16 +565,26 @@ export const mapServices = (docs: HubServiceDoc[]): Service[] =>
       image: photo(`${doc}.image`, d.image),
       imageAlt: d.imageAlt,
       ...opt('priceHint', d.priceHint),
+      ...opt('slug', d.slug),
+      ...opt('answer', d.answer),
     };
   });
 
 /** The `projects` collection is the work gallery only; the CTA strip lives on `site`. */
 export const mapProjects = (docs: HubProjectDoc[]): GalleryImage[] =>
-  docs.map((d, i) => ({
-    image: photo(`${at('projects', i)}.image`, d.image),
-    alt: d.alt,
-    emphasis: oneOf(`${at('projects', i)}.emphasis`, d.emphasis, EMPHASIS),
-  }));
+  docs.map((d, i) => {
+    const servicesProvided = texts(d.servicesProvided);
+    return {
+      image: photo(`${at('projects', i)}.image`, d.image),
+      alt: d.alt,
+      emphasis: oneOf(`${at('projects', i)}.emphasis`, d.emphasis, EMPHASIS),
+      // v0.8, each present only when set, so a v0.7 project maps to exactly its three fields.
+      ...opt('title', d.title),
+      ...opt('summary', d.summary),
+      ...(servicesProvided.length ? { servicesProvided } : {}),
+      ...(d.beforeImage == null ? {} : { beforeImage: photo(`${at('projects', i)}.beforeImage`, d.beforeImage) }),
+    };
+  });
 
 /**
  * `image` / `beforeImage` are optional in the hub: a card may show a before/after slider (both), a
@@ -519,6 +603,7 @@ export const mapTestimonials = (docs: HubTestimonialDoc[]): Testimonial[] =>
     // `2026-03-14T00:00:00.000Z` → `2026-03-14`; the time is Payload's, not the reviewer's.
     ...opt('date', d.date ? d.date.slice(0, 10) : undefined),
     ...(d.source == null || d.source === '' ? {} : { source: oneOf(`${at('testimonials', i)}.source`, d.source, SOURCES) }),
+    ...opt('role', d.role),
   }));
 
 export const mapProcess = (docs: HubProcessStepDoc[]): ProcessStep[] =>

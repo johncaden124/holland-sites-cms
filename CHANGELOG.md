@@ -7,10 +7,13 @@ bump.
 
 Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
-## 0.8.0 — 2026-10-01
+## Unreleased
+
+## 0.9.0 — 2026-10-12
 
 The rest of template-landscaping's proposed `types.ts` diff (its TEMPLATE-AUDIT, approved by the
-owner). Everything is optional, so v0.7 content is still valid content.
+owner). Everything is optional, so v0.8 content is still valid content. `BusinessProfile.priceRange`
+from the same diff shipped in 0.8.0.
 
 ### Added
 - `TRADE_INFO` (root, `./trades` and `./types`): one `{ noun, schemaType }` per `TRADES` value.
@@ -19,8 +22,6 @@ owner). Everything is optional, so v0.7 content is still valid content.
     schema.org: trades without a subtype (landscaping, pest control, cleaning, …) are
     `HomeAndConstructionBusiness`, never an invented `LandscapingBusiness`. A test holds every entry
     to a known list and requires one entry per trade.
-- `BusinessProfile.priceRange?`: `$ | $$ | $$$ | $$$$`, for LocalBusiness structured data. The
-  mapper refuses any other value by field.
 - `SiteSettings.legal?: LegalText` (`legalName?`, `callRecordingNotice?`, `smsConsent?`): per-client
   legal wording for the Holland tracking number's call recording and text-back. Attorney text: a
   template renders each only when set and ships no default.
@@ -28,15 +29,35 @@ owner). Everything is optional, so v0.7 content is still valid content.
   `labels.form?: FormLabels` (the contact section's chip, heading and intro, and every string the
   lead form shows), so a niche can reword its interface from the hub.
 - The mappers carry all of the above when a tenant sets them. A label or legal group whose every
-  leaf is `null` (what Payload sends for an untouched group) maps to no key, so v0.7 tenants map
+  leaf is `null` (what Payload sends for an untouched group) maps to no key, so v0.8 tenants map
   exactly as before. A half-filled label group is kept whole, so `validateSiteContent` names the
   empty labels instead of a template printing blanks.
 - Content files carry `legal` both ways; the label groups travel inside `labels` as they are.
 
 ### The hub needs
-- `site.business.priceRange`: select, options `$`, `$$`, `$$$`, `$$$$`.
 - `site.labels.pages` and `site.labels.form`: groups of text fields with the names above.
 - `site.legal`: group of three textareas.
+
+## 0.8.0 — 2026-10-11
+
+### Added: content model (all optional, so v0.7 content is still valid)
+- `SiteSettings.pricing?: PricingSection`, which is `{ intro: Intro; plans: PricingPlan[] }` (at least one plan).
+  - A `PricingPlan` has `name`, `price` (a number ≥ 0), `cadence` (`PricingCadence`: `visit | month | year | one-time`), optional `blurb`, `features[]`, `cta` (`NavLink`) and optional `recommended`.
+  - The mapper keeps the section only when the tenant has at least one plan, so the all-`null` group Payload sends for an untouched tenant maps to nothing. `recommended: false` maps to no key.
+- `SiteSettings.promos?: string[]`: ticker or banner lines. Empty maps to no key.
+- The hub stores `pricing` and `promos` on a new per-tenant **`offers`** document, not on `site`.
+  - The reason is a D1 limit: Payload reads `site` in a single query, D1 refuses a result with more than 100 columns, and `site` was already at 95.
+  - `COLLECTIONS` gains `offers`, and the new export `OPTIONAL_COLLECTIONS` lists it.
+  - An optional collection may be empty, and a 404 for it reads as empty. A hub that predates it, or a template's mock hub with no `hub-offers.json`, serves no offers. More than one document is refused, naming the key. Any other error still fails the build.
+  - `getSite()` fetches `site` and `offers` together and merges `offers` onto `site`. `mapSite(doc, offers?)` takes the offers document as its second argument, and `HubOffersDoc` / `HubPricingGroup` describe it.
+  - `capture-fixtures` skips an optional collection the hub answers 404 for, and writes an empty one as-is.
+  - In a content file, `offers` is an optional top-level object (`OPTIONAL_CONTENT_FILE_KEYS`) holding `pricing` and `promos`. `toContentFile` writes it only when the site has either.
+- `BusinessProfile.foundingYear?` (1800–2100) and `BusinessProfile.priceRange?` (`$`–`$$$$`), for schema.org `foundingDate` / `priceRange`.
+- `Service.slug?` (lowercase, hyphenated) and `Service.answer?` (the direct answer a service page opens with).
+- `GalleryImage.title?`, `summary?`, `servicesProvided?: string[]` and `beforeImage?: Photo`. A project that sets none of them maps to exactly its v0.7 three fields.
+- `Testimonial.role?`.
+- `PricingCadence`, `PricingPlan` and `PricingSection` are exported from the root and from `./types`.
+- In a content file, `offers.pricing.plans[].features`, `offers.promos` and `projects[].servicesProvided` travel as `{ text }` rows, like `bullets`. A project's `beforeImage` is a media basename, and `contentFileMedia` lists it.
 
 ### Changed
 - `consumers.json` pins template-landscaping to `a067b56`: its bump to v0.7.0 (template-landscaping#7). The smoke test uses the new pin as soon as this merges. `new-site` reads the copy shipped in the package, so it picks up the new pin only from the next tag.

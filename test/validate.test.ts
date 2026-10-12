@@ -134,3 +134,48 @@ describe('schema/site-content.schema.json', () => {
     );
   });
 });
+
+describe('validateSiteContent — v0.8 fields', () => {
+  const v08 = (): LocalContent => {
+    const c = full();
+    c.site.site.business = { ...business, foundingYear: 2009, priceRange: '$$' };
+    // Its own copy group: earlier tests mutate the shared one.
+    c.site.site.copy = { businessName: c.site.site.name, town: 'Westerville', primaryService: 'AC repair', differentiator: '24-7', tenure: null };
+    c.site.site.pricing = {
+      intro: { chip: 'Pricing', heading: 'Plans', copy: 'Two ways.' },
+      plans: [
+        { name: 'Tune-Up', price: 89, cadence: 'visit', features: ['Diagnostic'], cta: { label: 'Book', href: '#quote' } },
+        { name: 'Club', price: 19.5, cadence: 'month', blurb: 'No fees.', features: [], cta: { label: 'Join', href: '#quote' }, recommended: true },
+      ],
+    };
+    c.site.site.promos = ['Furnace check-up $89'];
+    c.services = c.services.map((s) => ({ ...s, slug: 'ac-repair', answer: 'A direct answer.' }));
+    c.projects = c.projects.map((p) => ({ ...p, title: 'Retrofit', summary: 'Done.', servicesProvided: ['Ducts'], beforeImage: p.image }));
+    c.testimonials = c.testimonials.map((t) => ({ ...t, role: 'Homeowner' }));
+    return c;
+  };
+
+  it('accepts content with every v0.8 field set', () => {
+    expect(validateSiteContent(v08())).toStrictEqual({ ok: true, problems: [] });
+  });
+
+  it('names a bad slug, price, cadence, price range and an empty plan list', () => {
+    const c = v08();
+    c.services[0]!.slug = 'AC Repair';
+    c.site.site.pricing!.plans[0]!.price = -1;
+    (c.site.site.pricing!.plans[1] as { cadence: string }).cadence = 'weekly';
+    c.site.site.business!.priceRange = 'cheap';
+    const paths = validateSiteContent(c).problems.map((p) => p.path);
+    expect(paths).toEqual(
+      expect.arrayContaining([
+        'services[0].slug',
+        'site.site.pricing.plans[0].price',
+        'site.site.pricing.plans[1].cadence',
+        'site.site.business.priceRange',
+      ]),
+    );
+    const empty = v08();
+    empty.site.site.pricing!.plans = [];
+    expect(validateSiteContent(empty).problems.map((p) => p.path)).toContain('site.site.pricing.plans');
+  });
+});

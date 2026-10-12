@@ -128,11 +128,6 @@ export interface BusinessProfile {
     url: string;
     placeId: string;
   };
-  /**
-   * schema.org `priceRange` as a dollar scale, for LocalBusiness structured data (v0.8). Free-text
-   * price cues belong in `Service.priceHint`; this is the one coarse signal search engines show.
-   */
-  priceRange?: '$' | '$$' | '$$$' | '$$$$';
   /** The review summary the site quotes. `site.review.summary` is its rendered sentence. */
   reviews?: {
     /** @minimum 0 */
@@ -143,6 +138,18 @@ export interface BusinessProfile {
      */
     rating: number;
   };
+  /**
+   * The year the business started (v0.8), for schema.org `foundingDate`. Distinct from
+   * `copy.tenure`, which is a copy input that goes stale every January.
+   * @minimum 1800
+   * @maximum 2100
+   */
+  foundingYear?: number;
+  /**
+   * schema.org `priceRange` (v0.8): `$` to `$$$$`. Optional because most clients never state one.
+   * @pattern ^\${1,4}$
+   */
+  priceRange?: string;
 }
 
 /** The one thing a client says sets them apart; the generator picks a copy block per value. */
@@ -223,6 +230,41 @@ export interface LegalText {
   smsConsent?: string;
 }
 
+// ---- pricing (optional, v0.8) ------------------------------------------------------------------
+
+/** How often a plan's `price` is charged. */
+export type PricingCadence = 'visit' | 'month' | 'year' | 'one-time';
+
+/**
+ * One published plan or price ("Standard Tune-Up, $89 per visit"; "Comfort Club, $19 a month"). A
+ * handful per site at most, so plans live on the `site` document rather than in a collection of
+ * their own.
+ */
+export interface PricingPlan {
+  name: string;
+  /**
+   * In whole currency units or with cents (89, 19.5). A number, not a string, so it can become a
+   * schema.org `Offer.price`; a template formats it.
+   * @minimum 0
+   */
+  price: number;
+  cadence: PricingCadence;
+  /** One or two sentences under the price. */
+  blurb?: string;
+  /** What the plan includes, one line each. */
+  features: string[];
+  cta: NavLink;
+  /** The plan a template highlights. At most one should set it; templates highlight the first. */
+  recommended?: boolean;
+}
+
+/** The pricing section: its intro and the plans, in display order. */
+export interface PricingSection {
+  intro: Intro;
+  /** @minItems 1 */
+  plans: PricingPlan[];
+}
+
 /** Site-wide settings — the hub's `site` global, one document per tenant. */
 export interface SiteSettings {
   name: string;
@@ -297,6 +339,16 @@ export interface SiteSettings {
   legal?: LegalText;
   /** Structured business facts (v0.6). Optional: a v0.5 site has none. */
   business?: BusinessProfile;
+  /**
+   * Published prices (v0.8). Absent for a business that quotes every job; a template then renders
+   * no pricing section rather than an empty one.
+   */
+  pricing?: PricingSection;
+  /**
+   * Short promotional lines for a ticker or banner (v0.8): "Furnace check-up $89 this month". Absent
+   * or empty means no ticker.
+   */
+  promos?: string[];
   /** The generator's copy inputs (v0.6). */
   copy?: CopyInputs;
   flags?: SiteFlags;
@@ -320,6 +372,17 @@ export interface Service {
   imageAlt: string;
   /** A short price cue ("From $89", "Free estimate"). Free text: trades price too differently to type. */
   priceHint?: string;
+  /**
+   * The service's URL segment (v0.8), for templates that give each service its own page. Absent: a
+   * template derives one from `title`. Set it to keep a URL stable when the title changes.
+   * @pattern ^[a-z0-9]+(?:-[a-z0-9]+)*$
+   */
+  slug?: string;
+  /**
+   * A direct 40–60 word answer to "what is this service and who needs it" (v0.8), which a service
+   * page opens with — the passage answer engines quote.
+   */
+  answer?: string;
 }
 
 /** The hub's `projects` collection — the work gallery. */
@@ -328,6 +391,20 @@ export interface GalleryImage {
   alt: string;
   /** How much room the image gets in the desktop gallery grid. */
   emphasis: 'featured' | 'standard';
+  /**
+   * The job's name (v0.8): "High-efficiency AC retrofit". Absent: the project is a photo only, which
+   * is all a v0.7 gallery has.
+   */
+  title?: string;
+  /** One or two sentences on what was done (v0.8). */
+  summary?: string;
+  /** The services the job involved, one short line each (v0.8). */
+  servicesProvided?: string[];
+  /**
+   * The same spot before the work (v0.8). When set, a template may render a before/after slider
+   * between it and `image`; `alt` must then describe both.
+   */
+  beforeImage?: Photo;
 }
 
 /** The hub's `testimonials` collection. */
@@ -354,6 +431,8 @@ export interface Testimonial {
   date?: string;
   /** Where it was posted. `direct` is a review given to the business, not on a platform. */
   source?: TestimonialSource;
+  /** Who the reviewer is to the business (v0.8): "Homeowner", "Property manager". */
+  role?: string;
 }
 
 export type TestimonialSource = 'google' | 'facebook' | 'yelp' | 'nextdoor' | 'direct';

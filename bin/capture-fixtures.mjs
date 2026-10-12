@@ -15,7 +15,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { COLLECTIONS, collectionUrl } from '../dist/cms.js'
+import { COLLECTIONS, OPTIONAL_COLLECTIONS, collectionUrl } from '../dist/cms.js'
 import { parseArgs, relative } from './args.mjs'
 
 const DEFAULT_OUT = 'src/lib/__fixtures__'
@@ -57,9 +57,13 @@ export async function captureFixtures(root, argv) {
       const e = /** @type {{ cause?: { code?: string, message?: string }, message?: string }} */ (err)
       throw new Error(`could not reach ${url} (${e.cause?.code ?? e.cause?.message ?? e.message}) — check PAYLOAD_URL`)
     }
+    const optional = OPTIONAL_COLLECTIONS.includes(collection)
+    // An optional collection the hub does not have yet (404) is not captured: the mock hub answers
+    // 404 for a missing fixture, which the fetch layer reads as "none", exactly as the hub would.
+    if (res.status === 404 && optional) continue
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} from ${url}`)
     const body = await res.json()
-    if (!Array.isArray(body?.docs) || body.docs.length === 0) {
+    if (!Array.isArray(body?.docs) || (body.docs.length === 0 && !optional)) {
       throw new Error(`${url} returned no documents — is the tenant seeded?`)
     }
     captured.push([collection, body])
@@ -71,6 +75,6 @@ export async function captureFixtures(root, argv) {
     writeFileSync(resolve(outDir, `hub-${collection}.json`), JSON.stringify(body, null, 2) + '\n')
     lines.push(`  hub-${collection}.json`.padEnd(30) + `${body.docs.length} doc(s)`)
   }
-  lines.push(`captured ${COLLECTIONS.length} collections to ${relative(root, outDir)}/`)
+  lines.push(`captured ${captured.length} collections to ${relative(root, outDir)}/`)
   console.log(lines.join('\n'))
 }
