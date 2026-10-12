@@ -304,8 +304,46 @@ describe('cms', () => {
     const cms = createCms(hub('http://localhost:3000'));
     const first = await cms.getSite();
     expect(await cms.getSite()).toBe(first);
-    // One request each for `site` and (v0.8) `offers`, however many calls.
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    // One request each for `site`, (v0.8) `offers` and (v0.9) `trade-details`, however many calls.
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  describe('trade-details (v0.9, optional)', () => {
+    const DETAILS = 'http://localhost:3000/api/trade-details?depth=1&limit=100&sort=order';
+    const detailsDoc = {
+      id: 1,
+      tenant: hubSite.docs[0]!.tenant,
+      emergency: { available: true, hours: '24/7' },
+      systems: ['furnace', 'ductless'],
+      serviceSeason: { from: null, to: null },
+    };
+    const routed = (respond: () => Response) =>
+      vi.fn(async (url: string | URL) => (String(url) === DETAILS ? respond() : json(hubSite)));
+
+    it('merges the trade-details document onto site', async () => {
+      vi.stubGlobal('fetch', routed(() => json({ docs: [detailsDoc], hasNextPage: false })));
+      const { site } = await createCms(hub('http://localhost:3000')).getSite();
+      expect(site.emergency).toStrictEqual({ available: true, hours: '24/7' });
+      expect(site.systems).toStrictEqual(['furnace', 'ductless']);
+      expect(Object.keys(site)).not.toContain('serviceSeason');
+    });
+
+    it('maps a tenant with none, or a hub without the collection, exactly as v0.8', async () => {
+      const v08 = async (respond: () => Response) => {
+        vi.stubGlobal('fetch', routed(respond));
+        return createCms(hub('http://localhost:3000')).getSite();
+      };
+      const none = await v08(() => json({ docs: [], hasNextPage: false }));
+      for (const key of ['emergency', 'systems', 'serviceSeason']) expect(Object.keys(none.site)).not.toContain(key);
+      expect(await v08(() => json({ errors: [{ message: 'Not Found' }] }, 404))).toStrictEqual(none);
+    });
+
+    it('refuses more than one trade-details document, naming the key', async () => {
+      vi.stubGlobal('fetch', routed(() => json({ docs: [detailsDoc, { ...detailsDoc, id: 2 }], hasNextPage: false })));
+      await expect(createCms(hub('http://localhost:3000')).getSite()).rejects.toThrow(
+        'CMS trade-details: expected at most 1 document for this tenant, got 2 — is PAYLOAD_API_KEY a build-bot key scoped to one tenant?',
+      );
+    });
   });
 
   describe('offers (v0.8, optional)', () => {

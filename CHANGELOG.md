@@ -9,6 +9,25 @@ Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
 ## Unreleased
 
+## 0.9.0 — 2026-10-12
+
+### Added: verticals
+- New subpath `./verticals` (also re-exported from the root): `VERTICALS`, `VERTICAL_IDS`, `isVertical`, `verticalInfo`, and the `Vertical` / `VerticalInfo` types.
+  - A vertical is a trade that has a template: `hvac` → `template-hvac`, `landscaping` → `template-landscaping`.
+  - It is the one list the hub's `tenants.vertical`, the intake form and `deploy-site` read. A client row's vertical picks the template that is built, the intake questions and the trade copy.
+  - Template refs are not pinned here; the builder pins them.
+
+### Added: content model (all optional, so v0.8 content is still valid)
+- `SiteSettings.emergency?: EmergencyService` (`{ available: boolean; hours?: string }`). The mapper keeps it only when `available` is `true`, so an unticked box with leftover hours maps to nothing.
+- `SiteSettings.systems?: HvacSystem[]`, from `HVAC_SYSTEMS`.
+- `SiteSettings.serviceSeason?: ServiceSeason` (`{ from: Month; to: Month }`, from `MONTHS`). Half a season is refused, naming the missing half.
+- `Service.seasons?: Season[]`, from `SEASONS`. Empty maps to no key.
+- The hub stores the three `site` fields on a new optional per-tenant **`trade-details`** document, for the same D1 column limit as `offers`.
+  - `COLLECTIONS` and `OPTIONAL_COLLECTIONS` gain `trade-details`. None, or a 404, maps exactly as v0.8; more than one is refused, naming the key.
+  - `getSite()` fetches `site`, `offers` and `trade-details` together. `mapSite(doc, offers?, details?)` takes it as a third argument; `HubTradeDetailsDoc` describes it, and `HubServiceDoc.seasons` the new service field.
+  - In a content file it is the optional top-level `tradeDetails` object, written only when one of the three is set.
+- `HVAC_SYSTEMS`, `SEASONS`, `MONTHS` and the types `EmergencyService`, `HvacSystem`, `Season`, `Month`, `ServiceSeason` are exported from the root and from `./types`.
+
 ## 0.8.0 — 2026-10-11
 
 ### Added: content model (all optional, so v0.7 content is still valid)

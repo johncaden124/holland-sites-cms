@@ -39,6 +39,7 @@ import {
   mapTestimonials,
   type HubFaqDoc,
   type HubOffersDoc,
+  type HubTradeDetailsDoc,
   type HubProcessStepDoc,
   type HubProjectDoc,
   type HubServiceDoc,
@@ -68,6 +69,7 @@ import type {
 export const COLLECTIONS = [
   'site',
   'offers',
+  'trade-details',
   'services',
   'projects',
   'testimonials',
@@ -77,12 +79,12 @@ export const COLLECTIONS = [
 ] as const;
 
 /**
- * Collections a tenant may leave empty (v0.8). Every other collection must have documents, because
+ * Collections a tenant may leave empty (`offers` since v0.8, `trade-details` since v0.9). Every other collection must have documents, because
  * an empty one would render a broken page; these hold optional sections that render nothing when
  * absent. A 404 for one of them reads as empty too: a hub that predates the collection has none,
  * and so does a template's mock hub without its fixture.
  */
-export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][] = ['offers'];
+export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][] = ['offers', 'trade-details'];
 const isOptional = (collection: string) => (OPTIONAL_COLLECTIONS as readonly string[]).includes(collection);
 
 /** Payload's page size. A collection larger than this is refused rather than silently truncated. */
@@ -317,10 +319,10 @@ export function createCms(options: CmsOptions): Cms {
         `CMS site: expected exactly 1 document for this tenant, got ${list.docs.length}` + ` — ${KEY_HINT}`,
       );
     }
-    // `offers` is per-tenant too, but optional: none or one.
-    if (collection === 'offers' && list.docs.length > 1) {
+    // `offers` and `trade-details` are per-tenant too, but optional: none or one.
+    if (isOptional(collection) && list.docs.length > 1) {
       throw new Error(
-        `CMS offers: expected at most 1 document for this tenant, got ${list.docs.length}` + ` — ${KEY_HINT}`,
+        `CMS ${collection}: expected at most 1 document for this tenant, got ${list.docs.length}` + ` — ${KEY_HINT}`,
       );
     }
     return list.docs;
@@ -452,8 +454,12 @@ export function createCms(options: CmsOptions): Cms {
     async getSite() {
       if (!cmsEnabled) return local.site;
       return memo('site:content', async () => {
-        const [siteDocs, offersDocs] = await Promise.all([fetchDocs<HubSiteDoc>('site'), fetchDocs<HubOffersDoc>('offers')]);
-        const content = mapSite(siteDocs[0] as HubSiteDoc, offersDocs[0]);
+        const [siteDocs, offersDocs, detailsDocs] = await Promise.all([
+          fetchDocs<HubSiteDoc>('site'),
+          fetchDocs<HubOffersDoc>('offers'),
+          fetchDocs<HubTradeDetailsDoc>('trade-details'),
+        ]);
+        const content = mapSite(siteDocs[0] as HubSiteDoc, offersDocs[0], detailsDocs[0]);
         const from = collectionUrl(BASE as string, 'site');
         assertContract('site', from, [['SiteContent', 'site', content]]);
         // The hero video is the one media URL that never reaches `<Image>` (a `<video>` source is a

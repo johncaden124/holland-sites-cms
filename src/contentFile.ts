@@ -122,12 +122,17 @@ export interface ContentFile {
     pricing?: Omit<PricingSection, 'plans'> & { plans: (Omit<PricingPlan, 'features'> & { features: TextRow[] })[] };
     promos?: TextRow[];
   };
+  /**
+   * The hub's per-tenant `trade-details` document (v0.9), present only when the site sets a trade
+   * fact. In the data modules these live on `site` too (see `HubTradeDetailsDoc`).
+   */
+  tradeDetails?: Pick<SiteSettings, 'emergency' | 'systems' | 'serviceSeason'>;
 }
 
 /** The content file's top-level keys: the hub's collection slugs, camelCased (`processSteps`). */
 export const CONTENT_FILE_KEYS = ['site', 'services', 'projects', 'testimonials', 'processSteps', 'stats', 'faqs'] as const;
-/** Keys a content file may omit (v0.8): one-per-tenant documents for optional sections. */
-export const OPTIONAL_CONTENT_FILE_KEYS = ['offers'] as const;
+/** Keys a content file may omit (v0.8, v0.9): one-per-tenant documents for optional sections. */
+export const OPTIONAL_CONTENT_FILE_KEYS = ['offers', 'tradeDetails'] as const;
 const LISTS = CONTENT_FILE_KEYS.filter((k) => k !== 'site');
 
 /** `/hero.mp4`, `hero.mp4` or `/videos/hero.mp4` → `hero.mp4`. */
@@ -229,6 +234,16 @@ export function toContentFile(data: DataModules): ContentFile {
           },
         }
       : {}),
+    // v0.9: trade facts go to the hub's `trade-details` document, and only when one is set.
+    ...(s.emergency || s.systems?.length || s.serviceSeason
+      ? {
+          tradeDetails: {
+            ...(s.emergency ? { emergency: s.emergency } : {}),
+            ...(s.systems?.length ? { systems: s.systems } : {}),
+            ...(s.serviceSeason ? { serviceSeason: s.serviceSeason } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -267,6 +282,9 @@ export function fromContentFile(file: ContentFile): DataModules {
       ? { pricing: { ...file.offers.pricing, plans: file.offers.pricing.plans.map((p) => ({ ...p, features: untexts(p.features) })) } }
       : {}),
     ...(file.offers?.promos?.length ? { promos: untexts(file.offers.promos) } : {}),
+    ...(file.tradeDetails?.emergency ? { emergency: file.tradeDetails.emergency } : {}),
+    ...(file.tradeDetails?.systems?.length ? { systems: file.tradeDetails.systems } : {}),
+    ...(file.tradeDetails?.serviceSeason ? { serviceSeason: file.tradeDetails.serviceSeason } : {}),
   };
   const f = file.site as Record<string, unknown> as {
     aboutHeading: string;
@@ -369,7 +387,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 /**
  * The structural rules the hub's `seed:tenant` applies to a content file (`src/seed/client.ts`
  * there), so a file that passes here is one the seed accepts: exactly the seven top-level keys (plus
- * an optional `offers` object, v0.8),
+ * optional `offers` (v0.8) and `tradeDetails` (v0.9) objects),
  * `site` an object, every list a non-empty array of objects (a client build fails on an empty
  * collection), and no list item carrying `order`. Field-level rules are `validateSiteContent`'s job.
  */
@@ -383,6 +401,7 @@ export function contentFileProblems(raw: unknown): string[] {
   }
   if (raw.site !== undefined && !isObject(raw.site)) problems.push('"site" must be an object');
   if (raw.offers !== undefined && !isObject(raw.offers)) problems.push('"offers" must be an object');
+  if (raw.tradeDetails !== undefined && !isObject(raw.tradeDetails)) problems.push('"tradeDetails" must be an object');
   for (const key of LISTS) {
     const value = raw[key];
     if (value === undefined) continue;

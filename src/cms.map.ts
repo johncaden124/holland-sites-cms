@@ -11,12 +11,14 @@
  */
 import { SERVICE_ICONS } from './serviceIcons.js';
 import { TRADES } from './trades.js';
+import { HVAC_SYSTEMS, MONTHS, SEASONS } from './types.js';
 import type { RemotePhoto } from './photo.js';
 import type {
   BusinessProfile,
   CopyInputs,
   DayOfWeek,
   Differentiator,
+  EmergencyService,
   Faq,
   GalleryImage,
   Intro,
@@ -25,6 +27,7 @@ import type {
   PricingSection,
   ProcessStep,
   Service,
+  ServiceSeason,
   ShortIntro,
   SiteContent,
   SiteFlags,
@@ -161,6 +164,17 @@ export interface HubOffersDoc {
   pricing?: HubPricingGroup | null;
   promos?: TextRows;
 }
+/**
+ * The tenant's `trade-details` document (v0.9): the facts one vertical needs and another does not
+ * (emergency calls for HVAC, the working season for lawn care). Its own per-tenant document for the
+ * same 100-column reason as `offers`, and optional the same way: none maps exactly as v0.8.
+ */
+export interface HubTradeDetailsDoc {
+  emergency?: { available?: boolean | null; hours?: OptionalText } | null;
+  /** A `hasMany` select: an array of values, `null` or `[]` when untouched. */
+  systems?: Select[] | null;
+  serviceSeason?: { from?: Select | null; to?: Select | null } | null;
+}
 export interface HubServiceDoc {
   icon: Select;
   title: string;
@@ -171,6 +185,8 @@ export interface HubServiceDoc {
   priceHint?: OptionalText;
   slug?: OptionalText;
   answer?: OptionalText;
+  /** v0.9, a `hasMany` select. */
+  seasons?: Select[] | null;
 }
 export interface HubProjectDoc {
   image: HubMedia;
@@ -378,6 +394,31 @@ function mapPricing(p: HubPricingGroup | null | undefined): { pricing?: PricingS
   return { pricing: pricing as PricingSection };
 }
 
+/** v0.9 trade facts, each present only when set, so a tenant without the document maps as v0.8. */
+function mapTradeDetails(d: HubTradeDetailsDoc | null | undefined): {
+  emergency?: EmergencyService;
+  systems?: (typeof HVAC_SYSTEMS)[number][];
+  serviceSeason?: ServiceSeason;
+} {
+  if (!d) return {};
+  const out: ReturnType<typeof mapTradeDetails> = {};
+  // An untouched checkbox is `null`/`false`: emergency wording appears only when it was switched on.
+  if (d.emergency?.available === true) {
+    out.emergency = { available: true, ...opt('hours', d.emergency.hours) };
+  }
+  const systems = (d.systems ?? []).map((v, i) => oneOf(`trade-details.systems[${i}]`, v, HVAC_SYSTEMS));
+  if (systems.length) out.systems = systems;
+  const season = d.serviceSeason;
+  if (season?.from != null || season?.to != null) {
+    // Half a season is an entry mistake, not "from March, forever": say which half is missing.
+    out.serviceSeason = {
+      from: oneOf('trade-details.serviceSeason.from', season.from, MONTHS),
+      to: oneOf('trade-details.serviceSeason.to', season.to, MONTHS),
+    };
+  }
+  return out;
+}
+
 /** Promo lines, present only when there is at least one. */
 function mapPromos(rows: TextRows): { promos?: string[] } {
   const promos = texts(rows).filter(Boolean);
@@ -412,10 +453,10 @@ function mapFlags(f: HubFlagsGroup | null | undefined): { flags?: SiteFlags } {
 // ---- mappers ------------------------------------------------------------------------------
 
 /**
- * `site` plus, from v0.8, the tenant's optional `offers` document, whose fields land on `site`: the
- * content model has one `SiteSettings`, however the hub splits its storage.
+ * `site` plus the tenant's optional `offers` (v0.8) and `trade-details` (v0.9) documents, whose
+ * fields land on `site`: the content model has one `SiteSettings`, however the hub splits its storage.
  */
-export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteContent {
+export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null, details?: HubTradeDetailsDoc | null): SiteContent {
   // Every group is read through `group()` so a hub-side rename fails by name instead of as a
   // `Cannot read properties of undefined` from somewhere inside this object literal.
   const footer = group('site.footer', doc.footer);
@@ -468,6 +509,7 @@ export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteCont
       ...mapFlags(doc.flags),
       ...mapPricing(offers?.pricing),
       ...mapPromos(offers?.promos),
+      ...mapTradeDetails(details),
     },
     hero: {
       // Optional: an unset upload is `null`/absent, and the key is then omitted entirely so a
@@ -526,8 +568,14 @@ export const mapServices = (docs: HubServiceDoc[]): Service[] =>
       ...opt('priceHint', d.priceHint),
       ...opt('slug', d.slug),
       ...opt('answer', d.answer),
+      ...seasonsOf(doc, d.seasons),
     };
   });
+
+function seasonsOf(doc: string, values: Select[] | null | undefined): { seasons?: (typeof SEASONS)[number][] } {
+  const seasons = (values ?? []).map((v, i) => oneOf(`${doc}.seasons[${i}]`, v, SEASONS));
+  return seasons.length ? { seasons } : {};
+}
 
 /** The `projects` collection is the work gallery only; the CTA strip lives on `site`. */
 export const mapProjects = (docs: HubProjectDoc[]): GalleryImage[] =>

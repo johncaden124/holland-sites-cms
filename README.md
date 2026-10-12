@@ -62,6 +62,7 @@ one-line change to the dependency spec in each template; nothing else moves.
 | `./photo` | `imageProps`, `isLocal`, `isRemote`, `Photo`, `RemotePhoto` | types only |
 | `./service-icons` | `SERVICE_ICONS`, `ServiceIcon` — for the hub | **no**, checked in CI |
 | `./trades` | `TRADES`, `Trade` — the hub's `NICHES`, value for value | no |
+| `./verticals` | `VERTICALS`, `VERTICAL_IDS`, `isVertical`, `verticalInfo`, `Vertical` — the trades that have a template, and which template | no |
 | `./astro` | `pruneStandaloneMedia` | yes |
 | `./config` | `SiteCmsConfig`, `ParityConfig` — the shape of `site-cms.config.mjs` | no |
 | `bin: site-cms` | the CLI, below | — |
@@ -109,7 +110,7 @@ render a field ignores it:
 - Both are `site` fields in the content model, but **the hub stores them on a separate per-tenant
   `offers` document**. Cloudflare D1 refuses a query returning more than 100 columns, and Payload
   reads `site` in one query, which was at 95 columns. `getSite()` fetches both and merges them.
-  `offers` is the one optional collection (`OPTIONAL_COLLECTIONS`): zero documents, or a 404 from
+  `offers` is an optional collection (`OPTIONAL_COLLECTIONS`): zero documents, or a 404 from
   a hub that predates it, maps to no pricing and no promos. In a content file it is an optional
   top-level `offers` object.
 - **`business.foundingYear`** (for `foundingDate`) and **`business.priceRange`** (`$`–`$$$$`).
@@ -118,6 +119,25 @@ render a field ignores it:
 - **`GalleryImage.title` / `summary` / `servicesProvided` / `beforeImage`**, for project write-ups
   and before/after sliders. A v0.7 project is still just a photo.
 - **`Testimonial.role`** ("Homeowner").
+
+v0.9 added the **verticals** and the facts one vertical needs and another doesn't. Again all
+optional, so v0.8 content is still valid:
+
+- **`VERTICALS`** (`./verticals`) maps each vertical — a trade that has a template — to its label
+  and template repo: `hvac` → `template-hvac`, `landscaping` → `template-landscaping`. A client's
+  hub row carries one, and that value decides which template is built, which intake questions are
+  asked and which trade copy seeds the site. Adding a vertical is an entry here plus its template.
+  Which commit of a template is built is the builder's choice, not this package's.
+- **`site.emergency`** `{ available, hours? }` (HVAC). Mapped only when `available` is ticked.
+- **`site.systems`** — `HVAC_SYSTEMS` values (`furnace`, `heat-pump`, `central-air`, `ductless`,
+  `boiler`, `water-heater`).
+- **`site.serviceSeason`** `{ from, to }` — `MONTHS` names (landscaping). Half a season fails the
+  build, naming the missing half.
+- **`Service.seasons`** — `SEASONS` values (`spring` … `winter`, `year-round`).
+- The three `site` fields are stored on a second optional per-tenant document,
+  **`trade-details`**, for the same 100-column reason as `offers`. It is in
+  `OPTIONAL_COLLECTIONS`, and in a content file it is the optional top-level `tradeDetails`
+  object.
 
 ## Using it from a template
 

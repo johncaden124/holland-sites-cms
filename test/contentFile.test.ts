@@ -20,6 +20,24 @@ const fixture = (): ContentFile =>
   JSON.parse(readFileSync(new URL('./__fixtures__/content.json', import.meta.url), 'utf8')) as ContentFile;
 
 describe('toContentFile / fromContentFile', () => {
+  it('carry v0.9 trade details in their own document, and service seasons on the service', () => {
+    const file = fixture();
+    file.tradeDetails = {
+      emergency: { available: true, hours: '24/7' },
+      systems: ['furnace'],
+      serviceSeason: { from: 'March', to: 'November' },
+    };
+    file.services[0] = { ...file.services[0]!, seasons: ['spring', 'fall'] };
+    const data = fromContentFile(file);
+    expect(data.site.site.emergency).toStrictEqual({ available: true, hours: '24/7' });
+    expect(data.site.site.serviceSeason).toStrictEqual({ from: 'March', to: 'November' });
+    expect(data.services.services[0]!.seasons).toStrictEqual(['spring', 'fall']);
+    expect(JSON.stringify(toContentFile(data))).toBe(JSON.stringify(file));
+    // A site with none gets no `tradeDetails` key at all.
+    expect('tradeDetails' in toContentFile(fromContentFile(fixture()))).toBe(false);
+    expect(contentFileProblems({ ...fixture(), tradeDetails: [] })).toStrictEqual(['"tradeDetails" must be an object']);
+  });
+
   it('are inverses on the hub demo content, key order included', () => {
     const file = fixture();
     expect(JSON.stringify(toContentFile(fromContentFile(file)))).toBe(JSON.stringify(file));

@@ -71,6 +71,7 @@ export interface ContentFile {
         image?: string;
         beforeImage?: string;
     })[];
+    tradeDetails?: Pick<SiteSettings, 'emergency' | 'systems' | 'serviceSeason'>;
 }
 
 // @public
@@ -170,7 +171,7 @@ export interface ImageRef {
 }
 
 // @public
-export const OPTIONAL_CONTENT_FILE_KEYS: readonly ["offers"];
+export const OPTIONAL_CONTENT_FILE_KEYS: readonly ["offers", "tradeDetails"];
 
 // @public
 export function renderDataModules(data: DataModules): Record<string, string>;
