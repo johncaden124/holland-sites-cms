@@ -190,6 +190,15 @@ describe('cms', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it('reads an empty testimonials or stats list as no section (v0.9), but a 404 for one is still an error', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => json({ docs: [], totalDocs: 0, hasNextPage: false })));
+    const cms = createCms(hub());
+    expect(await cms.getTestimonials()).toStrictEqual([]);
+    expect(await cms.getStats()).toStrictEqual([]);
+    vi.stubGlobal('fetch', vi.fn(async () => json({ errors: [{ message: 'Not Found' }] }, 404, 'Not Found')));
+    await expect(createCms(hub()).getStats()).rejects.toThrow('CMS stats: HTTP 404 Not Found');
+  });
+
   it('tells the operator to create the Site document when the site collection is empty', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => json({ ...hubSite, docs: [], totalDocs: 0 })));
     const cms = createCms(hub());

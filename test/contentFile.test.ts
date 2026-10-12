@@ -38,6 +38,13 @@ describe('toContentFile / fromContentFile', () => {
     expect(contentFileProblems({ ...fixture(), tradeDetails: [] })).toStrictEqual(['"tradeDetails" must be an object']);
   });
 
+  it('accept empty testimonials and stats (v0.9), and no other empty list', () => {
+    expect(contentFileProblems({ ...fixture(), testimonials: [], stats: [] })).toStrictEqual([]);
+    expect(contentFileProblems({ ...fixture(), faqs: [] })).toStrictEqual([
+      '"faqs" is empty — every collection needs at least one document',
+    ]);
+  });
+
   it('are inverses on the hub demo content, key order included', () => {
     const file = fixture();
     expect(JSON.stringify(toContentFile(fromContentFile(file)))).toBe(JSON.stringify(file));

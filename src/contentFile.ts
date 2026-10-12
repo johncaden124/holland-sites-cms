@@ -133,6 +133,8 @@ export interface ContentFile {
 export const CONTENT_FILE_KEYS = ['site', 'services', 'projects', 'testimonials', 'processSteps', 'stats', 'faqs'] as const;
 /** Keys a content file may omit (v0.8, v0.9): one-per-tenant documents for optional sections. */
 export const OPTIONAL_CONTENT_FILE_KEYS = ['offers', 'tradeDetails'] as const;
+/** Lists a content file may leave empty (v0.9): no reviews or figures yet is a real state. */
+export const EMPTY_OK_LISTS = ['testimonials', 'stats'] as const;
 const LISTS = CONTENT_FILE_KEYS.filter((k) => k !== 'site');
 
 /** `/hero.mp4`, `hero.mp4` or `/videos/hero.mp4` → `hero.mp4`. */
@@ -388,8 +390,8 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
  * The structural rules the hub's `seed:tenant` applies to a content file (`src/seed/client.ts`
  * there), so a file that passes here is one the seed accepts: exactly the seven top-level keys (plus
  * optional `offers` (v0.8) and `tradeDetails` (v0.9) objects),
- * `site` an object, every list a non-empty array of objects (a client build fails on an empty
- * collection), and no list item carrying `order`. Field-level rules are `validateSiteContent`'s job.
+ * `site` an object, every list an array of objects — non-empty except `EMPTY_OK_LISTS` (a client
+ * build fails on any other empty collection) — and no list item carrying `order`. Field-level rules are `validateSiteContent`'s job.
  */
 export function contentFileProblems(raw: unknown): string[] {
   if (!isObject(raw)) return ['the content file must be a JSON object'];
@@ -406,7 +408,9 @@ export function contentFileProblems(raw: unknown): string[] {
     const value = raw[key];
     if (value === undefined) continue;
     if (!Array.isArray(value) || !value.every(isObject)) problems.push(`"${key}" must be an array of objects`);
-    else if (value.length === 0) problems.push(`"${key}" is empty — every collection needs at least one document`);
+    else if (value.length === 0 && !(EMPTY_OK_LISTS as readonly string[]).includes(key)) {
+      problems.push(`"${key}" is empty — every collection needs at least one document`);
+    }
     else if (value.some((item) => 'order' in item)) problems.push(`"${key}": items must not carry "order"`);
   }
   return problems;

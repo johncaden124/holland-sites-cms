@@ -79,13 +79,22 @@ export const COLLECTIONS = [
 ] as const;
 
 /**
- * Collections a tenant may leave empty (`offers` since v0.8, `trade-details` since v0.9). Every other collection must have documents, because
- * an empty one would render a broken page; these hold optional sections that render nothing when
- * absent. A 404 for one of them reads as empty too: a hub that predates the collection has none,
- * and so does a template's mock hub without its fixture.
+ * Collections a tenant may leave empty. Every other collection must have documents, because an
+ * empty one would render a broken page; these hold optional sections that render nothing when
+ * absent:
+ *   - `offers` (v0.8) and `trade-details` (v0.9), one document per tenant or none;
+ *   - `testimonials` and `stats` (v0.9): a new client has no reviews or figures yet, and a site must
+ *     never invent them, so an empty list is a real state, not a missing one.
  */
-export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][] = ['offers', 'trade-details'];
+export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][] = ['offers', 'trade-details', 'testimonials', 'stats'];
 const isOptional = (collection: string) => (OPTIONAL_COLLECTIONS as readonly string[]).includes(collection);
+/**
+ * The optional one-per-tenant documents. A 404 for one reads as empty (a hub that predates the
+ * collection has none, and so does a template's mock hub without its fixture); a 404 for a list
+ * collection is still a misconfigured hub.
+ */
+const ONE_OR_NONE: readonly string[] = ['offers', 'trade-details'];
+const isOneOrNone = (collection: string) => ONE_OR_NONE.includes(collection);
 
 /** Payload's page size. A collection larger than this is refused rather than silently truncated. */
 const PAGE_LIMIT = 100;
@@ -286,7 +295,7 @@ export function createCms(options: CmsOptions): Cms {
       body = undefined;
     }
 
-    if (res.status === 404 && isOptional(collection)) return [];
+    if (res.status === 404 && isOneOrNone(collection)) return [];
     if (!res.ok) {
       const status = `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ''}`;
       const detail = payloadMessage(body);
@@ -320,7 +329,7 @@ export function createCms(options: CmsOptions): Cms {
       );
     }
     // `offers` and `trade-details` are per-tenant too, but optional: none or one.
-    if (isOptional(collection) && list.docs.length > 1) {
+    if (isOneOrNone(collection) && list.docs.length > 1) {
       throw new Error(
         `CMS ${collection}: expected at most 1 document for this tenant, got ${list.docs.length}` + ` — ${KEY_HINT}`,
       );

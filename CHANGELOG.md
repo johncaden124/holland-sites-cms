@@ -26,6 +26,7 @@ Entries before 0.6.0 were backfilled from the git tags and their annotations.
   - `COLLECTIONS` and `OPTIONAL_COLLECTIONS` gain `trade-details`. None, or a 404, maps exactly as v0.8; more than one is refused, naming the key.
   - `getSite()` fetches `site`, `offers` and `trade-details` together. `mapSite(doc, offers?, details?)` takes it as a third argument; `HubTradeDetailsDoc` describes it, and `HubServiceDoc.seasons` the new service field.
   - In a content file it is the optional top-level `tradeDetails` object, written only when one of the three is set.
+- **`testimonials` and `stats` may be empty.** A new client has no reviews or figures yet, and a site must never invent them. Both join `OPTIONAL_COLLECTIONS`: an empty list maps to `[]` rather than failing the build, and a template renders no section. A 404 for either is still an error; only the one-per-tenant documents read a 404 as none. `contentFileProblems` accepts them empty too (`EMPTY_OK_LISTS`).
 - `HVAC_SYSTEMS`, `SEASONS`, `MONTHS` and the types `EmergencyService`, `HvacSystem`, `Season`, `Month`, `ServiceSeason` are exported from the root and from `./types`.
 
 ## 0.8.0 — 2026-10-11

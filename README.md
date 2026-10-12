@@ -138,6 +138,9 @@ optional, so v0.8 content is still valid:
   **`trade-details`**, for the same 100-column reason as `offers`. It is in
   `OPTIONAL_COLLECTIONS`, and in a content file it is the optional top-level `tradeDetails`
   object.
+- **`testimonials` and `stats` may be empty.** A new client has no reviews or figures yet and a
+  site must never invent them, so an empty list maps to `[]` (no section) instead of failing the
+  build. A 404 for either is still an error.
 
 ## Using it from a template
 

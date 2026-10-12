@@ -156,6 +156,9 @@ export interface DataModules {
 }
 
 // @public
+export const EMPTY_OK_LISTS: readonly ["testimonials", "stats"];
+
+// @public
 export function fromContentFile(file: ContentFile): DataModules;
 
 // @public
