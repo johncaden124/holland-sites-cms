@@ -20,7 +20,7 @@ const fixture = (): ContentFile =>
   JSON.parse(readFileSync(new URL('./__fixtures__/content.json', import.meta.url), 'utf8')) as ContentFile;
 
 describe('toContentFile / fromContentFile', () => {
-  it('carry v0.9 trade details in their own document, and service seasons on the service', () => {
+  it('carry v0.10 trade details in their own document, and service seasons on the service', () => {
     const file = fixture();
     file.tradeDetails = {
       emergency: { available: true, hours: '24/7' },
@@ -38,7 +38,7 @@ describe('toContentFile / fromContentFile', () => {
     expect(contentFileProblems({ ...fixture(), tradeDetails: [] })).toStrictEqual(['"tradeDetails" must be an object']);
   });
 
-  it('accept empty testimonials and stats (v0.9), and no other empty list', () => {
+  it('accept empty testimonials and stats (v0.10), and no other empty list', () => {
     expect(contentFileProblems({ ...fixture(), testimonials: [], stats: [] })).toStrictEqual([]);
     expect(contentFileProblems({ ...fixture(), faqs: [] })).toStrictEqual([
       '"faqs" is empty — every collection needs at least one document',
@@ -65,6 +65,17 @@ describe('toContentFile / fromContentFile', () => {
     expect(back.site.flags).toStrictEqual({ isPreview: true });
     expect(back.services[0]!.priceHint).toBe('From $49');
     expect(back.testimonials[0]).toMatchObject({ rating: 5, date: '2026-01-02', source: 'google' });
+  });
+
+  it('carry the v0.8 legal text and label groups through, and leave them out when unset', () => {
+    const file = fixture();
+    expect('legal' in toContentFile(fromContentFile(file)).site).toBe(false);
+    file.site.legal = { callRecordingNotice: 'Calls may be recorded.' };
+    const pages = { home: 'Home', services: 'Services', contact: 'Contact', privacy: 'Privacy', terms: 'Terms' };
+    file.site.labels = { ...(file.site.labels as Record<string, unknown>), pages };
+    const back = toContentFile(fromContentFile(file));
+    expect(back.site.legal).toStrictEqual({ callRecordingNotice: 'Calls may be recorded.' });
+    expect((back.site.labels as { pages?: unknown }).pages).toStrictEqual(pages);
   });
 
   it('carry the v0.8 pricing, promos, project and service fields through', () => {

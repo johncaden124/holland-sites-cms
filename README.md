@@ -120,8 +120,16 @@ render a field ignores it:
   and before/after sliders. A v0.7 project is still just a photo.
 - **`Testimonial.role`** ("Homeowner").
 
-v0.9 added the **verticals** and the facts one vertical needs and another doesn't. Again all
-optional, so v0.8 content is still valid:
+v0.9 moved the last of what a template had been keeping in its own files into the package, again all
+optional:
+
+- **`TRADE_INFO`**: per trade, the `noun` for titles and the schema.org `schemaType` to publish.
+- **`site.legal`**: `legalName`, `callRecordingNotice`, `smsConsent`. Attorney text, rendered only
+  when set.
+- **`site.labels.pages`** and **`site.labels.form`**: page names and every string of the lead form.
+
+v0.10 added the **verticals** and the facts one vertical needs and another doesn't. Again all
+optional, so v0.9 content is still valid:
 
 - **`VERTICALS`** (`./verticals`) maps each vertical — a trade that has a template — to its label
   and template repo: `hvac` → `template-hvac`, `landscaping` → `template-landscaping`. A client's

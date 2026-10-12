@@ -123,7 +123,7 @@ export interface ContentFile {
     promos?: TextRow[];
   };
   /**
-   * The hub's per-tenant `trade-details` document (v0.9), present only when the site sets a trade
+   * The hub's per-tenant `trade-details` document (v0.10), present only when the site sets a trade
    * fact. In the data modules these live on `site` too (see `HubTradeDetailsDoc`).
    */
   tradeDetails?: Pick<SiteSettings, 'emergency' | 'systems' | 'serviceSeason'>;
@@ -131,9 +131,9 @@ export interface ContentFile {
 
 /** The content file's top-level keys: the hub's collection slugs, camelCased (`processSteps`). */
 export const CONTENT_FILE_KEYS = ['site', 'services', 'projects', 'testimonials', 'processSteps', 'stats', 'faqs'] as const;
-/** Keys a content file may omit (v0.8, v0.9): one-per-tenant documents for optional sections. */
+/** Keys a content file may omit (v0.8, v0.10): one-per-tenant documents for optional sections. */
 export const OPTIONAL_CONTENT_FILE_KEYS = ['offers', 'tradeDetails'] as const;
-/** Lists a content file may leave empty (v0.9): no reviews or figures yet is a real state. */
+/** Lists a content file may leave empty (v0.10): no reviews or figures yet is a real state. */
 export const EMPTY_OK_LISTS = ['testimonials', 'stats'] as const;
 const LISTS = CONTENT_FILE_KEYS.filter((k) => k !== 'site');
 
@@ -196,6 +196,8 @@ export function toContentFile(data: DataModules): ContentFile {
       ...(s.business ? { business: { ...s.business, serviceAreaTowns: texts(s.business.serviceAreaTowns) } } : {}),
       ...(s.copy ? { copy: s.copy } : {}),
       ...(s.flags ? { flags: s.flags } : {}),
+      // Legal wording (v0.8): only when a client's lawyer has written some.
+      ...(s.legal ? { legal: s.legal } : {}),
     },
     services: data.services.services.map((x) => ({ ...x, image: img(x.image), bullets: texts(x.bullets) })),
     // Rebuilt key by key, like testimonials, so the v0.8 optionals keep the source's key order and an
@@ -236,7 +238,7 @@ export function toContentFile(data: DataModules): ContentFile {
           },
         }
       : {}),
-    // v0.9: trade facts go to the hub's `trade-details` document, and only when one is set.
+    // v0.10: trade facts go to the hub's `trade-details` document, and only when one is set.
     ...(s.emergency || s.systems?.length || s.serviceSeason
       ? {
           tradeDetails: {
@@ -280,6 +282,7 @@ export function fromContentFile(file: ContentFile): DataModules {
       : {}),
     ...(s.copy ? { copy: s.copy } : {}),
     ...(s.flags ? { flags: s.flags } : {}),
+    ...(s.legal ? { legal: s.legal } : {}),
     ...(file.offers?.pricing
       ? { pricing: { ...file.offers.pricing, plans: file.offers.pricing.plans.map((p) => ({ ...p, features: untexts(p.features) })) } }
       : {}),
@@ -389,7 +392,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 /**
  * The structural rules the hub's `seed:tenant` applies to a content file (`src/seed/client.ts`
  * there), so a file that passes here is one the seed accepts: exactly the seven top-level keys (plus
- * optional `offers` (v0.8) and `tradeDetails` (v0.9) objects),
+ * optional `offers` (v0.8) and `tradeDetails` (v0.10) objects),
  * `site` an object, every list an array of objects — non-empty except `EMPTY_OK_LISTS` (a client
  * build fails on any other empty collection) — and no list item carrying `order`. Field-level rules are `validateSiteContent`'s job.
  */

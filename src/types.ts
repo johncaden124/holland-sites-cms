@@ -16,9 +16,9 @@ import type { Trade } from './trades.js';
 
 export type { Photo, RemotePhoto } from './photo.js';
 export type { ServiceIcon } from './serviceIcons.js';
-export type { Trade } from './trades.js';
+export type { Trade, TradeInfo } from './trades.js';
 export { SERVICE_ICONS } from './serviceIcons.js';
-export { TRADES } from './trades.js';
+export { TRADE_INFO, TRADES } from './trades.js';
 
 // ---- site settings ---------------------------------------------------------------------------
 
@@ -186,6 +186,50 @@ export interface SiteFlags {
   isPreview?: boolean;
 }
 
+/** Names of a template's pages, as links, breadcrumbs and titles print them (v0.8). */
+export interface PageLabels {
+  home: string;
+  services: string;
+  contact: string;
+  privacy: string;
+  terms: string;
+}
+
+/** The contact section and lead form (v0.8). Every string a form shows, so each niche can reword it. */
+export interface FormLabels {
+  /** The section's chip, above the heading. */
+  chip: string;
+  heading: string;
+  intro: string;
+  name: string;
+  phone: string;
+  email: string;
+  /** The service `<select>`'s label and its empty first option. */
+  service: string;
+  servicePlaceholder: string;
+  message: string;
+  submit: string;
+  /** The submit button while the request is in flight. */
+  sending: string;
+  /** Shown when neither a phone number nor an email was given. */
+  required: string;
+  success: string;
+  failure: string;
+}
+
+/**
+ * Wording a lawyer writes, per client (v0.8). The Holland tracking number may record calls and text
+ * back, and some states require notice of both; these are the slots for it.
+ */
+export interface LegalText {
+  /** The registered legal entity, when it differs from `site.name` ("Acme Services LLC"). */
+  legalName?: string;
+  /** Call-recording notice, shown near the phone number and the form. */
+  callRecordingNotice?: string;
+  /** SMS consent wording, shown under the lead form. */
+  smsConsent?: string;
+}
+
 // ---- pricing (optional, v0.8) ------------------------------------------------------------------
 
 /** How often a plan's `price` is charged. */
@@ -221,7 +265,7 @@ export interface PricingSection {
   plans: PricingPlan[];
 }
 
-// ---- trade details (optional, v0.9) -----------------------------------------------------------
+// ---- trade details (optional, v0.10) -----------------------------------------------------------
 
 /**
  * Whether the business takes emergency calls, and when. HVAC reads it (a no-heat call at 2 a.m. is
@@ -310,9 +354,21 @@ export interface SiteSettings {
     /** Headings for the two optional footer columns; unused when their field is unset. */
     footerServiceArea: string;
     footerHours: string;
+    /**
+     * Page names (v0.8): footer page links, breadcrumbs, `<title>`s, llms.txt. Absent: a template
+     * uses its own defaults.
+     */
+    pages?: PageLabels;
+    /** The contact section's heading and the lead form's copy (v0.8). Absent: template defaults. */
+    form?: FormLabels;
   };
   socials: Social[];
   copyright: string;
+  /**
+   * Per-client legal wording (v0.8). Every field renders only when set, and **each is attorney
+   * text**: a template must never ship a default for any of them.
+   */
+  legal?: LegalText;
   /** Structured business facts (v0.6). Optional: a v0.5 site has none. */
   business?: BusinessProfile;
   /**
@@ -329,13 +385,13 @@ export interface SiteSettings {
   copy?: CopyInputs;
   flags?: SiteFlags;
   /**
-   * Emergency calls (v0.9, HVAC). Absent: a template shows no emergency wording at all. Stored on
-   * the hub's `trade-details` document, like every v0.9 trade fact.
+   * Emergency calls (v0.10, HVAC). Absent: a template shows no emergency wording at all. Stored on
+   * the hub's `trade-details` document, like every v0.10 trade fact.
    */
   emergency?: EmergencyService;
-  /** The systems an HVAC business works on (v0.9), in display order. Absent or empty: not shown. */
+  /** The systems an HVAC business works on (v0.10), in display order. Absent or empty: not shown. */
   systems?: HvacSystem[];
-  /** The months a seasonal business works (v0.9, landscaping). Absent: year-round, or not said. */
+  /** The months a seasonal business works (v0.10, landscaping). Absent: year-round, or not said. */
   serviceSeason?: ServiceSeason;
 }
 
@@ -368,7 +424,7 @@ export interface Service {
    * page opens with — the passage answer engines quote.
    */
   answer?: string;
-  /** When the service is offered (v0.9, seasonal trades): "aeration" in spring and fall. Absent: always. */
+  /** When the service is offered (v0.10, seasonal trades): "aeration" in spring and fall. Absent: always. */
   seasons?: Season[];
 }
 

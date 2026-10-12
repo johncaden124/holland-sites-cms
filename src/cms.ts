@@ -82,8 +82,8 @@ export const COLLECTIONS = [
  * Collections a tenant may leave empty. Every other collection must have documents, because an
  * empty one would render a broken page; these hold optional sections that render nothing when
  * absent:
- *   - `offers` (v0.8) and `trade-details` (v0.9), one document per tenant or none;
- *   - `testimonials` and `stats` (v0.9): a new client has no reviews or figures yet, and a site must
+ *   - `offers` (v0.8) and `trade-details` (v0.10), one document per tenant or none;
+ *   - `testimonials` and `stats` (v0.10): a new client has no reviews or figures yet, and a site must
  *     never invent them, so an empty list is a real state, not a missing one.
  */
 export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][] = ['offers', 'trade-details', 'testimonials', 'stats'];

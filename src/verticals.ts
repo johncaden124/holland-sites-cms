@@ -1,5 +1,5 @@
 /**
- * The verticals Holland Sites builds sites for: one template each (v0.9).
+ * The verticals Holland Sites builds sites for: one template each (v0.10).
  *
  * A vertical is a trade that has a template. A client's hub row carries its vertical, and that one
  * value decides which template `deploy-site` builds, which intake questions the owner answers and

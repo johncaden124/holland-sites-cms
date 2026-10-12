@@ -135,6 +135,34 @@ export interface Faq {
 export const formatProblems: (problems: ContentProblem[]) => string;
 
 // @public
+export interface FormLabels {
+    chip: string;
+    // (undocumented)
+    email: string;
+    // (undocumented)
+    failure: string;
+    // (undocumented)
+    heading: string;
+    // (undocumented)
+    intro: string;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    phone: string;
+    required: string;
+    sending: string;
+    service: string;
+    // (undocumented)
+    servicePlaceholder: string;
+    // (undocumented)
+    submit: string;
+    // (undocumented)
+    success: string;
+}
+
+// @public
 export interface GalleryImage {
     // (undocumented)
     alt: string;
@@ -238,6 +266,9 @@ export interface HubFlagsGroup {
     // (undocumented)
     reviewsFromGbp?: boolean | null;
 }
+
+// @public
+export type HubLegalGroup = HubTextGroup<Required<LegalText>>;
 
 // @public
 export interface HubMedia {
@@ -378,8 +409,12 @@ export interface HubSiteDoc {
     heroVideo?: HubMedia | number | string | null;
     // (undocumented)
     impactIntro: ShortIntro;
+    labels: Omit<SiteSettings['labels'], 'pages' | 'form'> & {
+        pages?: HubTextGroup<PageLabels>;
+        form?: HubTextGroup<FormLabels>;
+    };
     // (undocumented)
-    labels: SiteSettings['labels'];
+    legal?: HubLegalGroup;
     // (undocumented)
     licenseNumber?: OptionalText;
     // (undocumented)
@@ -493,6 +528,13 @@ export const isRemote: (p: Photo) => p is RemotePhoto;
 export function isVertical(value: unknown): value is Vertical;
 
 // @public
+export interface LegalText {
+    callRecordingNotice?: string;
+    legalName?: string;
+    smsConsent?: string;
+}
+
+// @public
 export interface LocalContent {
     // (undocumented)
     faqs: Faq[];
@@ -583,6 +625,20 @@ export interface OpeningHours {
 
 // @public
 export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][];
+
+// @public
+export interface PageLabels {
+    // (undocumented)
+    contact: string;
+    // (undocumented)
+    home: string;
+    // (undocumented)
+    privacy: string;
+    // (undocumented)
+    services: string;
+    // (undocumented)
+    terms: string;
+}
 
 // @public
 export function parseMediaHost(value: string | undefined): string;
@@ -789,7 +845,10 @@ export interface SiteSettings {
         footerAddress: string;
         footerServiceArea: string;
         footerHours: string;
+        pages?: PageLabels;
+        form?: FormLabels;
     };
+    legal?: LegalText;
     licenseNumber?: string;
     // (undocumented)
     name: string;
@@ -845,6 +904,15 @@ export type TestimonialSource = 'google' | 'facebook' | 'yelp' | 'nextdoor' | 'd
 
 // @public (undocumented)
 export type Trade = (typeof TRADES)[number];
+
+// @public
+export const TRADE_INFO: Readonly<Record<Trade, TradeInfo>>;
+
+// @public
+export interface TradeInfo {
+    noun: string;
+    schemaType: string;
+}
 
 // @public
 export const TRADES: readonly ["hvac", "plumbing", "pest-control", "electrical", "garage-door", "appliance-repair", "restoration", "cleaning", "landscaping", "tree-service", "junk-removal", "roofing", "painting", "fence-deck", "auto-repair", "pool-service", "handyman", "gutters", "pressure-washing", "other"];

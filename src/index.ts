@@ -39,6 +39,7 @@ export {
   type HubCopyGroup,
   type HubFaqDoc,
   type HubFlagsGroup,
+  type HubLegalGroup,
   type HubMedia,
   type HubOffersDoc,
   type HubTradeDetailsDoc,
@@ -61,7 +62,7 @@ export {
   type MediaOriginsInput,
 } from './mediaOrigins.js';
 export { SERVICE_ICONS, type ServiceIcon } from './serviceIcons.js';
-export { TRADES, type Trade } from './trades.js';
+export { TRADE_INFO, TRADES, type Trade, type TradeInfo } from './trades.js';
 export { VERTICAL_IDS, VERTICALS, isVertical, verticalInfo, type Vertical, type VerticalInfo } from './verticals.js';
 export { HVAC_SYSTEMS, MONTHS, SEASONS } from './types.js';
 export {
@@ -80,15 +81,18 @@ export type {
   Differentiator,
   EmergencyService,
   Faq,
+  FormLabels,
   GalleryImage,
   Geo,
   HeroMedia,
   HvacSystem,
   Intro,
+  LegalText,
   LocalContent,
   Month,
   NavLink,
   OpeningHours,
+  PageLabels,
   PostalAddress,
   PricingCadence,
   PricingPlan,

@@ -190,7 +190,7 @@ describe('cms', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('reads an empty testimonials or stats list as no section (v0.9), but a 404 for one is still an error', async () => {
+  it('reads an empty testimonials or stats list as no section (v0.10), but a 404 for one is still an error', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => json({ docs: [], totalDocs: 0, hasNextPage: false })));
     const cms = createCms(hub());
     expect(await cms.getTestimonials()).toStrictEqual([]);
@@ -313,11 +313,11 @@ describe('cms', () => {
     const cms = createCms(hub('http://localhost:3000'));
     const first = await cms.getSite();
     expect(await cms.getSite()).toBe(first);
-    // One request each for `site`, (v0.8) `offers` and (v0.9) `trade-details`, however many calls.
+    // One request each for `site`, (v0.8) `offers` and (v0.10) `trade-details`, however many calls.
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  describe('trade-details (v0.9, optional)', () => {
+  describe('trade-details (v0.10, optional)', () => {
     const DETAILS = 'http://localhost:3000/api/trade-details?depth=1&limit=100&sort=order';
     const detailsDoc = {
       id: 1,

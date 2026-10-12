@@ -9,7 +9,7 @@ Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
 ## Unreleased
 
-## 0.9.0 — 2026-10-12
+## 0.10.0 — 2026-10-12
 
 ### Added: verticals
 - New subpath `./verticals` (also re-exported from the root): `VERTICALS`, `VERTICAL_IDS`, `isVertical`, `verticalInfo`, and the `Vertical` / `VerticalInfo` types.
@@ -28,6 +28,35 @@ Entries before 0.6.0 were backfilled from the git tags and their annotations.
   - In a content file it is the optional top-level `tradeDetails` object, written only when one of the three is set.
 - **`testimonials` and `stats` may be empty.** A new client has no reviews or figures yet, and a site must never invent them. Both join `OPTIONAL_COLLECTIONS`: an empty list maps to `[]` rather than failing the build, and a template renders no section. A 404 for either is still an error; only the one-per-tenant documents read a 404 as none. `contentFileProblems` accepts them empty too (`EMPTY_OK_LISTS`).
 - `HVAC_SYSTEMS`, `SEASONS`, `MONTHS` and the types `EmergencyService`, `HvacSystem`, `Season`, `Month`, `ServiceSeason` are exported from the root and from `./types`.
+
+## 0.9.0 — 2026-10-12
+
+The rest of template-landscaping's proposed `types.ts` diff (its TEMPLATE-AUDIT, approved by the
+owner). Everything is optional, so v0.8 content is still valid content. `BusinessProfile.priceRange`
+from the same diff shipped in 0.8.0.
+
+### Added
+- `TRADE_INFO` (root, `./trades` and `./types`): one `{ noun, schemaType }` per `TRADES` value.
+  - `noun` is how the trade reads in titles ("Landscaping in Westerville").
+  - `schemaType` is the schema.org `LocalBusiness` subtype to publish. Only types that exist in
+    schema.org: trades without a subtype (landscaping, pest control, cleaning, …) are
+    `HomeAndConstructionBusiness`, never an invented `LandscapingBusiness`. A test holds every entry
+    to a known list and requires one entry per trade.
+- `SiteSettings.legal?: LegalText` (`legalName?`, `callRecordingNotice?`, `smsConsent?`): per-client
+  legal wording for the Holland tracking number's call recording and text-back. Attorney text: a
+  template renders each only when set and ships no default.
+- `labels.pages?: PageLabels` (`home`, `services`, `contact`, `privacy`, `terms`) and
+  `labels.form?: FormLabels` (the contact section's chip, heading and intro, and every string the
+  lead form shows), so a niche can reword its interface from the hub.
+- The mappers carry all of the above when a tenant sets them. A label or legal group whose every
+  leaf is `null` (what Payload sends for an untouched group) maps to no key, so v0.8 tenants map
+  exactly as before. A half-filled label group is kept whole, so `validateSiteContent` names the
+  empty labels instead of a template printing blanks.
+- Content files carry `legal` both ways; the label groups travel inside `labels` as they are.
+
+### The hub needs
+- `site.labels.pages` and `site.labels.form`: groups of text fields with the names above.
+- `site.legal`: group of three textareas.
 
 ## 0.8.0 — 2026-10-11
 
