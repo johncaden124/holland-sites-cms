@@ -78,7 +78,7 @@ export interface CmsOptions {
 }
 
 // @public
-export const COLLECTIONS: readonly ["site", "offers", "services", "projects", "testimonials", "process-steps", "stats", "faqs"];
+export const COLLECTIONS: readonly ["site", "offers", "trade-details", "services", "projects", "testimonials", "process-steps", "stats", "faqs"];
 
 // @public
 export const collectionUrl: (base: string, collection: string) => string;
@@ -115,6 +115,13 @@ export const DEFAULT_MEDIA_HOST = "media.hollandsites.com";
 
 // @public
 export type Differentiator = 'same-day' | '24-7' | 'family-owned' | 'licensed-insured' | 'free-estimates' | 'none';
+
+// @public
+export interface EmergencyService {
+    // (undocumented)
+    available: boolean;
+    hours?: string;
+}
 
 // @public
 export interface Faq {
@@ -341,6 +348,7 @@ export interface HubServiceDoc {
     imageAlt: string;
     // (undocumented)
     priceHint?: OptionalText;
+    seasons?: Select[] | null;
     // (undocumented)
     slug?: OptionalText;
     // (undocumented)
@@ -469,6 +477,27 @@ export interface HubTestimonialDoc {
 }
 
 // @public
+export interface HubTradeDetailsDoc {
+    // (undocumented)
+    emergency?: {
+        available?: boolean | null;
+        hours?: OptionalText;
+    } | null;
+    // (undocumented)
+    serviceSeason?: {
+        from?: Select | null;
+        to?: Select | null;
+    } | null;
+    systems?: Select[] | null;
+}
+
+// @public
+export const HVAC_SYSTEMS: readonly ["furnace", "heat-pump", "central-air", "ductless", "boiler", "water-heater"];
+
+// @public (undocumented)
+export type HvacSystem = (typeof HVAC_SYSTEMS)[number];
+
+// @public
 export function imageProps(p: Photo): {
     src: ImageMetadata;
     width?: undefined;
@@ -494,6 +523,9 @@ export const isLocal: (p: Photo) => p is ImageMetadata;
 
 // @public (undocumented)
 export const isRemote: (p: Photo) => p is RemotePhoto;
+
+// @public (undocumented)
+export function isVertical(value: unknown): value is Vertical;
 
 // @public
 export interface LegalText {
@@ -533,7 +565,7 @@ export const mapProjects: (docs: HubProjectDoc[]) => GalleryImage[];
 export const mapServices: (docs: HubServiceDoc[]) => Service[];
 
 // @public
-export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteContent;
+export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null, details?: HubTradeDetailsDoc | null): SiteContent;
 
 // @public (undocumented)
 export const mapStats: (docs: HubStatDoc[]) => Stat[];
@@ -568,6 +600,12 @@ export interface MediaOriginsInput {
     mediaHost?: string | undefined;
     payloadUrl?: string | undefined;
 }
+
+// @public (undocumented)
+export type Month = (typeof MONTHS)[number];
+
+// @public (undocumented)
+export const MONTHS: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 // @public (undocumented)
 export interface NavLink {
@@ -665,6 +703,12 @@ export type RemotePhoto = {
     format?: never;
 };
 
+// @public (undocumented)
+export type Season = (typeof SEASONS)[number];
+
+// @public
+export const SEASONS: readonly ["spring", "summer", "fall", "winter", "year-round"];
+
 // @public
 export interface Service {
     answer?: string;
@@ -679,6 +723,7 @@ export interface Service {
     // (undocumented)
     imageAlt: string;
     priceHint?: string;
+    seasons?: Season[];
     slug?: string;
     // (undocumented)
     title: string;
@@ -689,6 +734,14 @@ export const SERVICE_ICONS: readonly ["heating", "cooling", "air-flow", "air-qua
 
 // @public
 export type ServiceIcon = (typeof SERVICE_ICONS)[number];
+
+// @public
+export interface ServiceSeason {
+    // (undocumented)
+    from: Month;
+    // (undocumented)
+    to: Month;
+}
 
 // @public (undocumented)
 export type ShortIntro = Pick<Intro, 'chip' | 'heading'>;
@@ -761,6 +814,7 @@ export interface SiteSettings {
     copyright: string;
     // (undocumented)
     description: string;
+    emergency?: EmergencyService;
     // (undocumented)
     flags?: SiteFlags;
     footer: {
@@ -807,8 +861,10 @@ export interface SiteSettings {
     review: {
         summary: string;
     };
+    serviceSeason?: ServiceSeason;
     // (undocumented)
     socials: Social[];
+    systems?: HvacSystem[];
     tagline: string;
 }
 
@@ -877,6 +933,35 @@ export interface ValidationResult {
     // (undocumented)
     problems: ContentProblem[];
 }
+
+// @public (undocumented)
+export type Vertical = keyof typeof VERTICALS;
+
+// @public
+export const VERTICAL_IDS: Vertical[];
+
+// @public (undocumented)
+export interface VerticalInfo {
+    label: string;
+    template: string;
+}
+
+// @public
+export function verticalInfo(value: string): VerticalInfo & {
+    id: Vertical;
+};
+
+// @public (undocumented)
+export const VERTICALS: {
+    readonly hvac: {
+        readonly label: "Heating & cooling";
+        readonly template: "template-hvac";
+    };
+    readonly landscaping: {
+        readonly label: "Lawn care & landscaping";
+        readonly template: "template-landscaping";
+    };
+};
 
 // (No @packageDocumentation comment for this package)
 

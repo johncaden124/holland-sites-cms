@@ -426,6 +426,21 @@
         },
         "flags": {
           "$ref": "#/definitions/SiteFlags"
+        },
+        "emergency": {
+          "$ref": "#/definitions/EmergencyService",
+          "description": "Emergency calls (v0.10, HVAC). Absent: a template shows no emergency wording at all. Stored on the hub's `trade-details` document, like every v0.10 trade fact."
+        },
+        "systems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HvacSystem"
+          },
+          "description": "The systems an HVAC business works on (v0.10), in display order. Absent or empty: not shown."
+        },
+        "serviceSeason": {
+          "$ref": "#/definitions/ServiceSeason",
+          "description": "The months a seasonal business works (v0.10, landscaping). Absent: year-round, or not said."
         }
       },
       "required": [
@@ -1002,6 +1017,68 @@
       "additionalProperties": false,
       "description": "Build-time switches the content carries rather than the environment. Each is off unless present and `true`; content mapped from the hub carries a flag only when it is on."
     },
+    "EmergencyService": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "hours": {
+          "type": "string",
+          "description": "When emergency calls are taken, as the business words it (\"24/7, holidays included\")."
+        }
+      },
+      "required": [
+        "available"
+      ],
+      "additionalProperties": false,
+      "description": "Whether the business takes emergency calls, and when. HVAC reads it (a no-heat call at 2 a.m. is the job); a lawn-care site leaves it out."
+    },
+    "HvacSystem": {
+      "type": "string",
+      "enum": [
+        "furnace",
+        "heat-pump",
+        "central-air",
+        "ductless",
+        "boiler",
+        "water-heater"
+      ]
+    },
+    "ServiceSeason": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/definitions/Month"
+        },
+        "to": {
+          "$ref": "#/definitions/Month"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "additionalProperties": false,
+      "description": "The months a seasonal business works (\"March to November\"). Wraps the year when `to` < `from`."
+    },
+    "Month": {
+      "type": "string",
+      "enum": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ]
+    },
     "HeroMedia": {
       "type": "object",
       "properties": {
@@ -1117,6 +1194,13 @@
         "answer": {
           "type": "string",
           "description": "A direct 40–60 word answer to \"what is this service and who needs it\" (v0.8), which a service page opens with — the passage answer engines quote."
+        },
+        "seasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Season"
+          },
+          "description": "When the service is offered (v0.10, seasonal trades): \"aeration\" in spring and fall. Absent: always."
         }
       },
       "required": [
@@ -1171,6 +1255,16 @@
         "phone"
       ],
       "description": "One icon from the shared vocabulary. The hub's `services.icon` select offers exactly these."
+    },
+    "Season": {
+      "type": "string",
+      "enum": [
+        "spring",
+        "summer",
+        "fall",
+        "winter",
+        "year-round"
+      ]
     },
     "GalleryImage": {
       "type": "object",

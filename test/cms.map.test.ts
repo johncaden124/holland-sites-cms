@@ -487,3 +487,51 @@ describe('v0.8 optional fields', () => {
     );
   });
 });
+
+describe('v0.10 trade details', () => {
+  it('maps nothing new without a trade-details document, or with an untouched one', () => {
+    const v08 = mapSite(baseSiteDoc);
+    expect(mapSite(baseSiteDoc, null, null)).toStrictEqual(v08);
+    const untouched = mapSite(baseSiteDoc, null, {
+      emergency: { available: null, hours: null },
+      systems: [],
+      serviceSeason: { from: null, to: null },
+    });
+    expect(untouched).toStrictEqual(v08);
+    // Emergency hours with the box unticked are a leftover, not an offer of emergency service.
+    expect(mapSite(baseSiteDoc, null, { emergency: { available: false, hours: '24/7' } })).toStrictEqual(v08);
+  });
+
+  it('maps emergency service, systems and the season onto site', () => {
+    const { site } = mapSite(baseSiteDoc, null, {
+      emergency: { available: true, hours: '24/7, holidays included' },
+      systems: ['furnace', 'heat-pump'],
+      serviceSeason: { from: 'March', to: 'November' },
+    });
+    expect(site.emergency).toStrictEqual({ available: true, hours: '24/7, holidays included' });
+    expect(site.systems).toStrictEqual(['furnace', 'heat-pump']);
+    expect(site.serviceSeason).toStrictEqual({ from: 'March', to: 'November' });
+    expect(mapSite(baseSiteDoc, null, { emergency: { available: true, hours: '' } }).site.emergency).toStrictEqual({
+      available: true,
+    });
+  });
+
+  it('refuses values outside the vocabularies, and half a season, naming the field', () => {
+    expect(() => mapSite(baseSiteDoc, null, { systems: ['furnace', 'geothermal'] })).toThrow(
+      'CMS trade-details.systems[1]: unexpected value "geothermal" (allowed: furnace, heat-pump, central-air, ductless, boiler, water-heater)',
+    );
+    expect(() => mapSite(baseSiteDoc, null, { serviceSeason: { from: 'March', to: null } })).toThrow(
+      'CMS trade-details.serviceSeason.to: unexpected value null',
+    );
+  });
+
+  it('maps service seasons only when set', () => {
+    const [seasonal] = mapServices([{ ...serviceDocs[0]!, seasons: ['spring', 'fall'] }]);
+    expect(seasonal!.seasons).toStrictEqual(['spring', 'fall']);
+    expect('seasons' in mapServices([{ ...serviceDocs[0]!, seasons: [] }])[0]!).toBe(false);
+    expect('seasons' in mapServices([{ ...serviceDocs[0]!, seasons: null }])[0]!).toBe(false);
+    expect(() => mapServices([{ ...serviceDocs[0]!, seasons: ['monsoon'] }])).toThrow(
+      `CMS services[0] ${JSON.stringify(serviceDocs[0]!.title)}.seasons[0]: unexpected value "monsoon"`,
+    );
+  });
+});

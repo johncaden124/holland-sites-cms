@@ -64,6 +64,13 @@ export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Frida
 export type Differentiator = 'same-day' | '24-7' | 'family-owned' | 'licensed-insured' | 'free-estimates' | 'none';
 
 // @public
+export interface EmergencyService {
+    // (undocumented)
+    available: boolean;
+    hours?: string;
+}
+
+// @public
 export interface Faq {
     // (undocumented)
     answer: string;
@@ -127,6 +134,12 @@ export interface HeroMedia {
     video?: string;
 }
 
+// @public
+export const HVAC_SYSTEMS: readonly ["furnace", "heat-pump", "central-air", "ductless", "boiler", "water-heater"];
+
+// @public (undocumented)
+export type HvacSystem = (typeof HVAC_SYSTEMS)[number];
+
 // @public (undocumented)
 export interface Intro {
     // (undocumented)
@@ -161,6 +174,12 @@ export interface LocalContent {
     // (undocumented)
     testimonials: Testimonial[];
 }
+
+// @public (undocumented)
+export type Month = (typeof MONTHS)[number];
+
+// @public (undocumented)
+export const MONTHS: readonly ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 // @public (undocumented)
 export interface NavLink {
@@ -246,6 +265,12 @@ export type RemotePhoto = {
     format?: never;
 };
 
+// @public (undocumented)
+export type Season = (typeof SEASONS)[number];
+
+// @public
+export const SEASONS: readonly ["spring", "summer", "fall", "winter", "year-round"];
+
 // @public
 export interface Service {
     answer?: string;
@@ -260,6 +285,7 @@ export interface Service {
     // (undocumented)
     imageAlt: string;
     priceHint?: string;
+    seasons?: Season[];
     slug?: string;
     // (undocumented)
     title: string;
@@ -270,6 +296,14 @@ export const SERVICE_ICONS: readonly ["heating", "cooling", "air-flow", "air-qua
 
 // @public
 export type ServiceIcon = (typeof SERVICE_ICONS)[number];
+
+// @public
+export interface ServiceSeason {
+    // (undocumented)
+    from: Month;
+    // (undocumented)
+    to: Month;
+}
 
 // @public (undocumented)
 export type ShortIntro = Pick<Intro, 'chip' | 'heading'>;
@@ -342,6 +376,7 @@ export interface SiteSettings {
     copyright: string;
     // (undocumented)
     description: string;
+    emergency?: EmergencyService;
     // (undocumented)
     flags?: SiteFlags;
     footer: {
@@ -388,8 +423,10 @@ export interface SiteSettings {
     review: {
         summary: string;
     };
+    serviceSeason?: ServiceSeason;
     // (undocumented)
     socials: Social[];
+    systems?: HvacSystem[];
     tagline: string;
 }
 

@@ -265,6 +265,38 @@ export interface PricingSection {
   plans: PricingPlan[];
 }
 
+// ---- trade details (optional, v0.10) -----------------------------------------------------------
+
+/**
+ * Whether the business takes emergency calls, and when. HVAC reads it (a no-heat call at 2 a.m. is
+ * the job); a lawn-care site leaves it out.
+ */
+export interface EmergencyService {
+  available: boolean;
+  /** When emergency calls are taken, as the business words it ("24/7, holidays included"). */
+  hours?: string;
+}
+
+/** The equipment an HVAC business works on. */
+export const HVAC_SYSTEMS = ['furnace', 'heat-pump', 'central-air', 'ductless', 'boiler', 'water-heater'] as const;
+export type HvacSystem = (typeof HVAC_SYSTEMS)[number];
+
+/** A season of the year, or all of it. */
+export const SEASONS = ['spring', 'summer', 'fall', 'winter', 'year-round'] as const;
+export type Season = (typeof SEASONS)[number];
+
+export const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+] as const;
+export type Month = (typeof MONTHS)[number];
+
+/** The months a seasonal business works ("March to November"). Wraps the year when `to` < `from`. */
+export interface ServiceSeason {
+  from: Month;
+  to: Month;
+}
+
 /** Site-wide settings — the hub's `site` global, one document per tenant. */
 export interface SiteSettings {
   name: string;
@@ -352,6 +384,15 @@ export interface SiteSettings {
   /** The generator's copy inputs (v0.6). */
   copy?: CopyInputs;
   flags?: SiteFlags;
+  /**
+   * Emergency calls (v0.10, HVAC). Absent: a template shows no emergency wording at all. Stored on
+   * the hub's `trade-details` document, like every v0.10 trade fact.
+   */
+  emergency?: EmergencyService;
+  /** The systems an HVAC business works on (v0.10), in display order. Absent or empty: not shown. */
+  systems?: HvacSystem[];
+  /** The months a seasonal business works (v0.10, landscaping). Absent: year-round, or not said. */
+  serviceSeason?: ServiceSeason;
 }
 
 // ---- list collections -------------------------------------------------------------------------
@@ -383,6 +424,8 @@ export interface Service {
    * page opens with — the passage answer engines quote.
    */
   answer?: string;
+  /** When the service is offered (v0.10, seasonal trades): "aeration" in spring and fall. Absent: always. */
+  seasons?: Season[];
 }
 
 /** The hub's `projects` collection — the work gallery. */

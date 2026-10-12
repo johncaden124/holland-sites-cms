@@ -9,6 +9,26 @@ Entries before 0.6.0 were backfilled from the git tags and their annotations.
 
 ## Unreleased
 
+## 0.10.0 — 2026-10-12
+
+### Added: verticals
+- New subpath `./verticals` (also re-exported from the root): `VERTICALS`, `VERTICAL_IDS`, `isVertical`, `verticalInfo`, and the `Vertical` / `VerticalInfo` types.
+  - A vertical is a trade that has a template: `hvac` → `template-hvac`, `landscaping` → `template-landscaping`.
+  - It is the one list the hub's `tenants.vertical`, the intake form and `deploy-site` read. A client row's vertical picks the template that is built, the intake questions and the trade copy.
+  - Template refs are not pinned here; the builder pins them.
+
+### Added: content model (all optional, so v0.8 content is still valid)
+- `SiteSettings.emergency?: EmergencyService` (`{ available: boolean; hours?: string }`). The mapper keeps it only when `available` is `true`, so an unticked box with leftover hours maps to nothing.
+- `SiteSettings.systems?: HvacSystem[]`, from `HVAC_SYSTEMS`.
+- `SiteSettings.serviceSeason?: ServiceSeason` (`{ from: Month; to: Month }`, from `MONTHS`). Half a season is refused, naming the missing half.
+- `Service.seasons?: Season[]`, from `SEASONS`. Empty maps to no key.
+- The hub stores the three `site` fields on a new optional per-tenant **`trade-details`** document, for the same D1 column limit as `offers`.
+  - `COLLECTIONS` and `OPTIONAL_COLLECTIONS` gain `trade-details`. None, or a 404, maps exactly as v0.8; more than one is refused, naming the key.
+  - `getSite()` fetches `site`, `offers` and `trade-details` together. `mapSite(doc, offers?, details?)` takes it as a third argument; `HubTradeDetailsDoc` describes it, and `HubServiceDoc.seasons` the new service field.
+  - In a content file it is the optional top-level `tradeDetails` object, written only when one of the three is set.
+- **`testimonials` and `stats` may be empty.** A new client has no reviews or figures yet, and a site must never invent them. Both join `OPTIONAL_COLLECTIONS`: an empty list maps to `[]` rather than failing the build, and a template renders no section. A 404 for either is still an error; only the one-per-tenant documents read a 404 as none. `contentFileProblems` accepts them empty too (`EMPTY_OK_LISTS`).
+- `HVAC_SYSTEMS`, `SEASONS`, `MONTHS` and the types `EmergencyService`, `HvacSystem`, `Season`, `Month`, `ServiceSeason` are exported from the root and from `./types`.
+
 ## 0.9.0 — 2026-10-12
 
 The rest of template-landscaping's proposed `types.ts` diff (its TEMPLATE-AUDIT, approved by the

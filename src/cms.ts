@@ -39,6 +39,7 @@ import {
   mapTestimonials,
   type HubFaqDoc,
   type HubOffersDoc,
+  type HubTradeDetailsDoc,
   type HubProcessStepDoc,
   type HubProjectDoc,
   type HubServiceDoc,
@@ -68,6 +69,7 @@ import type {
 export const COLLECTIONS = [
   'site',
   'offers',
+  'trade-details',
   'services',
   'projects',
   'testimonials',
@@ -77,13 +79,22 @@ export const COLLECTIONS = [
 ] as const;
 
 /**
- * Collections a tenant may leave empty (v0.8). Every other collection must have documents, because
- * an empty one would render a broken page; these hold optional sections that render nothing when
- * absent. A 404 for one of them reads as empty too: a hub that predates the collection has none,
- * and so does a template's mock hub without its fixture.
+ * Collections a tenant may leave empty. Every other collection must have documents, because an
+ * empty one would render a broken page; these hold optional sections that render nothing when
+ * absent:
+ *   - `offers` (v0.8) and `trade-details` (v0.10), one document per tenant or none;
+ *   - `testimonials` and `stats` (v0.10): a new client has no reviews or figures yet, and a site must
+ *     never invent them, so an empty list is a real state, not a missing one.
  */
-export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][] = ['offers'];
+export const OPTIONAL_COLLECTIONS: readonly (typeof COLLECTIONS)[number][] = ['offers', 'trade-details', 'testimonials', 'stats'];
 const isOptional = (collection: string) => (OPTIONAL_COLLECTIONS as readonly string[]).includes(collection);
+/**
+ * The optional one-per-tenant documents. A 404 for one reads as empty (a hub that predates the
+ * collection has none, and so does a template's mock hub without its fixture); a 404 for a list
+ * collection is still a misconfigured hub.
+ */
+const ONE_OR_NONE: readonly string[] = ['offers', 'trade-details'];
+const isOneOrNone = (collection: string) => ONE_OR_NONE.includes(collection);
 
 /** Payload's page size. A collection larger than this is refused rather than silently truncated. */
 const PAGE_LIMIT = 100;
@@ -284,7 +295,7 @@ export function createCms(options: CmsOptions): Cms {
       body = undefined;
     }
 
-    if (res.status === 404 && isOptional(collection)) return [];
+    if (res.status === 404 && isOneOrNone(collection)) return [];
     if (!res.ok) {
       const status = `HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ''}`;
       const detail = payloadMessage(body);
@@ -317,10 +328,10 @@ export function createCms(options: CmsOptions): Cms {
         `CMS site: expected exactly 1 document for this tenant, got ${list.docs.length}` + ` — ${KEY_HINT}`,
       );
     }
-    // `offers` is per-tenant too, but optional: none or one.
-    if (collection === 'offers' && list.docs.length > 1) {
+    // `offers` and `trade-details` are per-tenant too, but optional: none or one.
+    if (isOneOrNone(collection) && list.docs.length > 1) {
       throw new Error(
-        `CMS offers: expected at most 1 document for this tenant, got ${list.docs.length}` + ` — ${KEY_HINT}`,
+        `CMS ${collection}: expected at most 1 document for this tenant, got ${list.docs.length}` + ` — ${KEY_HINT}`,
       );
     }
     return list.docs;
@@ -452,8 +463,12 @@ export function createCms(options: CmsOptions): Cms {
     async getSite() {
       if (!cmsEnabled) return local.site;
       return memo('site:content', async () => {
-        const [siteDocs, offersDocs] = await Promise.all([fetchDocs<HubSiteDoc>('site'), fetchDocs<HubOffersDoc>('offers')]);
-        const content = mapSite(siteDocs[0] as HubSiteDoc, offersDocs[0]);
+        const [siteDocs, offersDocs, detailsDocs] = await Promise.all([
+          fetchDocs<HubSiteDoc>('site'),
+          fetchDocs<HubOffersDoc>('offers'),
+          fetchDocs<HubTradeDetailsDoc>('trade-details'),
+        ]);
+        const content = mapSite(siteDocs[0] as HubSiteDoc, offersDocs[0], detailsDocs[0]);
         const from = collectionUrl(BASE as string, 'site');
         assertContract('site', from, [['SiteContent', 'site', content]]);
         // The hero video is the one media URL that never reaches `<Image>` (a `<video>` source is a
