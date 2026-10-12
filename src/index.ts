@@ -39,6 +39,7 @@ export {
   type HubCopyGroup,
   type HubFaqDoc,
   type HubFlagsGroup,
+  type HubLegalGroup,
   type HubMedia,
   type HubOffersDoc,
   type HubPricingGroup,
@@ -60,7 +61,7 @@ export {
   type MediaOriginsInput,
 } from './mediaOrigins.js';
 export { SERVICE_ICONS, type ServiceIcon } from './serviceIcons.js';
-export { TRADES, type Trade } from './trades.js';
+export { TRADE_INFO, TRADES, type Trade, type TradeInfo } from './trades.js';
 export {
   formatProblems,
   validateSiteContent,
@@ -76,13 +77,16 @@ export type {
   DayOfWeek,
   Differentiator,
   Faq,
+  FormLabels,
   GalleryImage,
   Geo,
   HeroMedia,
   Intro,
+  LegalText,
   LocalContent,
   NavLink,
   OpeningHours,
+  PageLabels,
   PostalAddress,
   PricingCadence,
   PricingPlan,

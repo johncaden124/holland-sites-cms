@@ -119,6 +119,14 @@ render a field ignores it:
   and before/after sliders. A v0.7 project is still just a photo.
 - **`Testimonial.role`** ("Homeowner").
 
+v0.9 moved the last of what a template had been keeping in its own files into the package, again all
+optional:
+
+- **`TRADE_INFO`**: per trade, the `noun` for titles and the schema.org `schemaType` to publish.
+- **`site.legal`**: `legalName`, `callRecordingNotice`, `smsConsent`. Attorney text, rendered only
+  when set.
+- **`site.labels.pages`** and **`site.labels.form`**: page names and every string of the lead form.
+
 ## Using it from a template
 
 ```ts

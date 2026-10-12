@@ -72,6 +72,34 @@ export interface Faq {
 }
 
 // @public
+export interface FormLabels {
+    chip: string;
+    // (undocumented)
+    email: string;
+    // (undocumented)
+    failure: string;
+    // (undocumented)
+    heading: string;
+    // (undocumented)
+    intro: string;
+    // (undocumented)
+    message: string;
+    // (undocumented)
+    name: string;
+    // (undocumented)
+    phone: string;
+    required: string;
+    sending: string;
+    service: string;
+    // (undocumented)
+    servicePlaceholder: string;
+    // (undocumented)
+    submit: string;
+    // (undocumented)
+    success: string;
+}
+
+// @public
 export interface GalleryImage {
     // (undocumented)
     alt: string;
@@ -110,6 +138,13 @@ export interface Intro {
 }
 
 // @public
+export interface LegalText {
+    callRecordingNotice?: string;
+    legalName?: string;
+    smsConsent?: string;
+}
+
+// @public
 export interface LocalContent {
     // (undocumented)
     faqs: Faq[];
@@ -141,6 +176,20 @@ export interface OpeningHours {
     // (undocumented)
     dayOfWeek: DayOfWeek[];
     opens: string;
+}
+
+// @public
+export interface PageLabels {
+    // (undocumented)
+    contact: string;
+    // (undocumented)
+    home: string;
+    // (undocumented)
+    privacy: string;
+    // (undocumented)
+    services: string;
+    // (undocumented)
+    terms: string;
 }
 
 // @public
@@ -323,7 +372,10 @@ export interface SiteSettings {
         footerAddress: string;
         footerServiceArea: string;
         footerHours: string;
+        pages?: PageLabels;
+        form?: FormLabels;
     };
+    legal?: LegalText;
     licenseNumber?: string;
     // (undocumented)
     name: string;
@@ -377,6 +429,15 @@ export type TestimonialSource = 'google' | 'facebook' | 'yelp' | 'nextdoor' | 'd
 
 // @public (undocumented)
 export type Trade = (typeof TRADES)[number];
+
+// @public
+export const TRADE_INFO: Readonly<Record<Trade, TradeInfo>>;
+
+// @public
+export interface TradeInfo {
+    noun: string;
+    schemaType: string;
+}
 
 // @public
 export const TRADES: readonly ["hvac", "plumbing", "pest-control", "electrical", "garage-door", "appliance-repair", "restoration", "cleaning", "landscaping", "tree-service", "junk-removal", "roofing", "painting", "fence-deck", "auto-repair", "pool-service", "handyman", "gutters", "pressure-washing", "other"];

@@ -15,6 +15,9 @@ import type { RemotePhoto } from './photo.js';
 import type {
   BusinessProfile,
   CopyInputs,
+  FormLabels,
+  LegalText,
+  PageLabels,
   DayOfWeek,
   Differentiator,
   Faq,
@@ -103,6 +106,10 @@ export interface HubCopyGroup {
   differentiator?: Select | null;
   tenure?: OptionalNumber;
 }
+/** A group of strings as the hub serves it: every leaf `null` until a client fills it in. */
+type HubTextGroup<T> = { [K in keyof T]?: OptionalText } | null | undefined;
+/** v0.8. Per-client legal wording; every leaf optional. */
+export type HubLegalGroup = HubTextGroup<Required<LegalText>>;
 export interface HubFlagsGroup {
   reviewsFromGbp?: boolean | null;
   isPreview?: boolean | null;
@@ -118,7 +125,11 @@ export interface HubSiteDoc {
   nav?: Row<NavLink>[] | null;
   navCta: NavLink;
   heroCta: NavLink;
-  labels: SiteSettings['labels'];
+  /** `pages` / `form` (v0.8) arrive as groups of `null`s on a tenant that never set them. */
+  labels: Omit<SiteSettings['labels'], 'pages' | 'form'> & {
+    pages?: HubTextGroup<PageLabels>;
+    form?: HubTextGroup<FormLabels>;
+  };
   socials?: Row<{ label: Select; href: string }>[] | null;
   /** `serviceArea` / `hours` are optional, and the hub sends `null` rather than omitting them. */
   footer: Omit<SiteSettings['footer'], 'serviceArea' | 'hours'> & {
@@ -150,6 +161,7 @@ export interface HubSiteDoc {
   business?: HubBusinessGroup | null;
   copy?: HubCopyGroup | null;
   flags?: HubFlagsGroup | null;
+  legal?: HubLegalGroup;
 }
 /**
  * The tenant's `offers` document (v0.8): published prices and promo lines. A second per-tenant
@@ -308,6 +320,30 @@ const DIFFERENTIATORS = keys<Differentiator>({
 });
 const SOURCES = keys<TestimonialSource>({ google: true, facebook: true, yelp: true, nextdoor: true, direct: true });
 const RATINGS = [1, 2, 3, 4, 5] as const;
+/**
+ * An optional group of strings (v0.8): omitted when every leaf is unset, so a tenant that never
+ * touched it maps to no key at all. Once any leaf is set the group is copied whole, `null`s included,
+ * and a required leaf left empty becomes a named `validateSiteContent` problem, not a blank label.
+ */
+function textGroup<T>(g: { [K in keyof T]?: string | null | undefined } | null | undefined, fields: readonly (keyof T)[]): T | undefined {
+  if (!g || !fields.some((f) => g[f])) return undefined;
+  return Object.fromEntries(fields.map((f) => [f, g[f]])) as T;
+}
+const PAGE_FIELDS = ['home', 'services', 'contact', 'privacy', 'terms'] as const satisfies readonly (keyof PageLabels)[];
+const FORM_FIELDS = [
+  'chip', 'heading', 'intro', 'name', 'phone', 'email', 'service', 'servicePlaceholder', 'message',
+  'submit', 'sending', 'required', 'success', 'failure',
+] as const satisfies readonly (keyof FormLabels)[];
+
+/** Legal text (v0.8): only the fields a client's lawyer filled in, and no group when none is. */
+function mapLegal(l: HubLegalGroup): { legal?: LegalText } {
+  const legal: LegalText = {
+    ...opt('legalName', l?.legalName),
+    ...opt('callRecordingNotice', l?.callRecordingNotice),
+    ...opt('smsConsent', l?.smsConsent),
+  };
+  return Object.keys(legal).length ? { legal } : {};
+}
 const CADENCES = keys<PricingCadence>({ visit: true, month: true, year: true, 'one-time': true });
 
 /**
@@ -423,6 +459,8 @@ export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteCont
   const review = group('site.review', doc.review);
   const heroBadge = group('site.heroBadge', doc.heroBadge);
   const labels = group('site.labels', doc.labels);
+  const pages = textGroup<PageLabels>(labels.pages, PAGE_FIELDS);
+  const form = textGroup<FormLabels>(labels.form, FORM_FIELDS);
   const trustCard = group('site.trustCard', doc.trustCard);
   const faqSideCard = group('site.faqSideCard', doc.faqSideCard);
   const ctaBand = group('site.ctaBand', doc.ctaBand);
@@ -457,6 +495,8 @@ export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteCont
         footerAddress: labels.footerAddress,
         footerServiceArea: labels.footerServiceArea,
         footerHours: labels.footerHours,
+        ...(pages ? { pages } : {}),
+        ...(form ? { form } : {}),
       },
       socials: (doc.socials ?? []).map(({ label, href }, i) => ({
         label: oneOf(`${at('site.socials', i)}.label`, label, SOCIALS),
@@ -466,6 +506,7 @@ export function mapSite(doc: HubSiteDoc, offers?: HubOffersDoc | null): SiteCont
       ...mapBusiness(doc.business),
       ...mapCopy(doc.copy),
       ...mapFlags(doc.flags),
+      ...mapLegal(doc.legal),
       ...mapPricing(offers?.pricing),
       ...mapPromos(offers?.promos),
     },

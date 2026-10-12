@@ -189,6 +189,8 @@ export function toContentFile(data: DataModules): ContentFile {
       ...(s.business ? { business: { ...s.business, serviceAreaTowns: texts(s.business.serviceAreaTowns) } } : {}),
       ...(s.copy ? { copy: s.copy } : {}),
       ...(s.flags ? { flags: s.flags } : {}),
+      // Legal wording (v0.8): only when a client's lawyer has written some.
+      ...(s.legal ? { legal: s.legal } : {}),
     },
     services: data.services.services.map((x) => ({ ...x, image: img(x.image), bullets: texts(x.bullets) })),
     // Rebuilt key by key, like testimonials, so the v0.8 optionals keep the source's key order and an
@@ -263,6 +265,7 @@ export function fromContentFile(file: ContentFile): DataModules {
       : {}),
     ...(s.copy ? { copy: s.copy } : {}),
     ...(s.flags ? { flags: s.flags } : {}),
+    ...(s.legal ? { legal: s.legal } : {}),
     ...(file.offers?.pricing
       ? { pricing: { ...file.offers.pricing, plans: file.offers.pricing.plans.map((p) => ({ ...p, features: untexts(p.features) })) } }
       : {}),
